@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.02
-Created On: 3/9/2015 2:42:40 PM
+Created On: 3/9/2015 4:23:35 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : Opening Screen Project
@@ -11,235 +11,235 @@ Created On: 3/9/2015 2:42:40 PM
 00000000                             7  *              the program to be dissassembled.
 00000000                             8  *-----------------------------------------------------------
 00001000                             9      ORG    $1000
-00001000  43F9 00001218             10  START:          LEA         LINE1,A1                *Display welcome message to console
+00001000  43F9 00001212             10  START:          LEA         LINE1,A1                *Display welcome message to console
 00001006  103C 000E                 11                  MOVE.B      #14,D0
 0000100A  4E4F                      12                  TRAP        #15
 0000100C                            13              
-0000100C  43F9 0000123C             14                  LEA         GETSTARTMESSAGE,A1      *Display prompt for start address
+0000100C  43F9 00001236             14                  LEA         GETSTARTMESSAGE,A1      *Display prompt for start address
 00001012  103C 000E                 15                  MOVE.B      #14,D0
 00001016  4E4F                      16                  TRAP        #15
 00001018                            17                  
 00001018  1E3C 0001                 18                  MOVE.B      #1,D7
 0000101C  1C3C 0000                 19                  MOVE.B      #0,D6                   *Toggle for start/end address prompting: 0 = start, 1 = end
 00001020                            20              
-00001020  227C 00005000             21  PROMPTSTARTADDR MOVEA.L     #$5000,A1
-00001026  103C 0002                 22                  MOVE.B      #2,D0
-0000102A  4E4F                      23                  TRAP        #15
-0000102C                            24              
-0000102C  143C 0008                 25                  MOVE.B      #8,D2
-00001030  B441                      26                  CMP.W       D1,D2
-00001032  6600 002E                 27                  BNE         ERRORINPUTSIZE
-00001036  143C 0004                 28                  MOVE.B      #4,D2
-0000103A  163C 0000                 29                  MOVE.B      #0,D3
-0000103E                            30                              
-0000103E  45F9 0000130C             31                  LEA         STARTADDRSTRING1,A2
-00001044  14D9                      32  LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
-00001046  5203                      33                  ADD.B       #1,D3
-00001048  B602                      34                  CMP.B       D2,D3
-0000104A  66F8                      35                  BNE         LOADSTARTADDR1
-0000104C                            36                  
-0000104C  163C 0000                 37                  MOVE.B      #0,D3
-00001050  45F9 00001310             38                  LEA         STARTADDRSTRING2,A2
-00001056  14D9                      39  LOADSTARTADDR2  MOVE.B      (A1)+,(A2)+
-00001058  5203                      40                  ADD.B       #1,D3
-0000105A  B602                      41                  CMP.B       D2,D3
-0000105C  66F8                      42                  BNE         LOADSTARTADDR2
-0000105E  6000 001C                 43                  BRA         ENDADDR
-00001062                            44              
-00001062  43F9 0000128A             45  ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1
-00001068  103C 000E                 46                  MOVE.B      #14,D0
-0000106C  4E4F                      47                  TRAP        #15
-0000106E                            48                  
-0000106E  43F9 000012DD             49                  LEA         BUGFIXMESSAGE,A1
-00001074  BC07                      50                  CMP.B       D7,D6
-00001076  66A8                      51                  BNE         PROMPTSTARTADDR
-00001078  6000 0016                 52                  BRA         PROMPTENDADDR
-0000107C                            53                  
-0000107C  43F9 00001264             54  ENDADDR         LEA         GETENDMESSAGE,A1
-00001082  103C 000E                 55                  MOVE.B      #14,D0
-00001086  4E4F                      56                  TRAP        #15
-00001088  1C3C 0001                 57                  MOVE.B      #1,D6
-0000108C  143C 0008                 58                  MOVE.B      #8,D2
-00001090                            59                  
-00001090                            60                  
-00001090  227C 00005000             61  PROMPTENDADDR   MOVEA.L     #$5000,A1
-00001096  103C 0002                 62                  MOVE.B      #2,D0
-0000109A  4E4F                      63                  TRAP        #15
-0000109C                            64                  
-0000109C  B441                      65                  CMP.W       D1,D2
-0000109E  66C2                      66                  BNE         ERRORINPUTSIZE
-000010A0                            67                  
-000010A0  143C 0004                 68                  MOVE.B      #4,D2
-000010A4  163C 0000                 69                  MOVE.B      #0,D3
-000010A8  45F9 00001318             70                  LEA         ENDADDRSTRING1,A2
-000010AE  14D9                      71  LOADENDADDR1    MOVE.B      (A1)+,(A2)+
-000010B0  5203                      72                  ADD.B       #1,D3
-000010B2  B602                      73                  CMP.B       D2,D3
-000010B4  66F8                      74                  BNE         LOADENDADDR1
-000010B6                            75                  
-000010B6  163C 0000                 76                  MOVE.B      #0,D3
-000010BA  45F9 0000131C             77                  LEA         ENDADDRSTRING2,A2
-000010C0  14D9                      78  LOADENDADDR2    MOVE.B      (A1)+,(A2)+
-000010C2  5203                      79                  ADD.B       #1,D3
-000010C4  B602                      80                  CMP.B       D2,D3
-000010C6  66F8                      81                  BNE         LOADENDADDR2
-000010C8                            82                                 
-000010C8  2239 0000130C             83  CONVERTSTART1   MOVE.L      STARTADDRSTRING1,D1
-000010CE  1C3C 0000                 84                  MOVE.B      #0,D6
-000010D2  1A3C 0004                 85                  MOVE.B      #4,D5
-000010D6  163C 0039                 86                  MOVE.B      #$39,D3
-000010DA                            87                  
-000010DA  1401                      88  NEXTCHAR        MOVE.B      D1,D2
-000010DC  B602                      89                  CMP.B       D2,D3
-000010DE  6D00 0016                 90                  BLT         CHARISLETTER
-000010E2                            91                  
-000010E2  0402 0030                 92  CHARISNUM       SUB.B       #48,D2
-000010E6  1E02                      93                  MOVE.B      D2,D7
-000010E8  E89F                      94                  ROR.L       #4,D7
-000010EA  E099                      95                  ROR.L       #8,D1
-000010EC  5206                      96                  ADD.B       #1,D6
-000010EE  BA06                      97                  CMP.B       D6,D5
-000010F0  6700 0018                 98                  BEQ         CONVERTSTART2
-000010F4  60E4                      99                  BRA         NEXTCHAR
-000010F6                           100  
-000010F6  0402 0037                101  CHARISLETTER    SUB.B       #55,D2
-000010FA  1E02                     102                  MOVE.B      D2,D7
-000010FC  E89F                     103                  ROR.L       #4,D7
-000010FE  E099                     104                  ROR.L       #8,D1
-00001100  5206                     105                  ADD.B       #1,D6
-00001102  BA06                     106                  CMP.B       D6,D5
-00001104  6700 0004                107                  BEQ         CONVERTSTART2
-00001108  60D0                     108                  BRA         NEXTCHAR
-0000110A                           109                  
-0000110A  2239 00001310            110  CONVERTSTART2   MOVE.L      STARTADDRSTRING2,D1
-00001110  1C3C 0000                111                  MOVE.B      #0,D6
-00001114  1A3C 0004                112                  MOVE.B      #4,D5
-00001118  163C 0039                113                  MOVE.B      #$39,D3
-0000111C                           114                  
-0000111C  1401                     115  NEXTCHAR2       MOVE.B      D1,D2
-0000111E  B602                     116                  CMP.B       D2,D3
-00001120  6D00 0016                117                  BLT         CHARISLETTER2
-00001124                           118  
-00001124  0402 0030                119  CHARISNUM2      SUB.B       #48,D2
-00001128  1802                     120                  MOVE.B      D2,D4
-0000112A  E89C                     121                  ROR.L       #4,D4
-0000112C  E099                     122                  ROR.L       #8,D1
-0000112E  5206                     123                  ADD.B       #1,D6
-00001130  BA06                     124                  CMP.B       D6,D5
-00001132  6700 0018                125                  BEQ         COMBINESTART
-00001136  60E4                     126                  BRA         NEXTCHAR2
-00001138                           127  
-00001138                           128                  
-00001138  0402 0037                129  CHARISLETTER2   SUB.B       #55,D2
-0000113C  1802                     130                  MOVE.B      D2,D4
-0000113E  E89C                     131                  ROR.L       #4,D4
-00001140  E099                     132                  ROR.L       #8,D1
-00001142  5206                     133                  ADD.B       #1,D6
-00001144  BA06                     134                  CMP.B       D6,D5
-00001146  6700 0004                135                  BEQ         COMBINESTART
-0000114A  60D0                     136                  BRA         NEXTCHAR2
-0000114C                           137                  
-0000114C  E09C                     138  COMBINESTART    ROR.L       #8,D4
-0000114E  E09C                     139                  ROR.L       #8,D4
-00001150  DE84                     140                  ADD.L       D4,D7
-00001152  23C7 00001314            141                  MOVE.L      D7,HEXSTARTADDR
-00001158  7E00                     142                  MOVE.L      #$00000000,D7
-0000115A  7800                     143                  MOVE.L      #$00000000,D4
-0000115C                           144                  
-0000115C  2239 00001318            145  CONVERTEND1     MOVE.L      ENDADDRSTRING1,D1
-00001162  1C3C 0000                146                  MOVE.B      #0,D6
-00001166  1A3C 0004                147                  MOVE.B      #4,D5
-0000116A  163C 0039                148                  MOVE.B      #$39,D3
-0000116E                           149                  
-0000116E  1401                     150  NEXTCHAR3       MOVE.B      D1,D2
-00001170  B602                     151                  CMP.B       D2,D3
-00001172  6D00 0016                152                  BLT         CHARISLETTER3
-00001176                           153                  
-00001176  0402 0030                154  CHARISNUM3      SUB.B       #48,D2
-0000117A  1E02                     155                  MOVE.B      D2,D7
-0000117C  E89F                     156                  ROR.L       #4,D7
-0000117E  E099                     157                  ROR.L       #8,D1
-00001180  5206                     158                  ADD.B       #1,D6
-00001182  BA06                     159                  CMP.B       D6,D5
-00001184  6700 0018                160                  BEQ         CONVERTEND2
-00001188  60E4                     161                  BRA         NEXTCHAR3
-0000118A                           162  
-0000118A  0402 0037                163  CHARISLETTER3   SUB.B       #55,D2
-0000118E  1E02                     164                  MOVE.B      D2,D7
-00001190  E89F                     165                  ROR.L       #4,D7
-00001192  E099                     166                  ROR.L       #8,D1
-00001194  5206                     167                  ADD.B       #1,D6
-00001196  BA06                     168                  CMP.B       D6,D5
-00001198  6700 0004                169                  BEQ         CONVERTEND2
-0000119C  60D0                     170                  BRA         NEXTCHAR3
-0000119E                           171                  
-0000119E  2239 0000131C            172  CONVERTEND2     MOVE.L      ENDADDRSTRING2,D1
-000011A4  1C3C 0000                173                  MOVE.B      #0,D6
-000011A8  1A3C 0004                174                  MOVE.B      #4,D5
-000011AC  163C 0039                175                  MOVE.B      #$39,D3
-000011B0                           176                  
-000011B0  1401                     177  NEXTCHAR4       MOVE.B      D1,D2
-000011B2  B602                     178                  CMP.B       D2,D3
-000011B4  6D00 0016                179                  BLT         CHARISLETTER4
-000011B8                           180  
-000011B8  0402 0030                181  CHARISNUM4      SUB.B       #48,D2
-000011BC  1802                     182                  MOVE.B      D2,D4
-000011BE  E89C                     183                  ROR.L       #4,D4
-000011C0  E099                     184                  ROR.L       #8,D1
-000011C2  5206                     185                  ADD.B       #1,D6
-000011C4  BA06                     186                  CMP.B       D6,D5
-000011C6  6700 0018                187                  BEQ         COMBINEEND
-000011CA  60E4                     188                  BRA         NEXTCHAR4
-000011CC                           189  
-000011CC                           190                  
-000011CC  0402 0037                191  CHARISLETTER4   SUB.B       #55,D2
-000011D0  1802                     192                  MOVE.B      D2,D4
-000011D2  E89C                     193                  ROR.L       #4,D4
-000011D4  E099                     194                  ROR.L       #8,D1
-000011D6  5206                     195                  ADD.B       #1,D6
-000011D8  BA06                     196                  CMP.B       D6,D5
-000011DA  6700 0004                197                  BEQ         COMBINEEND
-000011DE  60D0                     198                  BRA         NEXTCHAR4
-000011E0                           199                  
-000011E0  E09C                     200  COMBINEEND      ROR.L       #8,D4
-000011E2  E09C                     201                  ROR.L       #8,D4
-000011E4  DE84                     202                  ADD.L       D4,D7
-000011E6  23C7 00001320            203                  MOVE.L      D7,HEXENDADDR
-000011EC  7E00                     204                  MOVE.L      #$00000000,D7
-000011EE  7800                     205                  MOVE.L      #$00000000,D4
-000011F0                           206  
-000011F0  2039 00001314            207                  MOVE.L      HEXSTARTADDR,D0
-000011F6  2239 00001320            208                  MOVE.L      HEXENDADDR,D1
-000011FC                           209                  
-000011FC  2439 0000130C            210                  MOVE.L      STARTADDRSTRING1,D2
-00001202  2639 00001310            211                  MOVE.L      STARTADDRSTRING2,D3
-00001208  2839 00001318            212                  MOVE.L      ENDADDRSTRING1,D4
-0000120E  2A39 0000131C            213                  MOVE.L      ENDADDRSTRING2,D5
-00001214                           214              
-00001214                           215  
-00001214                           216  * Put program code here
-00001214                           217  
-00001214  FFFF FFFF                218      SIMHALT             ; halt simulator
-00001218                           219  
-00001218                           220  * Put variables and constants here
-00001218  =0000000D                221  CR                  EQU             $0D
-00001218  =0000000A                222  LF                  EQU             $0A
-00001218                           223  
-00001218= 57 65 6C 63 6F 6D ...    224  LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
-0000123C= 50 6C 65 61 73 65 ...    225  GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
-00001264= 50 6C 65 61 73 65 ...    226  GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
-0000128A= 54 68 65 20 69 6E ...    227  ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
-000012DD                           228  
-000012DD= 54 68 69 73 20 64 ...    229  BUGFIXMESSAGE       DC.B        'This does nothing, and should never appear.',CR,LF,0
-0000130B                           230  
-0000130C                           231  STARTADDRSTRING1    DS.L        1
-00001310                           232  STARTADDRSTRING2    DS.L        1
-00001314                           233  HEXSTARTADDR        DS.L        1
-00001318                           234  
-00001318                           235  ENDADDRSTRING1      DS.L        1
-0000131C                           236  ENDADDRSTRING2      DS.L        1
-00001320                           237  HEXENDADDR          DS.L        1
-00001324                           238      END    START        ; last line of source
+00001020                            21  PROMPTSTARTADDR *MOVEA.L     #$5000,A1
+00001020  103C 0002                 22                  MOVE.B      #2,D0
+00001024  4E4F                      23                  TRAP        #15
+00001026                            24              
+00001026  143C 0008                 25                  MOVE.B      #8,D2
+0000102A  B441                      26                  CMP.W       D1,D2
+0000102C  6600 002E                 27                  BNE         ERRORINPUTSIZE
+00001030  143C 0004                 28                  MOVE.B      #4,D2
+00001034  163C 0000                 29                  MOVE.B      #0,D3
+00001038                            30                              
+00001038  45F9 00001306             31                  LEA         STARTADDRSTRING1,A2
+0000103E  14D9                      32  LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
+00001040  5203                      33                  ADD.B       #1,D3
+00001042  B602                      34                  CMP.B       D2,D3
+00001044  66F8                      35                  BNE         LOADSTARTADDR1
+00001046                            36                  
+00001046  163C 0000                 37                  MOVE.B      #0,D3
+0000104A  45F9 0000130A             38                  LEA         STARTADDRSTRING2,A2
+00001050  14D9                      39  LOADSTARTADDR2  MOVE.B      (A1)+,(A2)+
+00001052  5203                      40                  ADD.B       #1,D3
+00001054  B602                      41                  CMP.B       D2,D3
+00001056  66F8                      42                  BNE         LOADSTARTADDR2
+00001058  6000 001C                 43                  BRA         ENDADDR
+0000105C                            44              
+0000105C  43F9 00001284             45  ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1
+00001062  103C 000E                 46                  MOVE.B      #14,D0
+00001066  4E4F                      47                  TRAP        #15
+00001068                            48                  
+00001068  43F9 000012D7             49                  LEA         BUGFIXMESSAGE,A1
+0000106E  BC07                      50                  CMP.B       D7,D6
+00001070  66AE                      51                  BNE         PROMPTSTARTADDR
+00001072  6000 0016                 52                  BRA         PROMPTENDADDR
+00001076                            53                  
+00001076  43F9 0000125E             54  ENDADDR         LEA         GETENDMESSAGE,A1
+0000107C  103C 000E                 55                  MOVE.B      #14,D0
+00001080  4E4F                      56                  TRAP        #15
+00001082  1C3C 0001                 57                  MOVE.B      #1,D6
+00001086  143C 0008                 58                  MOVE.B      #8,D2
+0000108A                            59                  
+0000108A                            60                  
+0000108A  227C 00005000             61  PROMPTENDADDR   MOVEA.L     #$5000,A1
+00001090  103C 0002                 62                  MOVE.B      #2,D0
+00001094  4E4F                      63                  TRAP        #15
+00001096                            64                  
+00001096  B441                      65                  CMP.W       D1,D2
+00001098  66C2                      66                  BNE         ERRORINPUTSIZE
+0000109A                            67                  
+0000109A  143C 0004                 68                  MOVE.B      #4,D2
+0000109E  163C 0000                 69                  MOVE.B      #0,D3
+000010A2  45F9 00001312             70                  LEA         ENDADDRSTRING1,A2
+000010A8  14D9                      71  LOADENDADDR1    MOVE.B      (A1)+,(A2)+
+000010AA  5203                      72                  ADD.B       #1,D3
+000010AC  B602                      73                  CMP.B       D2,D3
+000010AE  66F8                      74                  BNE         LOADENDADDR1
+000010B0                            75                  
+000010B0  163C 0000                 76                  MOVE.B      #0,D3
+000010B4  45F9 00001316             77                  LEA         ENDADDRSTRING2,A2
+000010BA  14D9                      78  LOADENDADDR2    MOVE.B      (A1)+,(A2)+
+000010BC  5203                      79                  ADD.B       #1,D3
+000010BE  B602                      80                  CMP.B       D2,D3
+000010C0  66F8                      81                  BNE         LOADENDADDR2
+000010C2                            82                                 
+000010C2  2239 00001306             83  CONVERTSTART1   MOVE.L      STARTADDRSTRING1,D1
+000010C8  1C3C 0000                 84                  MOVE.B      #0,D6
+000010CC  1A3C 0004                 85                  MOVE.B      #4,D5
+000010D0  163C 0039                 86                  MOVE.B      #$39,D3
+000010D4                            87                  
+000010D4  1401                      88  NEXTCHAR        MOVE.B      D1,D2
+000010D6  B602                      89                  CMP.B       D2,D3
+000010D8  6D00 0016                 90                  BLT         CHARISLETTER
+000010DC                            91                  
+000010DC  0402 0030                 92  CHARISNUM       SUB.B       #48,D2
+000010E0  1E02                      93                  MOVE.B      D2,D7
+000010E2  E89F                      94                  ROR.L       #4,D7
+000010E4  E099                      95                  ROR.L       #8,D1
+000010E6  5206                      96                  ADD.B       #1,D6
+000010E8  BA06                      97                  CMP.B       D6,D5
+000010EA  6700 0018                 98                  BEQ         CONVERTSTART2
+000010EE  60E4                      99                  BRA         NEXTCHAR
+000010F0                           100  
+000010F0  0402 0037                101  CHARISLETTER    SUB.B       #55,D2
+000010F4  1E02                     102                  MOVE.B      D2,D7
+000010F6  E89F                     103                  ROR.L       #4,D7
+000010F8  E099                     104                  ROR.L       #8,D1
+000010FA  5206                     105                  ADD.B       #1,D6
+000010FC  BA06                     106                  CMP.B       D6,D5
+000010FE  6700 0004                107                  BEQ         CONVERTSTART2
+00001102  60D0                     108                  BRA         NEXTCHAR
+00001104                           109                  
+00001104  2239 0000130A            110  CONVERTSTART2   MOVE.L      STARTADDRSTRING2,D1
+0000110A  1C3C 0000                111                  MOVE.B      #0,D6
+0000110E  1A3C 0004                112                  MOVE.B      #4,D5
+00001112  163C 0039                113                  MOVE.B      #$39,D3
+00001116                           114                  
+00001116  1401                     115  NEXTCHAR2       MOVE.B      D1,D2
+00001118  B602                     116                  CMP.B       D2,D3
+0000111A  6D00 0016                117                  BLT         CHARISLETTER2
+0000111E                           118  
+0000111E  0402 0030                119  CHARISNUM2      SUB.B       #48,D2
+00001122  1802                     120                  MOVE.B      D2,D4
+00001124  E89C                     121                  ROR.L       #4,D4
+00001126  E099                     122                  ROR.L       #8,D1
+00001128  5206                     123                  ADD.B       #1,D6
+0000112A  BA06                     124                  CMP.B       D6,D5
+0000112C  6700 0018                125                  BEQ         COMBINESTART
+00001130  60E4                     126                  BRA         NEXTCHAR2
+00001132                           127  
+00001132                           128                  
+00001132  0402 0037                129  CHARISLETTER2   SUB.B       #55,D2
+00001136  1802                     130                  MOVE.B      D2,D4
+00001138  E89C                     131                  ROR.L       #4,D4
+0000113A  E099                     132                  ROR.L       #8,D1
+0000113C  5206                     133                  ADD.B       #1,D6
+0000113E  BA06                     134                  CMP.B       D6,D5
+00001140  6700 0004                135                  BEQ         COMBINESTART
+00001144  60D0                     136                  BRA         NEXTCHAR2
+00001146                           137                  
+00001146  E09C                     138  COMBINESTART    ROR.L       #8,D4
+00001148  E09C                     139                  ROR.L       #8,D4
+0000114A  DE84                     140                  ADD.L       D4,D7
+0000114C  23C7 0000130E            141                  MOVE.L      D7,HEXSTARTADDR
+00001152  7E00                     142                  MOVE.L      #$00000000,D7
+00001154  7800                     143                  MOVE.L      #$00000000,D4
+00001156                           144                  
+00001156  2239 00001312            145  CONVERTEND1     MOVE.L      ENDADDRSTRING1,D1
+0000115C  1C3C 0000                146                  MOVE.B      #0,D6
+00001160  1A3C 0004                147                  MOVE.B      #4,D5
+00001164  163C 0039                148                  MOVE.B      #$39,D3
+00001168                           149                  
+00001168  1401                     150  NEXTCHAR3       MOVE.B      D1,D2
+0000116A  B602                     151                  CMP.B       D2,D3
+0000116C  6D00 0016                152                  BLT         CHARISLETTER3
+00001170                           153                  
+00001170  0402 0030                154  CHARISNUM3      SUB.B       #48,D2
+00001174  1E02                     155                  MOVE.B      D2,D7
+00001176  E89F                     156                  ROR.L       #4,D7
+00001178  E099                     157                  ROR.L       #8,D1
+0000117A  5206                     158                  ADD.B       #1,D6
+0000117C  BA06                     159                  CMP.B       D6,D5
+0000117E  6700 0018                160                  BEQ         CONVERTEND2
+00001182  60E4                     161                  BRA         NEXTCHAR3
+00001184                           162  
+00001184  0402 0037                163  CHARISLETTER3   SUB.B       #55,D2
+00001188  1E02                     164                  MOVE.B      D2,D7
+0000118A  E89F                     165                  ROR.L       #4,D7
+0000118C  E099                     166                  ROR.L       #8,D1
+0000118E  5206                     167                  ADD.B       #1,D6
+00001190  BA06                     168                  CMP.B       D6,D5
+00001192  6700 0004                169                  BEQ         CONVERTEND2
+00001196  60D0                     170                  BRA         NEXTCHAR3
+00001198                           171                  
+00001198  2239 00001316            172  CONVERTEND2     MOVE.L      ENDADDRSTRING2,D1
+0000119E  1C3C 0000                173                  MOVE.B      #0,D6
+000011A2  1A3C 0004                174                  MOVE.B      #4,D5
+000011A6  163C 0039                175                  MOVE.B      #$39,D3
+000011AA                           176                  
+000011AA  1401                     177  NEXTCHAR4       MOVE.B      D1,D2
+000011AC  B602                     178                  CMP.B       D2,D3
+000011AE  6D00 0016                179                  BLT         CHARISLETTER4
+000011B2                           180  
+000011B2  0402 0030                181  CHARISNUM4      SUB.B       #48,D2
+000011B6  1802                     182                  MOVE.B      D2,D4
+000011B8  E89C                     183                  ROR.L       #4,D4
+000011BA  E099                     184                  ROR.L       #8,D1
+000011BC  5206                     185                  ADD.B       #1,D6
+000011BE  BA06                     186                  CMP.B       D6,D5
+000011C0  6700 0018                187                  BEQ         COMBINEEND
+000011C4  60E4                     188                  BRA         NEXTCHAR4
+000011C6                           189  
+000011C6                           190                  
+000011C6  0402 0037                191  CHARISLETTER4   SUB.B       #55,D2
+000011CA  1802                     192                  MOVE.B      D2,D4
+000011CC  E89C                     193                  ROR.L       #4,D4
+000011CE  E099                     194                  ROR.L       #8,D1
+000011D0  5206                     195                  ADD.B       #1,D6
+000011D2  BA06                     196                  CMP.B       D6,D5
+000011D4  6700 0004                197                  BEQ         COMBINEEND
+000011D8  60D0                     198                  BRA         NEXTCHAR4
+000011DA                           199                  
+000011DA  E09C                     200  COMBINEEND      ROR.L       #8,D4
+000011DC  E09C                     201                  ROR.L       #8,D4
+000011DE  DE84                     202                  ADD.L       D4,D7
+000011E0  23C7 0000131A            203                  MOVE.L      D7,HEXENDADDR
+000011E6  7E00                     204                  MOVE.L      #$00000000,D7
+000011E8  7800                     205                  MOVE.L      #$00000000,D4
+000011EA                           206  
+000011EA  2039 0000130E            207                  MOVE.L      HEXSTARTADDR,D0
+000011F0  2239 0000131A            208                  MOVE.L      HEXENDADDR,D1
+000011F6                           209                  
+000011F6  2439 00001306            210                  MOVE.L      STARTADDRSTRING1,D2
+000011FC  2639 0000130A            211                  MOVE.L      STARTADDRSTRING2,D3
+00001202  2839 00001312            212                  MOVE.L      ENDADDRSTRING1,D4
+00001208  2A39 00001316            213                  MOVE.L      ENDADDRSTRING2,D5
+0000120E                           214              
+0000120E                           215  
+0000120E                           216  * Put program code here
+0000120E                           217  
+0000120E  FFFF FFFF                218      SIMHALT             ; halt simulator
+00001212                           219  
+00001212                           220  * Put variables and constants here
+00001212  =0000000D                221  CR                  EQU             $0D
+00001212  =0000000A                222  LF                  EQU             $0A
+00001212                           223  
+00001212= 57 65 6C 63 6F 6D ...    224  LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
+00001236= 50 6C 65 61 73 65 ...    225  GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
+0000125E= 50 6C 65 61 73 65 ...    226  GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
+00001284= 54 68 65 20 69 6E ...    227  ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
+000012D7                           228  
+000012D7= 54 68 69 73 20 64 ...    229  BUGFIXMESSAGE       DC.B        'This does nothing, and should never appear.',CR,LF,0
+00001305                           230  
+00001306                           231  STARTADDRSTRING1    DS.L        1
+0000130A                           232  STARTADDRSTRING2    DS.L        1
+0000130E                           233  HEXSTARTADDR        DS.L        1
+00001312                           234  
+00001312                           235  ENDADDRSTRING1      DS.L        1
+00001316                           236  ENDADDRSTRING2      DS.L        1
+0000131A                           237  HEXENDADDR          DS.L        1
+0000131E                           238      END    START        ; last line of source
 
 No errors detected
 No warnings generated
@@ -248,43 +248,43 @@ No warnings generated
 SYMBOL TABLE INFORMATION
 Symbol-name         Value
 -------------------------
-BUGFIXMESSAGE       12DD
-CHARISLETTER        10F6
-CHARISLETTER2       1138
-CHARISLETTER3       118A
-CHARISLETTER4       11CC
-CHARISNUM           10E2
-CHARISNUM2          1124
-CHARISNUM3          1176
-CHARISNUM4          11B8
-COMBINEEND          11E0
-COMBINESTART        114C
-CONVERTEND1         115C
-CONVERTEND2         119E
-CONVERTSTART1       10C8
-CONVERTSTART2       110A
+BUGFIXMESSAGE       12D7
+CHARISLETTER        10F0
+CHARISLETTER2       1132
+CHARISLETTER3       1184
+CHARISLETTER4       11C6
+CHARISNUM           10DC
+CHARISNUM2          111E
+CHARISNUM3          1170
+CHARISNUM4          11B2
+COMBINEEND          11DA
+COMBINESTART        1146
+CONVERTEND1         1156
+CONVERTEND2         1198
+CONVERTSTART1       10C2
+CONVERTSTART2       1104
 CR                  D
-ENDADDR             107C
-ENDADDRSTRING1      1318
-ENDADDRSTRING2      131C
-ERRORINPUTSIZE      1062
-ERRORMESSAGESIZE    128A
-GETENDMESSAGE       1264
-GETSTARTMESSAGE     123C
-HEXENDADDR          1320
-HEXSTARTADDR        1314
+ENDADDR             1076
+ENDADDRSTRING1      1312
+ENDADDRSTRING2      1316
+ERRORINPUTSIZE      105C
+ERRORMESSAGESIZE    1284
+GETENDMESSAGE       125E
+GETSTARTMESSAGE     1236
+HEXENDADDR          131A
+HEXSTARTADDR        130E
 LF                  A
-LINE1               1218
-LOADENDADDR1        10AE
-LOADENDADDR2        10C0
-LOADSTARTADDR1      1044
-LOADSTARTADDR2      1056
-NEXTCHAR            10DA
-NEXTCHAR2           111C
-NEXTCHAR3           116E
-NEXTCHAR4           11B0
-PROMPTENDADDR       1090
+LINE1               1212
+LOADENDADDR1        10A8
+LOADENDADDR2        10BA
+LOADSTARTADDR1      103E
+LOADSTARTADDR2      1050
+NEXTCHAR            10D4
+NEXTCHAR2           1116
+NEXTCHAR3           1168
+NEXTCHAR4           11AA
+PROMPTENDADDR       108A
 PROMPTSTARTADDR     1020
 START               1000
-STARTADDRSTRING1    130C
-STARTADDRSTRING2    1310
+STARTADDRSTRING1    1306
+STARTADDRSTRING2    130A

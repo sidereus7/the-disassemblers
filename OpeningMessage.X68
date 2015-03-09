@@ -18,8 +18,7 @@ START:          LEA         LINE1,A1                *Display welcome message to 
                 MOVE.B      #1,D7
                 MOVE.B      #0,D6                   *Toggle for start/end address prompting: 0 = start, 1 = end
             
-PROMPTSTARTADDR MOVEA.L     #$5000,A1
-                MOVE.B      #2,D0
+PROMPTSTARTADDR MOVE.B      #2,D0
                 TRAP        #15
             
                 MOVE.B      #8,D2
@@ -236,6 +235,7 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
 
 
 
