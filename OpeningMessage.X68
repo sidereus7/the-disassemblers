@@ -36,7 +36,7 @@ LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
                 BNE         LOADSTARTADDR1
                 
                 MOVE.B      #0,D3
-                MOVEA.L     STARTADDRSTRING2,A2
+                LEA         STARTADDRSTRING2,A2
 LOADSTARTADDR2  MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
@@ -67,14 +67,14 @@ PROMPTENDADDR   MOVEA.L     #$5000,A1
                 BNE         ERRORINPUTSIZE
                 
                 MOVE.B      #0,D3
-                MOVEA.L     ENDADDRSTRING1,A2
+                LEA         ENDADDRSTRING1,A2
 LOADENDADDR1    MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
                 BNE         LOADENDADDR1
                 
                 MOVE.B      #0,D3
-                MOVEA.L     ENDADDRSTRING2,A2
+                LEA         ENDADDRSTRING2,A2
 LOADENDADDR2    MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
@@ -114,9 +114,103 @@ CONVERTSTART2   MOVE.L      STARTADDRSTRING2,D1
                 
 NEXTCHAR2       MOVE.B      D1,D2
                 CMP.B       D2,D3
+                BLT         CHARISLETTER2
+
+CHARISNUM2      SUB.B       #48,D2
+                MOVE.B      D2,D4
+                ROR.L       #4,D4
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         COMBINESTART
+                BRA         NEXTCHAR2
+
                 
-                MOVE.L      STARTADDRSTRING1,D0
+CHARISLETTER2   SUB.B       #55,D2
+                MOVE.B      D2,D4
+                ROR.L       #4,D4
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         COMBINESTART
+                BRA         NEXTCHAR2
                 
+COMBINESTART    ROR.L       #8,D4
+                ROR.L       #8,D4
+                ADD.L       D4,D7
+                MOVE.L      D7,HEXSTARTADDR
+                MOVE.L      #$00000000,D7
+                MOVE.L      #$00000000,D4
+                
+CONVERTEND1     MOVE.L      ENDADDRSTRING1,D1
+                MOVE.B      #0,D6
+                MOVE.B      #4,D5
+                MOVE.B      #$39,D3
+                
+NEXTCHAR3       MOVE.B      D1,D2
+                CMP.B       D2,D3
+                BLT         CHARISLETTER3
+                
+CHARISNUM3      SUB.B       #48,D2
+                MOVE.B      D2,D7
+                ROR.L       #4,D7
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         CONVERTEND2
+                BRA         NEXTCHAR3
+
+CHARISLETTER3   SUB.B       #55,D2
+                MOVE.B      D2,D7
+                ROR.L       #4,D7
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         CONVERTEND2
+                BRA         NEXTCHAR3
+                
+CONVERTEND2     MOVE.L      ENDADDRSTRING2,D1
+                MOVE.B      #0,D6
+                MOVE.B      #4,D5
+                MOVE.B      #$39,D3
+                
+NEXTCHAR4       MOVE.B      D1,D2
+                CMP.B       D2,D3
+                BLT         CHARISLETTER4
+
+CHARISNUM4      SUB.B       #48,D2
+                MOVE.B      D2,D4
+                ROR.L       #4,D4
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         COMBINEEND
+                BRA         NEXTCHAR4
+
+                
+CHARISLETTER4   SUB.B       #55,D2
+                MOVE.B      D2,D4
+                ROR.L       #4,D4
+                ROR.L       #8,D1
+                ADD.B       #1,D6
+                CMP.B       D6,D5
+                BEQ         COMBINEEND
+                BRA         NEXTCHAR4
+                
+COMBINEEND      ROR.L       #8,D4
+                ROR.L       #8,D4
+                ADD.L       D4,D7
+                MOVE.L      D7,HEXENDADDR
+                MOVE.L      #$00000000,D7
+                MOVE.L      #$00000000,D4
+
+                MOVE.L      HEXSTARTADDR,D0
+                MOVE.L      HEXENDADDR,D1
+                
+                MOVE.L      STARTADDRSTRING1,D2
+                MOVE.L      STARTADDRSTRING2,D3
+                MOVE.L      ENDADDRSTRING1,D4
+                MOVE.L      ENDADDRSTRING2,D5
             
 
 * Put program code here
@@ -136,10 +230,13 @@ BUGFIXMESSAGE       DC.B        'This does nothing, and should never appear.',CR
 
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
+HEXSTARTADDR        DS.L        1
 
 ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
+HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~
