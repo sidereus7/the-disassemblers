@@ -66,6 +66,7 @@ PROMPTENDADDR   MOVEA.L     #$5000,A1
                 CMP.W       D1,D2
                 BNE         ERRORINPUTSIZE
                 
+                MOVE.B      #4,D2
                 MOVE.B      #0,D3
                 LEA         ENDADDRSTRING1,A2
 LOADENDADDR1    MOVE.B      (A1)+,(A2)+
