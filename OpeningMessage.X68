@@ -7,16 +7,16 @@
 *              the program to be dissassembled.
 *-----------------------------------------------------------
     ORG    $1000
-START:          LEA         LINE1,A1
+START:          LEA         LINE1,A1                *Display welcome message to console
                 MOVE.B      #14,D0
                 TRAP        #15
             
-                LEA         GETSTARTMESSAGE,A1
+                LEA         GETSTARTMESSAGE,A1      *Display prompt for start address
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 MOVE.B      #1,D7
-                MOVE.B      #0,D6
+                MOVE.B      #0,D6                   *Toggle for start/end address prompting: 0 = start, 1 = end
             
 PROMPTSTARTADDR MOVEA.L     #$5000,A1
                 MOVE.B      #2,D0
@@ -27,8 +27,7 @@ PROMPTSTARTADDR MOVEA.L     #$5000,A1
                 BNE         ERRORINPUTSIZE
                 MOVE.B      #4,D2
                 MOVE.B      #0,D3
-                
-                MOVE.L      #$12345678,STARTADDRSTRING1   *TEST             
+                            
                 LEA         STARTADDRSTRING1,A2
 LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
@@ -237,6 +236,8 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
+
 
 
 *~Font name~Courier New~
