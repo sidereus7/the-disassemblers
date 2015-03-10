@@ -7,7 +7,8 @@
 *              the program to be dissassembled.
 *-----------------------------------------------------------
     ORG    $1000
-START:          LEA         LINE1,A1                *Display welcome message to console
+START:          LEA         stack,SP
+                LEA         LINE1,A1                *Display welcome message to console
                 MOVE.B      #14,D0
                 TRAP        #15
             
@@ -230,7 +231,7 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A6
                 MOVE.L      D0,A7
                 
-                MOVE.W      #$AABB,$C0680000   *Fills data to show that following code works correctly.
+                MOVE.W      #$1200,$C0680000   *Fills data to show that following code works correctly.
 BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2    *A2 is RESERVED for walking through the target code.
 
 OP_IDENT        MOVE.L      HEXENDADDR,D0
@@ -247,11 +248,11 @@ OP_IDENT        MOVE.L      HEXENDADDR,D0
                 MOVE.B      #14,D0
                 TRAP        #15
 
-                MOVE.B      (A2)+,D7
-                ROL.L       #8,D7
-                MOVE.B      (A2)+,D7
+                MOVE.B      (A2)+,D7       
+                ROL.W       #8,D7
+                MOVE.B      (A2)+,D7        *D7 storing 16 bits of Machine Code into D7. Only WORD data is relevant.
                 
-                MOVE.W      #$F000,D2                  
+                MOVE.W      #$F000,D2                
                 AND.W       D7,D2           * D2 storing the nibble representing opcode.
                 ROR.L       #8,D2
                 ROR.L       #4,D2
@@ -260,55 +261,55 @@ OP_IDENT        MOVE.L      HEXENDADDR,D0
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_0
                 
-                MOVE.B      OPCODE_1,D3
+                MOVE.B      #OPCODE_1,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_1
                 
-                MOVE.B      OPCODE_2,D3
+                MOVE.B      #OPCODE_2,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_2                
 
-                MOVE.B      OPCODE_3,D3
+                MOVE.B      #OPCODE_3,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_3
                 
-                MOVE.B      OPCODE_4,D3
+                MOVE.B      #OPCODE_4,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_4
                 
-                MOVE.B      OPCODE_5,D3
+                MOVE.B      #OPCODE_5,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_5
                 
-                MOVE.B      OPCODE_6,D3
+                MOVE.B      #OPCODE_6,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_6                
 
-                MOVE.B      OPCODE_7,D3
+                MOVE.B      #OPCODE_7,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_7
 
-                MOVE.B      OPCODE_8,D3
+                MOVE.B      #OPCODE_8,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_8
                 
-                MOVE.B      OPCODE_9,D3
+                MOVE.B      #OPCODE_9,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_9
                 
-                MOVE.B      OPCODE_B,D3
+                MOVE.B      #OPCODE_B,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_B                
 
-                MOVE.B      OPCODE_C,D3
+                MOVE.B      #OPCODE_C,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_C
 
-                MOVE.B      OPCODE_D,D3
+                MOVE.B      #OPCODE_D,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_D
                 
-                MOVE.B      OPCODE_E,D3
+                MOVE.B      #OPCODE_E,D3
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_E
                                 
@@ -330,12 +331,31 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 BRA         OP_IDENT
                 
                 
-                
+* USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)                
 * ANDI,SUBI,EORI,CMPI,BCHG
 PARSE_OP_0
 
+
 * MOVE.B
-PARSE_OP_1
+PARSE_OP_1      LEA         PRINT_MOVE_B,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.W      D7,D6       * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$0FC0,D5
+                AND.W       D5,D6       * D6 stores only Destination information, not shifted.
+                LSR.W       #6,D6       * D6 stores Destination info
+                
+                MOVE.W      #%000111,D5   * BitMask for only mode
+                AND.W       D6,D5         * D5 stores Destination Mode
+                
+                LSR.W       #3,D6         * D6 stores Destination Register
+                
+                JSR         HANDLE_DESTINATION
+                
+                
+                BRA         OP_IDENT
+
 
 * MOVE.L
 PARSE_OP_2
@@ -373,11 +393,22 @@ PARSE_OP_D
 * ASL,ASR,LSL,LSR,ROL,ROR
 PARSE_OP_E
 
+* D6 holds destination register.  D5 holds Destination mode.
+HANDLE_DESTINATION      MOVEM.L     D7,-(SP)
+                        
+                        
+                        
+                        
+                        MOVEM.L     (SP)+,D7
+                        RTS
+
 END                      
                               
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
+stack               EQU             $7000   *Stack pointer start location
+
 CR                  EQU             $0D     * Carriage Return
 LF                  EQU             $0A     * Line Feed
 HT                  EQU             $09     * Horizontal Tab
@@ -397,16 +428,29 @@ OPCODE_C            EQU             %1100   * AND,MULS
 OPCODE_D            EQU             %1101   * ADD,ADDA
 OPCODE_E            EQU             %1110   * ASL,ASR,LSL,LSR,ROL,ROR
 
+DR_DIRECT           EQU             %000    * Data Register Direct Mode
+AR_DIRECT           EQU             %001    * Address Register Direct Mode
+AR_INDIRECT         EQU             %010    * Address Register Indirect Mode
+AR_INDIRECT_POST    EQU             %011    * Address Register Indirect Post-Incrementing Mode
+AR_INDIRECT_PRE     EQU             %100    * Address Register Inderect Pre-Decrementing Mode
+ABS_ADDR            EQU             %111    * Absolute Address and Immediate Data Mode
+
+ABS_ADDR_WORD_REG   EQU             %000    * Absolute Word Address Register
+ABS_ADDR_LONG_REG   EQU             %001    * Absolute Long Address Register
+IMMEDIATE_DATA      EQU             %100    * Immediate Data Register
+
 
 LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
 GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
 GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
 
-BUGFIXMESSAGE       DC.B        'This does nothing, and should never appear.',CR,LF,0
+BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
 INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
 CR_LF_MSG           DC.B        CR,LF,0
 TAB_MSG             DC.B        HT,0
+
+PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
 
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
@@ -416,6 +460,8 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
+
 
 
 
