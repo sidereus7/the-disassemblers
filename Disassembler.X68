@@ -203,22 +203,200 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      #$00000000,D7
                 MOVE.L      #$00000000,D4
 
-                MOVE.L      HEXSTARTADDR,D0
-                MOVE.L      HEXENDADDR,D1
+*  TEST CODE FOR DEMONSTRATING THE VALUES IN THE VARIABLES                
+*                MOVE.L      HEXSTARTADDR,D0
+*                MOVE.L      HEXENDADDR,D1
                 
-                MOVE.L      STARTADDRSTRING1,D2
-                MOVE.L      STARTADDRSTRING2,D3
-                MOVE.L      ENDADDRSTRING1,D4
-                MOVE.L      ENDADDRSTRING2,D5
-            
+*                MOVE.L      STARTADDRSTRING1,D2
+*                MOVE.L      STARTADDRSTRING2,D3
+*                MOVE.L      ENDADDRSTRING1,D4
+*                MOVE.L      ENDADDRSTRING2,D5
 
-* Put program code here
+* Clear all registers to move on to next segment
+                CLR.L       D0
+                CLR.L       D1
+                CLR.L       D2
+                CLR.L       D3
+                CLR.L       D4
+                CLR.L       D5
+                CLR.L       D6
+                CLR.L       D7
+                MOVE.L      D0,A0
+                MOVE.L      D0,A1
+                MOVE.L      D0,A2
+                MOVE.L      D0,A3
+                MOVE.L      D0,A4
+                MOVE.L      D0,A5
+                MOVE.L      D0,A6
+                MOVE.L      D0,A7
+                
+                MOVE.W      #$AABB,$C0680000   *Fills data to show that following code works correctly.
+BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2    *A2 is RESERVED for walking through the target code.
 
+OP_IDENT        MOVE.L      HEXENDADDR,D0
+                MOVE.L      A2,D1
+                CMP.L       D0,D1
+                BGT         END
+
+                MOVE.L      A2,D1           *Print current address.  TODO: Add tab
+                MOVE.B      #15,D0
+                MOVE.B      #16,D2
+                TRAP        #15
+                
+                LEA         TAB_MSG,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                MOVE.B      (A2)+,D7
+                ROL.L       #8,D7
+                MOVE.B      (A2)+,D7
+                
+                MOVE.W      #$F000,D2                  
+                AND.W       D7,D2           * D2 storing the nibble representing opcode.
+                ROR.L       #8,D2
+                ROR.L       #4,D2
+                
+                MOVE.B      OPCODE_0,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_0
+                
+                MOVE.B      OPCODE_1,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_1
+                
+                MOVE.B      OPCODE_2,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_2                
+
+                MOVE.B      OPCODE_3,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_3
+                
+                MOVE.B      OPCODE_4,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_4
+                
+                MOVE.B      OPCODE_5,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_5
+                
+                MOVE.B      OPCODE_6,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_6                
+
+                MOVE.B      OPCODE_7,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_7
+
+                MOVE.B      OPCODE_8,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_8
+                
+                MOVE.B      OPCODE_9,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_9
+                
+                MOVE.B      OPCODE_B,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_B                
+
+                MOVE.B      OPCODE_C,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_C
+
+                MOVE.B      OPCODE_D,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_D
+                
+                MOVE.B      OPCODE_E,D3
+                CMP.B       D2,D3
+                BEQ         PARSE_OP_E
+                                
+                
+                *CASE where nothing matched, bad data. report to user. Skip to next 16 bit code
+NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.L      D2,D1
+                MOVE.B      #15,D0
+                MOVE.B      #2,D2
+                TRAP        #15
+                
+                LEA         CR_LF_MSG,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+                
+                
+                
+* ANDI,SUBI,EORI,CMPI,BCHG
+PARSE_OP_0
+
+* MOVE.B
+PARSE_OP_1
+
+* MOVE.L
+PARSE_OP_2
+
+* MOVE.W
+PARSE_OP_3
+
+* CLR,RTS,JSR,MOVEM,LEA
+PARSE_OP_4
+
+* ADDQ
+PARSE_OP_5
+
+* BCC
+PARSE_OP_6
+
+* MOVEQ
+PARSE_OP_7
+
+* DIVS
+PARSE_OP_8
+
+* SUB,SUBA
+PARSE_OP_9
+
+* EOR,CMP,CMPA
+PARSE_OP_B
+
+* AND,MULS
+PARSE_OP_C
+
+* ADD,ADDA
+PARSE_OP_D
+
+* ASL,ASR,LSL,LSR,ROL,ROR
+PARSE_OP_E
+
+END                      
+                              
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
-CR                  EQU             $0D
-LF                  EQU             $0A
+CR                  EQU             $0D     * Carriage Return
+LF                  EQU             $0A     * Line Feed
+HT                  EQU             $09     * Horizontal Tab
+
+OPCODE_0            EQU             %0000   * ANDI,SUBI,EORI,CMPI,BCHG
+OPCODE_1            EQU             %0001   * MOVE.B
+OPCODE_2            EQU             %0010   * MOVE.L
+OPCODE_3            EQU             %0011   * MOVE.W
+OPCODE_4            EQU             %0100   * CLR,RTS,JSR,MOVEM,LEA
+OPCODE_5            EQU             %0101   * ADDQ
+OPCODE_6            EQU             %0110   * BCC
+OPCODE_7            EQU             %0111   * MOVEQ
+OPCODE_8            EQU             %1000   * DIVS
+OPCODE_9            EQU             %1001   * SUB,SUBA
+OPCODE_B            EQU             %1011   * EOR,CMP,CMPA
+OPCODE_C            EQU             %1100   * AND,MULS
+OPCODE_D            EQU             %1101   * ADD,ADDA
+OPCODE_E            EQU             %1110   * ASL,ASR,LSL,LSR,ROL,ROR
+
 
 LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
 GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
@@ -226,6 +404,9 @@ GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
 
 BUGFIXMESSAGE       DC.B        'This does nothing, and should never appear.',CR,LF,0
+INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
+CR_LF_MSG           DC.B        CR,LF,0
+TAB_MSG             DC.B        HT,0
 
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
