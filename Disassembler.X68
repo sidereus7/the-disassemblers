@@ -1,5 +1,5 @@
 *-----------------------------------------------------------
-* Title      : Opening Screen Project
+* Title      : 68K Disassembler
 * Written by : Chance O'Day, Sara Jackson, and Bonnie Vo
 * Date       : 3/6/2015
 * Description: Displays an opening message and prompts the
@@ -213,6 +213,9 @@ COMBINEEND      ROR.L       #8,D4
 *                MOVE.L      ENDADDRSTRING1,D4
 *                MOVE.L      ENDADDRSTRING2,D5
 
+****************************************************************************
+*-------------------------------------------------------------------------*
+****************************************************************************
 * Clear all registers to move on to next segment
                 CLR.L       D0
                 CLR.L       D1
@@ -396,11 +399,83 @@ PARSE_OP_E
 * D6 holds destination register.  D5 holds Destination mode.
 HANDLE_DESTINATION      MOVEM.L     D7,-(SP)
                         
+                        MOVE.B      #DR_DIRECT,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_0             * Branch to Data Register Direct
+                        
+                        MOVE.B      #AR_DIRECT,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_1             * Branch to Address Register Direct
+                        
+                        MOVE.B      #AR_INDIRECT,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_2             * Branch to Address Register Indirect
+                        
+                        MOVE.B      #AR_INDIRECT_POST,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing
+                        
+                        MOVE.B      #AR_INDIRECT_PRE,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting
+                        
+                        MOVE.B      #ABS_ADDR,D0
+                        CMP.B       D0,D5
+                        BEQ         DEST_MODE_7             * Branch to Absolute Addressing
+
+* Invalid Destination Mode Handling                        
+INVALID_DEST_MODE       LEA         INVALID_DEST_MODE_MSG,A1        
+                        MOVE.B      #14,D0
+                        TRAP        #15                     * Print error message for Destination Mode
+                        
+                        MOVE.L      D5,D1
+                        MOVE.B      #15,D0
+                        MOVE.B      #2,D2
+                        TRAP        #15                     * Print the problematic Destination mode
+                        
+                        LEA         CR_LF_MSG,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15                     * Print carriage return/new line
                         
                         
-                        
-                        MOVEM.L     (SP)+,D7
+EXIT_HANDLE_DEST        MOVEM.L     (SP)+,D7                *Exit HANDLE_DESTINATION subroutine
                         RTS
+
+* Complex part of destination handling                        
+DEST_MODE_0             LEA         PRINT_D,A1          * Print D
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.L      D6,D1               * Print target Register
+                        MOVE.B      #15,D0
+                        MOVE.B      #10,D2
+                        TRAP        #15
+                        
+                        LEA         PRINT_COMMA,A1      * Print Comma
+                        MOVE.B      #14,D0
+                        TRAP        #15
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST
+
+DEST_MODE_1
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST
+
+DEST_MODE_2
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST
+
+DEST_MODE_3
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST
+
+DEST_MODE_4
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST
+
+DEST_MODE_7
+* Code goes here
+                        BRA         EXIT_HANDLE_DEST                        
 
 END                      
                               
@@ -444,6 +519,11 @@ LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
 GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
 GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
+INVALID_DEST_MODE_MSG   DC.B    'The following destination mode is invalid: ',0
+PRINT_D             DC.B        'D',0
+PRINT_COMMA         DC.B        ',',0
+PRINT_A             DC.B        'A',0
+
 
 BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
 INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
