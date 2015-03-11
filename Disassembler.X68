@@ -11,7 +11,7 @@
 *               the user for the start and end address
 *               for the program to be disassembled.
 *-----------------------------------------------------------
-                ORG    $1000
+                ORG         $1000
 START:          LEA         stack,SP
                 LEA         LINE1,A1                * Display welcome message to console
                 MOVE.B      #14,D0
@@ -24,7 +24,7 @@ START:          LEA         stack,SP
                 MOVE.B      #1,D7
                 MOVE.B      #0,D6                   * Toggle for start/end address prompting: 0 = start, 1 = end
             
-PROMPTSTARTADDR MOVE.B      #2,D0                   * Read starting address string from keyboard
+PROMPTSTARTADDR MOVE.B      #2,D0                   * Read starting address string from console
                 TRAP        #15
             
                 MOVE.B      #8,D2
@@ -486,11 +486,11 @@ OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
                         BRA         EXIT_HANDLE_OPERAND
 
 * Address Register Direct
-OPERAND_MODE_1          LEA         PRINT_A,A1          * Prints: A
+OPERAND_MODE_1          LEA         PRINT_A,A1                  * Prints: A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1               * Prints Register in Decimal
+                        MOVE.L      D6,D1                       * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
@@ -498,23 +498,23 @@ OPERAND_MODE_1          LEA         PRINT_A,A1          * Prints: A
                         BRA         EXIT_HANDLE_OPERAND 
 
 * Address Register Indirect
-OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1 * Prints: (A
+OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1               * Prints Register in Decimal
+                        MOVE.L      D6,D1                       * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN,A1  * Prints: )
+                        LEA         PRINT_END_PAREN,A1          * Prints: )
                         MOVE.B      #14,D0
                         TRAP        #15       
 
                         BRA         EXIT_HANDLE_OPERAND
 
 * Address Register Indirect w/Post-Incrementation
-OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1 * Prints:  (A
+OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints:  (A
                         MOVE.B      #14,D0
                         TRAP        #15
 
@@ -663,6 +663,7 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
                     END     START           ; last line of source
+
 
 
 
