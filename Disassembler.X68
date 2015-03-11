@@ -375,7 +375,195 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
 ****************************************************************************
 
 * ANDI,SUBI,EORI,CMPI,BCHG
-PARSE_OP_0
+PARSE_OP_0      MOVE.W      D7,D3                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$01C0,D2               * First Case: BitMask to check if BCHG Dn,<EA>
+                AND.W       D2,D3
+                
+                MOVE.W      D7,D6                   * EA for ANDI,SUBI,BCHG,EORI,CMPI
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6
+                
+                MOVE.W      #%000111,D5
+                AND.W       D6,D5
+                LSR.W       #3,D6
+                
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Register
+                MOVE.W      D4,D5                   * D5 stores Mode
+                
+                LSR.W       #6,D3                   * Shift the BitMask to compare if BCHG Dn,<EA>
+                CMPI.W      #%0101,D3
+                BEQ         BCHG_DN
+                
+                MOVE.W      D7,D3                   * Check for other cases
+                MOVE.W      #$0F00,D4               * BitMask to check other cases
+                AND.W       D4,D3
+                LSR.W       #8,D3                   * Shift the BitMask to compare
+                
+PARSE_OF_0_CMP  CMPI.W      #%1000,D3               * BCHG #<data>,<EA>
+                BEQ         PARSE_0_BCHG
+
+                CMPI.W      #%0010,D3               * ANDI #<data>,<EA>
+                BEQ         PARSE_0_ANDI
+                
+                CMPI.W      #%0100,D3               * SUBI #<data>,<EA>
+                BEQ         PARSE_0_SUBI
+                
+                CMPI.W      #%1010,D3               * EORI #<data>,<EA>
+                BEQ         PARSE_0_EORI
+                
+                CMPI.W      #%1100,D3               * CMPI #<data>,<EA>
+                BEQ         PARSE_0_CMPI
+                
+                BRA         NO_OP_MATCH             * BRANCH if No Match
+                
+PARSE_0_ANDI    LEA         PRINT_ANDI,A1           * Print ANDI
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_0_SIZE
+
+PARSE_0_SUBI    LEA         PRINT_SUBI,A1           * Print SUBI
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_0_SIZE
+
+PARSE_0_EORI    LEA         PRINT_EORI,A1           * Print EORI
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_0_SIZE
+
+PARSE_0_CMPI    LEA         PRINT_CMPI,A1           * Print CMPI
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_0_SIZE
+                
+PARSE_0_SIZE    MOVE.W      D7,D2                   * Need to check for size
+                MOVE.W      #$00C0,D1               * BitMask to check size
+                AND.W       D1,D2
+                LSR.W       #6,D1                   * Shift the BitMask to compare
+                
+                CMPI.B      #%0000,D1               * Byte size
+                BEQ         PARSE_0_SIZE_B
+                
+                CMPI.B      #%0001,D1               * Word size
+                BEQ         PARSE_0_SIZE_W
+                
+                CMPI.B      #%0010,D1               * Long size
+                BEQ         PARSE_0_SIZE_L
+                
+PARSE_0_SIZE_B  MOVE.B      #$00,OP_SIZE            * Sets OP_SIZE to byte
+                LEA         PRINT_B,A1              * Print .B
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_0_IMMDATA 
+                
+PARSE_0_SIZE_W  MOVE.B      #$01,OP_SIZE            * Sets OP_SIZE to word
+                LEA         PRINT_W,A1              * Print .W
+                MOVE.B      #14,D0
+                TRAP        #15               
+                BRA         PARSE_0_IMMDATA 
+                
+PARSE_0_SIZE_L  MOVE.B      #$02,OP_SIZE            * Sets OP_SIZE to long
+                LEA         PRINT_L,A1              * Print .L
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+PARSE_0_IMMDATA LEA         TAB_MSG,A1            
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.W      #$0007,D5               * Set immediate data mode
+                MOVE.W      #$0004,D6               * Set immediate data register
+
+                JSR         HANDLE_OPERAND          * Enter Subroutine to print out immediate data
+                
+PARSE_0_EA      LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15   
+
+                MOVE.W      D7,D6                   * EA for ANDI,SUBI,BCHG,EORI,CMPI
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6
+                
+                MOVE.W      #%000111,D5
+                AND.W       D6,D5
+                LSR.W       #3,D6
+                
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Register
+                MOVE.W      D4,D5                   * D5 stores Mode
+                
+                JSR         HANDLE_OPERAND          * Enter subroutine for source handling
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                BRA         OP_IDENT
+* Parse_0 for BCHG.x #<data>,<ea>                
+PARSE_0_BCHG    MOVE.W      D7,D2                   * Need to check if the rest of the op code ends in 01
+                MOVE.W      #$00C0,D1               * BitMask to check 
+                AND.W       D1,D2
+                LSR.W       #6,D1                   * Shift the BitMask to compare
+                
+                CMPI.B      #%0001,D1               * Is the rest of the op code 01?
+                BNE         NO_OP_MATCH             * If not equal: ERROR
+                
+                CMPI.B      #DR_DIRECT,D5           * Check if EA is Dn
+                BEQ         PARSE_0_BCHG_L          * If so, BCHG is long
+                
+                LEA         PRINT_BCHG_B,A1         * Print BCHG.B
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_BCHG_DATA
+
+PARSE_0_BCHG_L  LEA         PRINT_BCHG_L,A1         * Print BCHG.L
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+PARSE_BCHG_DATA
+
+                MOVE.W      #$0007,D5               * Set immediate data mode
+                MOVE.W      #$0004,D6               * Set immediate data register
+                MOVE.B      #$01,OP_SIZE            * Special case: BCHG immediate data should always be WORD size
+                JSR         HANDLE_OPERAND          * Enter Subroutine to print out immediate data
+                
+                BRA         PARSE_0_EA
+* Parse_0 for BCHG.x Dn,<ea> case:         
+BCHG_DN         CMPI.B      #DR_DIRECT,D5           * Check if EA is Dn
+                BEQ         BCHG_PRINT_L            * If so, BCHG is long
+                
+BCHG_PRINT_B    LEA         PRINT_BCHG_B,A1         * Print BCHG.B
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         BCHG_PRINT_D        
+                
+BCHG_PRINT_L    LEA         PRINT_BCHG_L,A1         * Print BCHG.L
+                MOVE.B      #14,D0
+                TRAP        #15
+
+BCHG_PRINT_D    LEA         TAB_MSG,A1              * Print tab
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_D,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.L      D7,D1                   * Move target register to D1
+                MOVE.L      #$0E00,D4
+                AND.L       D4,D1
+                
+                LSR.L       #8,D1                   * Shift 9 to get target register
+                LSR.L       #1,D1
+                
+                ************************************************************************ FIX
+                MOVE.B      #15,D0                  * Print target register
+                MOVE.B      #10,D2
+                TRAP        #15
+
+                BRA         PARSE_0_EA              * Branch to print parse 0 EA
+
 
 
 * MOVE.B
@@ -987,6 +1175,15 @@ PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
 PRINT_SUB_B         DC.B        'SUB.B',HT,0
 PRINT_SUB_W         DC.B        'SUB.W',HT,0
 PRINT_SUB_L         DC.B        'SUB.L',HT,0
+PRINT_BCHG_B        DC.B        'BCHG.B',HT,0
+PRINT_BCHG_L        DC.B        'BCHG.L',HT,0
+PRINT_ANDI          DC.B        'ANDI',HT,0
+PRINT_SUBI          DC.B        'SUBI',HT,0
+PRINT_EORI          DC.B        'EORI',HT,0
+PRINT_CMPI          DC.B        'CMPI',HT,0
+PRINT_B             DC.B        '.B',HT,0
+PRINT_W             DC.B        '.W',HT,0
+PRINT_L             DC.B        '.L',HT,0
 
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
@@ -998,6 +1195,7 @@ HEXENDADDR          DS.L        1
 
 OP_SIZE             DS.B        1
                     END     START           ; last line of source
+
 
 
 *~Font name~Courier New~
