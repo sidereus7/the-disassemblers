@@ -240,7 +240,7 @@ BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2    *A2 is RESERVED for walking throu
 OP_IDENT        MOVE.L      HEXENDADDR,D0
                 MOVE.L      A2,D1
                 CMP.L       D0,D1
-                BGT         END
+                BGT         END             * Branch to end if current address is greater than ending address.
 
                 MOVE.L      A2,D1           *Print current address.  TODO: Add tab
                 MOVE.B      #15,D0
@@ -482,69 +482,105 @@ OPERAND_MODE_0          LEA         PRINT_D,A1          * Print D
                         BRA         EXIT_HANDLE_OPERAND
 
 * Address Register Direct
-OPERAND_MODE_1          LEA         PRINT_A,A1
+OPERAND_MODE_1          LEA         PRINT_A,A1          * Prints: A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1
+                        MOVE.L      D6,D1               * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
    
-                        BRA         EXIT_HANDLE_OPERAND
+                        BRA         EXIT_HANDLE_OPERAND 
 
 * Address Register Indirect
-OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1
+OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1 * Prints: (A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1
+                        MOVE.L      D6,D1               * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN,A1
+                        LEA         PRINT_END_PAREN,A1  * Prints: )
                         MOVE.B      #14,D0
                         TRAP        #15       
 
                         BRA         EXIT_HANDLE_OPERAND
 
 * Address Register Indirect w/Post-Incrementation
-OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1
+OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1 * Prints:  (A
                         MOVE.B      #14,D0
                         TRAP        #15
 
-                        MOVE.L      D6,D1
+                        MOVE.L      D6,D1               * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN_PLUS,A1
+                        LEA         PRINT_END_PAREN_PLUS,A1 * Prints:  )+
                         MOVE.B      #14,D0
                         TRAP        #15                           
 
                         BRA         EXIT_HANDLE_OPERAND
                         
 * Address Register Indirect w/Pre-Decrementation
-OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1
+OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1
+                        MOVE.L      D6,D1                       * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN,A1
+                        LEA         PRINT_END_PAREN,A1          * Prints:  )
                         MOVE.B      #14,D0
                         TRAP        #15
 
                         BRA         EXIT_HANDLE_OPERAND
                         
 * Absolute Addressing
-OPERAND_MODE_7          
-* Code goes here
-                        BRA         EXIT_HANDLE_OPERAND   
+OPERAND_MODE_7          MOVE.B      #ABS_ADDR_WORD_REG,D0   * Load %000 to D0
+                        CMP.B       D0,D6
+                        BEQ         HANDLE_ABS_ADDR_WORD
+                        
+                        MOVE.B      #ABS_ADDR_LONG_REG,D0   * Load %001 to D0
+                        CMP.B       D0,D6
+                        BEQ         HANDLE_ABS_ADDR_LONG
+                        
+                        MOVE.B      #IMMEDIATE_DATA,D0      * Load %100 to D0
+                        CMP.B       D0,D6
+                        BEQ         HANDLE_IMMED_DATA
+
+* The address register stored in D6 is invalid.                        
+INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error message
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.L      D6,D1                       * Print invalid address register stored in D6
+                        MOVE.B      #15,D0
+                        MOVE.B      #2,D2
+                        TRAP        #15 
+                        
+                        LEA         CR_LF_MSG,A1                * Print new Line
+                        MOVE.B      #14,D0
+                        TRAP        #15  
+                                                
+
+EXIT_OPERAND_MODE_7     BRA         EXIT_HANDLE_OPERAND 
+
+
+HANDLE_ABS_ADDR_WORD
+                        BRA         EXIT_OPERAND_MODE_7
+
+HANDLE_ABS_ADDR_LONG
+
+                        BRA         EXIT_OPERAND_MODE_7
+HANDLE_IMMED_DATA  
+
+                        BRA         EXIT_OPERAND_MODE_7
                      
 *********************************************************************************
 *-------------------------------------------------------------------------------*
@@ -595,6 +631,8 @@ GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
 GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
 INVALID_OPERAND_MODE_MSG   DC.B 'The following operand mode is invalid: ',0
+INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
+
 PRINT_D             DC.B        'D',0
 PRINT_COMMA         DC.B        ',',0
 PRINT_A             DC.B        'A',0
