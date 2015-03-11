@@ -243,6 +243,9 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
                 MOVE.W      #$143C,$C0680002
                 MOVE.B      #$17,$C0680004
+                MOVE.B      #$1A,$C0680005
+                MOVE.B      #$BC,$C0680006
+                MOVE.B      #$33,$C0680007
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
 *--------------------------------------------------------------------------
                 
