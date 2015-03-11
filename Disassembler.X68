@@ -64,7 +64,7 @@ ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end add
                 
                 
 PROMPTENDADDR   MOVEA.L     #$5000,A1
-                MOVE.B      #2,D0                   * Read end address string from keyboard
+                MOVE.B      #2,D0                   * Read end address string from console
                 TRAP        #15
                 
                 CMP.W       D1,D2                   * Check end address size
@@ -245,7 +245,7 @@ BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking
 OP_IDENT        MOVE.L      HEXENDADDR,D0
                 MOVE.L      A2,D1
                 CMP.L       D0,D1
-                BGT         END             * Branch to end if current address is greater than ending address.
+                BGT         END                     * Branch to end if current address is greater than ending address.
 
                 MOVE.L      A2,D1                   * Print current address.  TODO: Add tab **************************
                 MOVE.B      #15,D0
@@ -514,16 +514,16 @@ OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         BRA         EXIT_HANDLE_OPERAND
 
 * Address Register Indirect w/Post-Incrementation
-OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints:  (A
+OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         MOVE.B      #14,D0
                         TRAP        #15
 
-                        MOVE.L      D6,D1               * Prints Register in Decimal
+                        MOVE.L      D6,D1                       * Prints Register in Decimal
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN_PLUS,A1 * Prints:  )+
+                        LEA         PRINT_END_PAREN_PLUS,A1     * Prints: )+
                         MOVE.B      #14,D0
                         TRAP        #15                           
 
@@ -539,22 +539,22 @@ OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_END_PAREN,A1          * Prints:  )
+                        LEA         PRINT_END_PAREN,A1          * Prints: )
                         MOVE.B      #14,D0
                         TRAP        #15
 
                         BRA         EXIT_HANDLE_OPERAND
                         
 * Absolute Addressing
-OPERAND_MODE_7          MOVE.B      #ABS_ADDR_WORD_REG,D0   * Load %000 to D0
+OPERAND_MODE_7          MOVE.B      #ABS_ADDR_WORD_REG,D0       * Load %000 to D0
                         CMP.B       D0,D6
                         BEQ         HANDLE_ABS_ADDR_WORD
                         
-                        MOVE.B      #ABS_ADDR_LONG_REG,D0   * Load %001 to D0
+                        MOVE.B      #ABS_ADDR_LONG_REG,D0       * Load %001 to D0
                         CMP.B       D0,D6
                         BEQ         HANDLE_ABS_ADDR_LONG
                         
-                        MOVE.B      #IMMEDIATE_DATA,D0      * Load %100 to D0
+                        MOVE.B      #IMMEDIATE_DATA,D0          * Load %100 to D0
                         CMP.B       D0,D6
                         BEQ         HANDLE_IMMED_DATA
 
@@ -663,18 +663,6 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
                     END     START           ; last line of source
-
-
-
-
-
-
-
-
-
-
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
