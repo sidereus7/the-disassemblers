@@ -219,7 +219,7 @@ COMBINEEND      ROR.L       #8,D4
 *                MOVE.L      ENDADDRSTRING2,D5
 
 ****************************************************************************
-*-------------------------------------------------------------------------*
+*--------------------------------------------------------------------------*
 ****************************************************************************
 * Clear all registers to move on to next segment
                 CLR.L       D0
@@ -238,8 +238,14 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A5
                 MOVE.L      D0,A6
                 MOVE.L      D0,A7                
-                
+
+*-----------------------TEST CODE-----------------------------------------------------                
                 MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
+                MOVE.W      #$143C,$C0680002
+                MOVE.B      #$17,$C0680004
+              * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
+*--------------------------------------------------------------------------
+                
 BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
 
 OP_IDENT        MOVE.L      HEXENDADDR,D0
@@ -338,7 +344,8 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 
                 BRA         OP_IDENT
                 
-* USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)                
+* USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)
+* Before branching to HANDLE_OPERAND, put Register in D6, Mode in D5 and size in OP_SIZE.                
 * ANDI,SUBI,EORI,CMPI,BCHG
 PARSE_OP_0
 
@@ -347,6 +354,8 @@ PARSE_OP_0
 PARSE_OP_1      LEA         PRINT_MOVE_B,A1
                 MOVE.B      #14,D0
                 TRAP        #15
+                
+                MOVE.B      #$00,OP_SIZE            * Sets OP_SIZE to byte.
                 
                 MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
                 MOVE.W      #$003F,D5
@@ -425,7 +434,9 @@ PARSE_OP_E
 *********************************************************************************
 *---------------------------Operand Subroutine----------------------------------*
 *********************************************************************************
-* D6 holds register.  D5 holds mode.
+* D6 holds register.  
+* D5 holds mode.  
+* OP_SIZE holds size of operation: $00 = Byte, $01 = Word, $02 = Long
 HANDLE_OPERAND          MOVEM.L     D7,-(SP)
                         
                         MOVE.B      #DR_DIRECT,D0
@@ -576,15 +587,88 @@ INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error me
 EXIT_OPERAND_MODE_7     BRA         EXIT_HANDLE_OPERAND 
 
 
-HANDLE_ABS_ADDR_WORD
+HANDLE_ABS_ADDR_WORD    LEA         PRINT_DOLLAR,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+                        LSL.W       #8,D4               * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4            * D4 stores word absolute address
+                        
+                        MOVE.L      D4,D1               * Print absolute address
+                        MOVE.B      #15,D0
+                        MOVE.B      #16,D2
+                        TRAP        #15
+                        
                         BRA         EXIT_OPERAND_MODE_7
 
-HANDLE_ABS_ADDR_LONG
+HANDLE_ABS_ADDR_LONG    LEA         PRINT_DOLLAR,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+                        LSL.L       #8,D4               * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4
+                        LSL.L       #8,D4
+                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+                        LSL.L       #8,D4               * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4            * D4 stores long absolute address
+
+                        MOVE.L      D4,D1               * Print absolute address
+                        MOVE.B      #15,D0
+                        MOVE.B      #16,D2
+                        TRAP        #15
 
                         BRA         EXIT_OPERAND_MODE_7
-HANDLE_IMMED_DATA  
+                        
+HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        CLR.L       D1                  * Clears D1
+                        MOVE.B      OP_SIZE,D1          * Set D1 to OP_SIZE ($00 = Byte, $01 = Word, $02 = Long)
+                        
+                        CMPI.B      #$00,D1
+                        BEQ         IMMED_DATA_BYTE
+                        
+                        CMPI.B      #$01,D1
+                        BEQ         IMMED_DATA_WORD
+                        
+                        CMPI.B      #$02,D1
+                        BEQ         IMMED_DATA_LONG
+                        
+                        
+EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
 
-                        BRA         EXIT_OPERAND_MODE_7
+IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Print byte of immediate data and move A2
+                        MOVE.B      #15,D0
+                        MOVE.B      #16,D2
+                        TRAP        #15
+                        
+                        BRA         EXIT_HANDLE_IMMED_DATA
+
+IMMED_DATA_WORD         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+                        LSL.W       #8,D1               * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1            * D1 stores immediate data word
+                        
+                        MOVE.B      #15,D0              * Print immediate data word
+                        MOVE.B      #16,D2
+                        TRAP        #15
+                        
+                        BRA         EXIT_HANDLE_IMMED_DATA
+
+IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+                        LSL.L       #8,D1               * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1
+                        LSL.L       #8,D1
+                        MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+                        LSL.L       #8,D1               * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1            * D1 stores immediate data long
+                        
+                        MOVE.B      #15,D0              * Print immediate data long
+                        MOVE.B      #16,D2
+                        TRAP        #15
+                        BRA         EXIT_HANDLE_IMMED_DATA
                      
 *********************************************************************************
 *-------------------------------------------------------------------------------*
@@ -662,7 +746,10 @@ HEXSTARTADDR        DS.L        1
 ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
+
+OP_SIZE             DS.B        1
                     END     START           ; last line of source
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

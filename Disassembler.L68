@@ -1,6 +1,6 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.02
-Created On: 3/10/2015 8:55:06 PM
+Created On: 3/10/2015 10:22:04 PM
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      :  68K Disassembler
@@ -17,11 +17,11 @@ Created On: 3/10/2015 8:55:06 PM
 00000000                            13  *-----------------------------------------------------------
 00001000                            14                  ORG         $1000
 00001000  4FF9 00007000             15  START:          LEA         stack,SP
-00001006  43F9 000014C8             16                  LEA         LINE1,A1                * Display welcome message to console
+00001006  43F9 0000158A             16                  LEA         LINE1,A1                * Display welcome message to console
 0000100C  103C 000E                 17                  MOVE.B      #14,D0
 00001010  4E4F                      18                  TRAP        #15
 00001012                            19              
-00001012  43F9 000014EC             20                  LEA         GETSTARTMESSAGE,A1      * Display prompt for start address
+00001012  43F9 000015AE             20                  LEA         GETSTARTMESSAGE,A1      * Display prompt for start address
 00001018  103C 000E                 21                  MOVE.B      #14,D0
 0000101C  4E4F                      22                  TRAP        #15
 0000101E                            23                  
@@ -37,30 +37,30 @@ Created On: 3/10/2015 8:55:06 PM
 00001036  143C 0004                 33                  MOVE.B      #4,D2
 0000103A  163C 0000                 34                  MOVE.B      #0,D3
 0000103E                            35                              
-0000103E  45F9 0000166E             36                  LEA         STARTADDRSTRING1,A2     * Load ASCII of the first half of start address to A2 register
+0000103E  45F9 00001730             36                  LEA         STARTADDRSTRING1,A2     * Load ASCII of the first half of start address to A2 register
 00001044  14D9                      37  LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
 00001046  5203                      38                  ADD.B       #1,D3
 00001048  B602                      39                  CMP.B       D2,D3
 0000104A  66F8                      40                  BNE         LOADSTARTADDR1
 0000104C                            41                  
 0000104C  163C 0000                 42                  MOVE.B      #0,D3
-00001050  45F9 00001672             43                  LEA         STARTADDRSTRING2,A2     * Load ASCII of the second half of start address to A2 register
+00001050  45F9 00001734             43                  LEA         STARTADDRSTRING2,A2     * Load ASCII of the second half of start address to A2 register
 00001056  14D9                      44  LOADSTARTADDR2  MOVE.B      (A1)+,(A2)+
 00001058  5203                      45                  ADD.B       #1,D3
 0000105A  B602                      46                  CMP.B       D2,D3
 0000105C  66F8                      47                  BNE         LOADSTARTADDR2
 0000105E  6000 001C                 48                  BRA         ENDADDR
 00001062                            49              
-00001062  43F9 0000153A             50  ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1     * Start/End Address Error
+00001062  43F9 000015FC             50  ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1     * Start/End Address Error
 00001068  103C 000E                 51                  MOVE.B      #14,D0
 0000106C  4E4F                      52                  TRAP        #15
 0000106E                            53                  
-0000106E  43F9 00001600             54                  LEA         BUGFIXMESSAGE,A1
+0000106E  43F9 000016C2             54                  LEA         BUGFIXMESSAGE,A1
 00001074  BC07                      55                  CMP.B       D7,D6
 00001076  66AE                      56                  BNE         PROMPTSTARTADDR
 00001078  6000 0016                 57                  BRA         PROMPTENDADDR
 0000107C                            58                  
-0000107C  43F9 00001514             59  ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end address
+0000107C  43F9 000015D6             59  ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end address
 00001082  103C 000E                 60                  MOVE.B      #14,D0
 00001086  4E4F                      61                  TRAP        #15
 00001088  1C3C 0001                 62                  MOVE.B      #1,D6
@@ -68,7 +68,7 @@ Created On: 3/10/2015 8:55:06 PM
 00001090                            64                  
 00001090                            65                  
 00001090  227C 00005000             66  PROMPTENDADDR   MOVEA.L     #$5000,A1
-00001096  103C 0002                 67                  MOVE.B      #2,D0                   * Read end address string from keyboard
+00001096  103C 0002                 67                  MOVE.B      #2,D0                   * Read end address string from console
 0000109A  4E4F                      68                  TRAP        #15
 0000109C                            69                  
 0000109C  B441                      70                  CMP.W       D1,D2                   * Check end address size
@@ -76,20 +76,20 @@ Created On: 3/10/2015 8:55:06 PM
 000010A0                            72                  
 000010A0  143C 0004                 73                  MOVE.B      #4,D2
 000010A4  163C 0000                 74                  MOVE.B      #0,D3
-000010A8  45F9 0000167A             75                  LEA         ENDADDRSTRING1,A2       * Load ASCII of the first half of end address to A2 register
+000010A8  45F9 0000173C             75                  LEA         ENDADDRSTRING1,A2       * Load ASCII of the first half of end address to A2 register
 000010AE  14D9                      76  LOADENDADDR1    MOVE.B      (A1)+,(A2)+
 000010B0  5203                      77                  ADD.B       #1,D3
 000010B2  B602                      78                  CMP.B       D2,D3
 000010B4  66F8                      79                  BNE         LOADENDADDR1
 000010B6                            80                  
 000010B6  163C 0000                 81                  MOVE.B      #0,D3
-000010BA  45F9 0000167E             82                  LEA         ENDADDRSTRING2,A2       * Load ASCII of the second half of end address to A2 register
+000010BA  45F9 00001740             82                  LEA         ENDADDRSTRING2,A2       * Load ASCII of the second half of end address to A2 register
 000010C0  14D9                      83  LOADENDADDR2    MOVE.B      (A1)+,(A2)+
 000010C2  5203                      84                  ADD.B       #1,D3
 000010C4  B602                      85                  CMP.B       D2,D3
 000010C6  66F8                      86                  BNE         LOADENDADDR2
 000010C8                            87                                 
-000010C8  2239 0000166E             88  CONVERTSTART1   MOVE.L      STARTADDRSTRING1,D1
+000010C8  2239 00001730             88  CONVERTSTART1   MOVE.L      STARTADDRSTRING1,D1
 000010CE  1C3C 0000                 89                  MOVE.B      #0,D6
 000010D2  1A3C 0004                 90                  MOVE.B      #4,D5
 000010D6  163C 0039                 91                  MOVE.B      #$39,D3
@@ -116,7 +116,7 @@ Created On: 3/10/2015 8:55:06 PM
 00001104  6700 0004                112                  BEQ         CONVERTSTART2
 00001108  60D0                     113                  BRA         NEXTCHAR
 0000110A                           114                  
-0000110A  2239 00001672            115  CONVERTSTART2   MOVE.L      STARTADDRSTRING2,D1
+0000110A  2239 00001734            115  CONVERTSTART2   MOVE.L      STARTADDRSTRING2,D1
 00001110  1C3C 0000                116                  MOVE.B      #0,D6
 00001114  1A3C 0004                117                  MOVE.B      #4,D5
 00001118  163C 0039                118                  MOVE.B      #$39,D3
@@ -147,11 +147,11 @@ Created On: 3/10/2015 8:55:06 PM
 0000114C  E09C                     143  COMBINESTART    ROR.L       #8,D4
 0000114E  E09C                     144                  ROR.L       #8,D4
 00001150  DE84                     145                  ADD.L       D4,D7
-00001152  23C7 00001676            146                  MOVE.L      D7,HEXSTARTADDR
+00001152  23C7 00001738            146                  MOVE.L      D7,HEXSTARTADDR
 00001158  7E00                     147                  MOVE.L      #$00000000,D7
 0000115A  7800                     148                  MOVE.L      #$00000000,D4
 0000115C                           149                  
-0000115C  2239 0000167A            150  CONVERTEND1     MOVE.L      ENDADDRSTRING1,D1
+0000115C  2239 0000173C            150  CONVERTEND1     MOVE.L      ENDADDRSTRING1,D1
 00001162  1C3C 0000                151                  MOVE.B      #0,D6
 00001166  1A3C 0004                152                  MOVE.B      #4,D5
 0000116A  163C 0039                153                  MOVE.B      #$39,D3
@@ -178,7 +178,7 @@ Created On: 3/10/2015 8:55:06 PM
 00001198  6700 0004                174                  BEQ         CONVERTEND2
 0000119C  60D0                     175                  BRA         NEXTCHAR3
 0000119E                           176                  
-0000119E  2239 0000167E            177  CONVERTEND2     MOVE.L      ENDADDRSTRING2,D1
+0000119E  2239 00001740            177  CONVERTEND2     MOVE.L      ENDADDRSTRING2,D1
 000011A4  1C3C 0000                178                  MOVE.B      #0,D6
 000011A8  1A3C 0004                179                  MOVE.B      #4,D5
 000011AC  163C 0039                180                  MOVE.B      #$39,D3
@@ -209,7 +209,7 @@ Created On: 3/10/2015 8:55:06 PM
 000011E0  E09C                     205  COMBINEEND      ROR.L       #8,D4
 000011E2  E09C                     206                  ROR.L       #8,D4
 000011E4  DE84                     207                  ADD.L       D4,D7
-000011E6  23C7 00001682            208                  MOVE.L      D7,HEXENDADDR
+000011E6  23C7 00001744            208                  MOVE.L      D7,HEXENDADDR
 000011EC  7E00                     209                  MOVE.L      #$00000000,D7
 000011EE  7800                     210                  MOVE.L      #$00000000,D4
 000011F0                           211  
@@ -223,7 +223,7 @@ Created On: 3/10/2015 8:55:06 PM
 000011F0                           219  *                MOVE.L      ENDADDRSTRING2,D5
 000011F0                           220  
 000011F0                           221  ****************************************************************************
-000011F0                           222  *-------------------------------------------------------------------------*
+000011F0                           222  *--------------------------------------------------------------------------*
 000011F0                           223  ****************************************************************************
 000011F0                           224  * Clear all registers to move on to next segment
 000011F0  4280                     225                  CLR.L       D0
@@ -242,431 +242,517 @@ Created On: 3/10/2015 8:55:06 PM
 0000120A  2A40                     238                  MOVE.L      D0,A5
 0000120C  2C40                     239                  MOVE.L      D0,A6
 0000120E  2E40                     240                  MOVE.L      D0,A7                
-00001210                           241                  
-00001210  33FC 1207 C0680000       242                  MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
-00001218  2479 00001676            243  BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
-0000121E                           244  
-0000121E  2039 00001682            245  OP_IDENT        MOVE.L      HEXENDADDR,D0
-00001224  220A                     246                  MOVE.L      A2,D1
-00001226  B280                     247                  CMP.L       D0,D1
-00001228  6E00 029A                248                  BGT         END             * Branch to end if current address is greater than ending address.
-0000122C                           249  
-0000122C  220A                     250                  MOVE.L      A2,D1                   * Print current address.  TODO: Add tab **************************
-0000122E  103C 000F                251                  MOVE.B      #15,D0
-00001232  143C 0010                252                  MOVE.B      #16,D2
-00001236  4E4F                     253                  TRAP        #15
-00001238                           254                  
-00001238  43F9 00001664            255                  LEA         TAB_MSG,A1
-0000123E  103C 000E                256                  MOVE.B      #14,D0
-00001242  4E4F                     257                  TRAP        #15
-00001244                           258  
-00001244  1E1A                     259                  MOVE.B      (A2)+,D7       
-00001246  E15F                     260                  ROL.W       #8,D7
-00001248  1E1A                     261                  MOVE.B      (A2)+,D7                * D7 storing 16 bits of Machine Code into D7. Only WORD data is relevant.
-0000124A                           262                  
-0000124A  343C F000                263                  MOVE.W      #$F000,D2                
-0000124E  C447                     264                  AND.W       D7,D2                   * D2 storing the nibble representing opcode.
-00001250  E09A                     265                  ROR.L       #8,D2
-00001252  E89A                     266                  ROR.L       #4,D2
-00001254                           267                  
-00001254  163C 0000                268                  MOVE.B      #OPCODE_0,D3            * ANDI,SUBI,EORI,CMPI,BCHG
-00001258  B602                     269                  CMP.B       D2,D3
-0000125A  6700 00AC                270                  BEQ         PARSE_OP_0
-0000125E                           271                  
-0000125E  163C 0001                272                  MOVE.B      #OPCODE_1,D3            * MOVE BYTE
-00001262  B602                     273                  CMP.B       D2,D3
-00001264  6700 00A2                274                  BEQ         PARSE_OP_1
-00001268                           275                  
-00001268  163C 0002                276                  MOVE.B      #OPCODE_2,D3            * MOVE LONG
-0000126C  B602                     277                  CMP.B       D2,D3
-0000126E  6700 00F4                278                  BEQ         PARSE_OP_2                
-00001272                           279  
-00001272  163C 0003                280                  MOVE.B      #OPCODE_3,D3            * MOVE WORD
-00001276  B602                     281                  CMP.B       D2,D3
-00001278  6700 00EA                282                  BEQ         PARSE_OP_3
-0000127C                           283                  
-0000127C  163C 0004                284                  MOVE.B      #OPCODE_4,D3            * CLR,RTS,JSR,MOVEM,LEA
-00001280  B602                     285                  CMP.B       D2,D3
-00001282  6700 00E0                286                  BEQ         PARSE_OP_4
-00001286                           287                  
-00001286  163C 0005                288                  MOVE.B      #OPCODE_5,D3            * ADDQ
-0000128A  B602                     289                  CMP.B       D2,D3
-0000128C  6700 00D6                290                  BEQ         PARSE_OP_5
-00001290                           291                  
-00001290  163C 0006                292                  MOVE.B      #OPCODE_6,D3            * BCC
-00001294  B602                     293                  CMP.B       D2,D3
-00001296  6700 00CC                294                  BEQ         PARSE_OP_6                
-0000129A                           295  
-0000129A  163C 0007                296                  MOVE.B      #OPCODE_7,D3            * MOVEQ
-0000129E  B602                     297                  CMP.B       D2,D3
-000012A0  6700 00C2                298                  BEQ         PARSE_OP_7
-000012A4                           299  
-000012A4  163C 0008                300                  MOVE.B      #OPCODE_8,D3            * DIVS
-000012A8  B602                     301                  CMP.B       D2,D3
-000012AA  6700 00B8                302                  BEQ         PARSE_OP_8
-000012AE                           303                  
-000012AE  163C 0009                304                  MOVE.B      #OPCODE_9,D3            * SUB,SUBA
-000012B2  B602                     305                  CMP.B       D2,D3
-000012B4  6700 00AE                306                  BEQ         PARSE_OP_9
-000012B8                           307                  
-000012B8  163C 000B                308                  MOVE.B      #OPCODE_B,D3            * EOR,CMP,CMPA
-000012BC  B602                     309                  CMP.B       D2,D3
-000012BE  6700 00A4                310                  BEQ         PARSE_OP_B                
-000012C2                           311  
-000012C2  163C 000C                312                  MOVE.B      #OPCODE_C,D3            * AND,MULS
-000012C6  B602                     313                  CMP.B       D2,D3
-000012C8  6700 009A                314                  BEQ         PARSE_OP_C
-000012CC                           315  
-000012CC  163C 000D                316                  MOVE.B      #OPCODE_D,D3            * ADD,ADDA
-000012D0  B602                     317                  CMP.B       D2,D3
-000012D2  6700 0090                318                  BEQ         PARSE_OP_D
-000012D6                           319                  
-000012D6  163C 000E                320                  MOVE.B      #OPCODE_E,D3            * ASL,ASR,LSL,LSR,ROL,ROR
-000012DA  B602                     321                  CMP.B       D2,D3
-000012DC  6700 0086                322                  BEQ         PARSE_OP_E
-000012E0                           323                                  
-000012E0                           324                  
-000012E0                           325                  *CASE where nothing matched, bad data. report to user. Skip to next 16 bit code
-000012E0  43F9 00001648            326  NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
-000012E6  103C 000E                327                  MOVE.B      #14,D0
-000012EA  4E4F                     328                  TRAP        #15
-000012EC                           329                  
-000012EC  2202                     330                  MOVE.L      D2,D1
-000012EE  103C 000F                331                  MOVE.B      #15,D0
-000012F2  143C 0002                332                  MOVE.B      #2,D2
-000012F6  4E4F                     333                  TRAP        #15
-000012F8                           334                  
-000012F8  43F9 00001661            335                  LEA         CR_LF_MSG,A1
-000012FE  103C 000E                336                  MOVE.B      #14,D0
-00001302  4E4F                     337                  TRAP        #15
-00001304                           338                  
-00001304  6000 FF18                339                  BRA         OP_IDENT
+00001210                           241  
+00001210                           242  *-----------------------TEST CODE-----------------------------------------------------                
+00001210  33FC 1207 C0680000       243                  MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
+00001218  33FC 143C C0680002       244                  MOVE.W      #$143C,$C0680002
+00001220  13FC 0017 C0680004       245                  MOVE.B      #$17,$C0680004
+00001228                           246                * 0001 0100 0011 1100
+00001228                           247  *--------------------------------------------------------------------------
+00001228                           248                  
+00001228  2479 00001738            249  BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
+0000122E                           250  
+0000122E  2039 00001744            251  OP_IDENT        MOVE.L      HEXENDADDR,D0
+00001234  220A                     252                  MOVE.L      A2,D1
+00001236  B280                     253                  CMP.L       D0,D1
+00001238  6E00 034C                254                  BGT         END                     * Branch to end if current address is greater than ending address.
+0000123C                           255  
+0000123C  220A                     256                  MOVE.L      A2,D1                   * Print current address.  TODO: Add tab **************************
+0000123E  103C 000F                257                  MOVE.B      #15,D0
+00001242  143C 0010                258                  MOVE.B      #16,D2
+00001246  4E4F                     259                  TRAP        #15
+00001248                           260                  
+00001248  43F9 00001726            261                  LEA         TAB_MSG,A1
+0000124E  103C 000E                262                  MOVE.B      #14,D0
+00001252  4E4F                     263                  TRAP        #15
+00001254                           264  
+00001254  1E1A                     265                  MOVE.B      (A2)+,D7       
+00001256  E15F                     266                  ROL.W       #8,D7
+00001258  1E1A                     267                  MOVE.B      (A2)+,D7                * D7 storing 16 bits of Machine Code into D7. Only WORD data is relevant.
+0000125A                           268                  
+0000125A  343C F000                269                  MOVE.W      #$F000,D2                
+0000125E  C447                     270                  AND.W       D7,D2                   * D2 storing the nibble representing opcode.
+00001260  E09A                     271                  ROR.L       #8,D2
+00001262  E89A                     272                  ROR.L       #4,D2
+00001264                           273                  
+00001264  163C 0000                274                  MOVE.B      #OPCODE_0,D3            * ANDI,SUBI,EORI,CMPI,BCHG
+00001268  B602                     275                  CMP.B       D2,D3
+0000126A  6700 00AC                276                  BEQ         PARSE_OP_0
+0000126E                           277                  
+0000126E  163C 0001                278                  MOVE.B      #OPCODE_1,D3            * MOVE BYTE
+00001272  B602                     279                  CMP.B       D2,D3
+00001274  6700 00A2                280                  BEQ         PARSE_OP_1
+00001278                           281                  
+00001278  163C 0002                282                  MOVE.B      #OPCODE_2,D3            * MOVE LONG
+0000127C  B602                     283                  CMP.B       D2,D3
+0000127E  6700 00FC                284                  BEQ         PARSE_OP_2                
+00001282                           285  
+00001282  163C 0003                286                  MOVE.B      #OPCODE_3,D3            * MOVE WORD
+00001286  B602                     287                  CMP.B       D2,D3
+00001288  6700 00F2                288                  BEQ         PARSE_OP_3
+0000128C                           289                  
+0000128C  163C 0004                290                  MOVE.B      #OPCODE_4,D3            * CLR,RTS,JSR,MOVEM,LEA
+00001290  B602                     291                  CMP.B       D2,D3
+00001292  6700 00E8                292                  BEQ         PARSE_OP_4
+00001296                           293                  
+00001296  163C 0005                294                  MOVE.B      #OPCODE_5,D3            * ADDQ
+0000129A  B602                     295                  CMP.B       D2,D3
+0000129C  6700 00DE                296                  BEQ         PARSE_OP_5
+000012A0                           297                  
+000012A0  163C 0006                298                  MOVE.B      #OPCODE_6,D3            * BCC
+000012A4  B602                     299                  CMP.B       D2,D3
+000012A6  6700 00D4                300                  BEQ         PARSE_OP_6                
+000012AA                           301  
+000012AA  163C 0007                302                  MOVE.B      #OPCODE_7,D3            * MOVEQ
+000012AE  B602                     303                  CMP.B       D2,D3
+000012B0  6700 00CA                304                  BEQ         PARSE_OP_7
+000012B4                           305  
+000012B4  163C 0008                306                  MOVE.B      #OPCODE_8,D3            * DIVS
+000012B8  B602                     307                  CMP.B       D2,D3
+000012BA  6700 00C0                308                  BEQ         PARSE_OP_8
+000012BE                           309                  
+000012BE  163C 0009                310                  MOVE.B      #OPCODE_9,D3            * SUB,SUBA
+000012C2  B602                     311                  CMP.B       D2,D3
+000012C4  6700 00B6                312                  BEQ         PARSE_OP_9
+000012C8                           313                  
+000012C8  163C 000B                314                  MOVE.B      #OPCODE_B,D3            * EOR,CMP,CMPA
+000012CC  B602                     315                  CMP.B       D2,D3
+000012CE  6700 00AC                316                  BEQ         PARSE_OP_B                
+000012D2                           317  
+000012D2  163C 000C                318                  MOVE.B      #OPCODE_C,D3            * AND,MULS
+000012D6  B602                     319                  CMP.B       D2,D3
+000012D8  6700 00A2                320                  BEQ         PARSE_OP_C
+000012DC                           321  
+000012DC  163C 000D                322                  MOVE.B      #OPCODE_D,D3            * ADD,ADDA
+000012E0  B602                     323                  CMP.B       D2,D3
+000012E2  6700 0098                324                  BEQ         PARSE_OP_D
+000012E6                           325                  
+000012E6  163C 000E                326                  MOVE.B      #OPCODE_E,D3            * ASL,ASR,LSL,LSR,ROL,ROR
+000012EA  B602                     327                  CMP.B       D2,D3
+000012EC  6700 008E                328                  BEQ         PARSE_OP_E
+000012F0                           329                                  
+000012F0                           330                  
+000012F0                           331                  *CASE where nothing matched, bad data. report to user. Skip to next 16 bit code
+000012F0  43F9 0000170A            332  NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
+000012F6  103C 000E                333                  MOVE.B      #14,D0
+000012FA  4E4F                     334                  TRAP        #15
+000012FC                           335                  
+000012FC  2202                     336                  MOVE.L      D2,D1
+000012FE  103C 000F                337                  MOVE.B      #15,D0
+00001302  143C 0002                338                  MOVE.B      #2,D2
+00001306  4E4F                     339                  TRAP        #15
 00001308                           340                  
-00001308                           341  * USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)                
-00001308                           342  * ANDI,SUBI,EORI,CMPI,BCHG
-00001308                           343  PARSE_OP_0
-00001308                           344  
-00001308                           345  
-00001308                           346  * MOVE.B
-00001308  43F9 00001666            347  PARSE_OP_1      LEA         PRINT_MOVE_B,A1
-0000130E  103C 000E                348                  MOVE.B      #14,D0
-00001312  4E4F                     349                  TRAP        #15
-00001314                           350                  
-00001314  3C07                     351                  MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
-00001316  3A3C 003F                352                  MOVE.W      #$003F,D5
-0000131A  CC45                     353                  AND.W       D5,D6                   * D6 stores Source information
-0000131C                           354                  
-0000131C  3A3C 0007                355                  MOVE.W      #%000111,D5             * BitMask for Source register
-00001320  CA46                     356                  AND.W       D6,D5                   * D5 stores Source Register
-00001322  E64E                     357                  LSR.W       #3,D6                   * D6 stores Source Mode
-00001324                           358                  
-00001324  3806                     359                  MOVE.W      D6,D4                   * Temp memory for swap
-00001326  3C05                     360                  MOVE.W      D5,D6                   * D6 stores Source Register
-00001328  3A04                     361                  MOVE.W      D4,D5                   * D5 stores Source Mode
-0000132A                           362                  
-0000132A  4EB9 00001364            363                  JSR         HANDLE_OPERAND          * Enter Subroutine for Source Handling
-00001330                           364                  
-00001330  43F9 000015EC            365                  LEA         PRINT_COMMA,A1          * Print comma
-00001336  103C 000E                366                  MOVE.B      #14,D0
-0000133A  4E4F                     367                  TRAP        #15         
-0000133C                           368                  
-0000133C                           369                 
-0000133C  3C07                     370                  MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
-0000133E  3A3C 0FC0                371                  MOVE.W      #$0FC0,D5
-00001342  CC45                     372                  AND.W       D5,D6                   * D6 stores only Destination information, not shifted.
-00001344  EC4E                     373                  LSR.W       #6,D6                   * D6 stores Destination info
-00001346                           374                  
-00001346  3A3C 0007                375                  MOVE.W      #%000111,D5             * BitMask for only mode
-0000134A  CA46                     376                  AND.W       D6,D5                   * D5 stores Destination Mode
-0000134C                           377                  
-0000134C  E64E                     378                  LSR.W       #3,D6                   * D6 stores Destination Register
-0000134E                           379                  
-0000134E  4EB9 00001364            380                  JSR         HANDLE_OPERAND
-00001354                           381                  
-00001354  43F9 00001661            382                  LEA         CR_LF_MSG,A1            * Print New Line
-0000135A  103C 000E                383                  MOVE.B      #14,D0
-0000135E  4E4F                     384                  TRAP        #15
-00001360                           385                  
-00001360  6000 FEBC                386                  BRA         OP_IDENT
-00001364                           387  
-00001364                           388  
-00001364                           389  * MOVE.L
-00001364                           390  PARSE_OP_2
-00001364                           391  
-00001364                           392  * MOVE.W
-00001364                           393  PARSE_OP_3
-00001364                           394  
-00001364                           395  * CLR,RTS,JSR,MOVEM,LEA
-00001364                           396  PARSE_OP_4
-00001364                           397  
-00001364                           398  * ADDQ
-00001364                           399  PARSE_OP_5
-00001364                           400  
-00001364                           401  * BCC
-00001364                           402  PARSE_OP_6
-00001364                           403  
-00001364                           404  * MOVEQ
-00001364                           405  PARSE_OP_7
-00001364                           406  
-00001364                           407  * DIVS
-00001364                           408  PARSE_OP_8
-00001364                           409  
-00001364                           410  * SUB,SUBA
-00001364                           411  PARSE_OP_9
-00001364                           412  
-00001364                           413  * EOR,CMP,CMPA
-00001364                           414  PARSE_OP_B
-00001364                           415  
-00001364                           416  * AND,MULS
-00001364                           417  PARSE_OP_C
-00001364                           418  
-00001364                           419  * ADD,ADDA
-00001364                           420  PARSE_OP_D
-00001364                           421  
-00001364                           422  * ASL,ASR,LSL,LSR,ROL,ROR
-00001364                           423  PARSE_OP_E
-00001364                           424  
-00001364                           425  *********************************************************************************
-00001364                           426  *---------------------------Operand Subroutine----------------------------------*
-00001364                           427  *********************************************************************************
-00001364                           428  * D6 holds register.  D5 holds mode.
-00001364  48E7 0100                429  HANDLE_OPERAND          MOVEM.L     D7,-(SP)
-00001368                           430                          
-00001368  103C 0000                431                          MOVE.B      #DR_DIRECT,D0
-0000136C  BA00                     432                          CMP.B       D0,D5
-0000136E  6700 005E                433                          BEQ         OPERAND_MODE_0             * Branch to Data Register Direct: Dn
-00001372                           434                          
-00001372  103C 0001                435                          MOVE.B      #AR_DIRECT,D0
-00001376  BA00                     436                          CMP.B       D0,D5
-00001378  6700 006E                437                          BEQ         OPERAND_MODE_1             * Branch to Address Register Direct: An
-0000137C                           438                          
-0000137C  103C 0002                439                          MOVE.B      #AR_INDIRECT,D0
-00001380  BA00                     440                          CMP.B       D0,D5
-00001382  6700 007E                441                          BEQ         OPERAND_MODE_2             * Branch to Address Register Indirect: (An)
-00001386                           442                          
-00001386  103C 0003                443                          MOVE.B      #AR_INDIRECT_POST,D0
-0000138A  BA00                     444                          CMP.B       D0,D5
-0000138C  6700 009A                445                          BEQ         OPERAND_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing: (An)+
-00001390                           446                          
-00001390  103C 0004                447                          MOVE.B      #AR_INDIRECT_PRE,D0
-00001394  BA00                     448                          CMP.B       D0,D5
-00001396  6700 00B8                449                          BEQ         OPERAND_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting: -(An)
-0000139A                           450                          
-0000139A  103C 0007                451                          MOVE.B      #ABS_ADDR,D0
-0000139E  BA00                     452                          CMP.B       D0,D5
-000013A0  6700 00D6                453                          BEQ         OPERAND_MODE_7             * Branch to Absolute Addressing: 3 cases (xxx).W (xxx).L #<data>
-000013A4                           454  
-000013A4                           455  * Invalid Destination Mode Handling                        
-000013A4  43F9 0000158D            456  INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1        
-000013AA  103C 000E                457                          MOVE.B      #14,D0
-000013AE  4E4F                     458                          TRAP        #15                        * Print error message for Destination Mode
-000013B0                           459                          
-000013B0  2205                     460                          MOVE.L      D5,D1
-000013B2  103C 000F                461                          MOVE.B      #15,D0
-000013B6  143C 0002                462                          MOVE.B      #2,D2
-000013BA  4E4F                     463                          TRAP        #15                        * Print the problematic Destination mode
-000013BC                           464                          
-000013BC  43F9 00001661            465                          LEA         CR_LF_MSG,A1
-000013C2  103C 000E                466                          MOVE.B      #14,D0
-000013C6  4E4F                     467                          TRAP        #15                        * Print carriage return/new line
-000013C8                           468                          
-000013C8                           469                          
-000013C8  4CDF 0080                470  EXIT_HANDLE_OPERAND     MOVEM.L     (SP)+,D7                   * Exit HANDLE_DESTINATION subroutine
-000013CC  4E75                     471                          RTS
-000013CE                           472  
-000013CE                           473  * Complex part of destination handling
-000013CE                           474  
-000013CE                           475  * Data Register Direct                        
-000013CE  43F9 000015EA            476  OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
-000013D4  103C 000E                477                          MOVE.B      #14,D0
-000013D8  4E4F                     478                          TRAP        #15
-000013DA                           479                          
-000013DA  2206                     480                          MOVE.L      D6,D1                      * Print target Register
-000013DC  103C 000F                481                          MOVE.B      #15,D0
-000013E0  143C 000A                482                          MOVE.B      #10,D2
-000013E4  4E4F                     483                          TRAP        #15
-000013E6                           484                          
-000013E6                           485  * Code goes here
-000013E6  60E0                     486                          BRA         EXIT_HANDLE_OPERAND
-000013E8                           487  
-000013E8                           488  * Address Register Direct
-000013E8  43F9 000015EE            489  OPERAND_MODE_1          LEA         PRINT_A,A1                  * Prints: A
-000013EE  103C 000E                490                          MOVE.B      #14,D0
-000013F2  4E4F                     491                          TRAP        #15
-000013F4                           492                          
-000013F4  2206                     493                          MOVE.L      D6,D1                       * Prints Register in Decimal
-000013F6  103C 000F                494                          MOVE.B      #15,D0
-000013FA  143C 000A                495                          MOVE.B      #10,D2
-000013FE  4E4F                     496                          TRAP        #15
-00001400                           497     
-00001400  60C6                     498                          BRA         EXIT_HANDLE_OPERAND 
-00001402                           499  
-00001402                           500  * Address Register Indirect
-00001402  43F9 000015F0            501  OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
-00001408  103C 000E                502                          MOVE.B      #14,D0
-0000140C  4E4F                     503                          TRAP        #15
-0000140E                           504                          
-0000140E  2206                     505                          MOVE.L      D6,D1                       * Prints Register in Decimal
-00001410  103C 000F                506                          MOVE.B      #15,D0
-00001414  143C 000A                507                          MOVE.B      #10,D2
-00001418  4E4F                     508                          TRAP        #15
-0000141A                           509                          
-0000141A  43F9 000015F3            510                          LEA         PRINT_END_PAREN,A1          * Prints: )
-00001420  103C 000E                511                          MOVE.B      #14,D0
-00001424  4E4F                     512                          TRAP        #15       
-00001426                           513  
-00001426  60A0                     514                          BRA         EXIT_HANDLE_OPERAND
-00001428                           515  
-00001428                           516  * Address Register Indirect w/Post-Incrementation
-00001428  43F9 000015F0            517  OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints:  (A
-0000142E  103C 000E                518                          MOVE.B      #14,D0
-00001432  4E4F                     519                          TRAP        #15
-00001434                           520  
-00001434  2206                     521                          MOVE.L      D6,D1               * Prints Register in Decimal
-00001436  103C 000F                522                          MOVE.B      #15,D0
-0000143A  143C 000A                523                          MOVE.B      #10,D2
-0000143E  4E4F                     524                          TRAP        #15
-00001440                           525                          
-00001440  43F9 000015F5            526                          LEA         PRINT_END_PAREN_PLUS,A1 * Prints:  )+
-00001446  103C 000E                527                          MOVE.B      #14,D0
-0000144A  4E4F                     528                          TRAP        #15                           
-0000144C                           529  
-0000144C  6000 FF7A                530                          BRA         EXIT_HANDLE_OPERAND
-00001450                           531                          
-00001450                           532  * Address Register Indirect w/Pre-Decrementation
-00001450  43F9 000015F8            533  OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
-00001456  103C 000E                534                          MOVE.B      #14,D0
-0000145A  4E4F                     535                          TRAP        #15
-0000145C                           536                          
-0000145C  2206                     537                          MOVE.L      D6,D1                       * Prints Register in Decimal
-0000145E  103C 000F                538                          MOVE.B      #15,D0
-00001462  143C 000A                539                          MOVE.B      #10,D2
-00001466  4E4F                     540                          TRAP        #15
-00001468                           541                          
-00001468  43F9 000015F3            542                          LEA         PRINT_END_PAREN,A1          * Prints:  )
-0000146E  103C 000E                543                          MOVE.B      #14,D0
-00001472  4E4F                     544                          TRAP        #15
-00001474                           545  
-00001474  6000 FF52                546                          BRA         EXIT_HANDLE_OPERAND
-00001478                           547                          
-00001478                           548  * Absolute Addressing
-00001478  103C 0000                549  OPERAND_MODE_7          MOVE.B      #ABS_ADDR_WORD_REG,D0   * Load %000 to D0
-0000147C  BC00                     550                          CMP.B       D0,D6
-0000147E  6700 003E                551                          BEQ         HANDLE_ABS_ADDR_WORD
-00001482                           552                          
-00001482  103C 0001                553                          MOVE.B      #ABS_ADDR_LONG_REG,D0   * Load %001 to D0
-00001486  BC00                     554                          CMP.B       D0,D6
-00001488  6700 0036                555                          BEQ         HANDLE_ABS_ADDR_LONG
-0000148C                           556                          
-0000148C  103C 0004                557                          MOVE.B      #IMMEDIATE_DATA,D0      * Load %100 to D0
-00001490  BC00                     558                          CMP.B       D0,D6
-00001492  6700 002E                559                          BEQ         HANDLE_IMMED_DATA
-00001496                           560  
-00001496                           561  * The address register stored in D6 is invalid.                        
-00001496  43F9 000015B5            562  INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error message
-0000149C  103C 000E                563                          MOVE.B      #14,D0
-000014A0  4E4F                     564                          TRAP        #15
-000014A2                           565                          
-000014A2  2206                     566                          MOVE.L      D6,D1                       * Print invalid address register stored in D6
-000014A4  103C 000F                567                          MOVE.B      #15,D0
-000014A8  143C 0002                568                          MOVE.B      #2,D2
-000014AC  4E4F                     569                          TRAP        #15 
-000014AE                           570                          
-000014AE  43F9 00001661            571                          LEA         CR_LF_MSG,A1                * Print new Line
-000014B4  103C 000E                572                          MOVE.B      #14,D0
-000014B8  4E4F                     573                          TRAP        #15  
-000014BA                           574                                                  
-000014BA                           575  
-000014BA  6000 FF0C                576  EXIT_OPERAND_MODE_7     BRA         EXIT_HANDLE_OPERAND 
-000014BE                           577  
-000014BE                           578  
-000014BE                           579  HANDLE_ABS_ADDR_WORD
-000014BE  60FA                     580                          BRA         EXIT_OPERAND_MODE_7
-000014C0                           581  
-000014C0                           582  HANDLE_ABS_ADDR_LONG
-000014C0                           583  
-000014C0  60F8                     584                          BRA         EXIT_OPERAND_MODE_7
-000014C2                           585  HANDLE_IMMED_DATA  
-000014C2                           586  
-000014C2  60F6                     587                          BRA         EXIT_OPERAND_MODE_7
-000014C4                           588                       
-000014C4                           589  *********************************************************************************
-000014C4                           590  *-------------------------------------------------------------------------------*
-000014C4                           591  *********************************************************************************
-000014C4                           592  
-000014C4                           593  
-000014C4                           594  
-000014C4                           595  END                      
-000014C4                           596                                
-000014C4  FFFF FFFF                597      SIMHALT             ; halt simulator
-000014C8                           598  
-000014C8                           599  * Put variables and constants here
-000014C8  =00007000                600  stack               EQU             $7000   * Stack pointer start location
-000014C8                           601  
-000014C8  =0000000D                602  CR                  EQU             $0D     * Carriage Return
-000014C8  =0000000A                603  LF                  EQU             $0A     * Line Feed
-000014C8  =00000009                604  HT                  EQU             $09     * Horizontal Tab
-000014C8                           605  
-000014C8  =00000000                606  OPCODE_0            EQU             %0000   * ANDI,SUBI,EORI,CMPI,BCHG
-000014C8  =00000001                607  OPCODE_1            EQU             %0001   * MOVE.B
-000014C8  =00000002                608  OPCODE_2            EQU             %0010   * MOVE.L
-000014C8  =00000003                609  OPCODE_3            EQU             %0011   * MOVE.W
-000014C8  =00000004                610  OPCODE_4            EQU             %0100   * CLR,RTS,JSR,MOVEM,LEA
-000014C8  =00000005                611  OPCODE_5            EQU             %0101   * ADDQ
-000014C8  =00000006                612  OPCODE_6            EQU             %0110   * BCC
-000014C8  =00000007                613  OPCODE_7            EQU             %0111   * MOVEQ
-000014C8  =00000008                614  OPCODE_8            EQU             %1000   * DIVS
-000014C8  =00000009                615  OPCODE_9            EQU             %1001   * SUB,SUBA
-000014C8  =0000000B                616  OPCODE_B            EQU             %1011   * EOR,CMP,CMPA
-000014C8  =0000000C                617  OPCODE_C            EQU             %1100   * AND,MULS
-000014C8  =0000000D                618  OPCODE_D            EQU             %1101   * ADD,ADDA
-000014C8  =0000000E                619  OPCODE_E            EQU             %1110   * ASL,ASR,LSL,LSR,ROL,ROR
-000014C8                           620  
-000014C8  =00000000                621  DR_DIRECT           EQU             %000    * Data Register Direct Mode
-000014C8  =00000001                622  AR_DIRECT           EQU             %001    * Address Register Direct Mode
-000014C8  =00000002                623  AR_INDIRECT         EQU             %010    * Address Register Indirect Mode
-000014C8  =00000003                624  AR_INDIRECT_POST    EQU             %011    * Address Register Indirect Post-Incrementing Mode
-000014C8  =00000004                625  AR_INDIRECT_PRE     EQU             %100    * Address Register Inderect Pre-Decrementing Mode
-000014C8  =00000007                626  ABS_ADDR            EQU             %111    * Absolute Address and Immediate Data Mode
-000014C8                           627  
-000014C8  =00000000                628  ABS_ADDR_WORD_REG   EQU             %000    * Absolute Word Address Register
-000014C8  =00000001                629  ABS_ADDR_LONG_REG   EQU             %001    * Absolute Long Address Register
-000014C8  =00000004                630  IMMEDIATE_DATA      EQU             %100    * Immediate Data Register
-000014C8                           631  
-000014C8                           632  
-000014C8= 57 65 6C 63 6F 6D ...    633  LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
-000014EC= 50 6C 65 61 73 65 ...    634  GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
-00001514= 50 6C 65 61 73 65 ...    635  GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
-0000153A= 54 68 65 20 69 6E ...    636  ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
-0000158D= 54 68 65 20 66 6F ...    637  INVALID_OPERAND_MODE_MSG   DC.B 'The following operand mode is invalid: ',0
-000015B5= 54 68 65 20 66 6F ...    638  INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
-000015EA                           639  
-000015EA= 44 00                    640  PRINT_D             DC.B        'D',0
-000015EC= 2C 00                    641  PRINT_COMMA         DC.B        ',',0
-000015EE= 41 00                    642  PRINT_A             DC.B        'A',0
-000015F0= 28 41 00                 643  PRINT_A_INDIRECT    DC.B        '(A',0
-000015F3= 29 00                    644  PRINT_END_PAREN     DC.B        ')',0
-000015F5= 29 2B 00                 645  PRINT_END_PAREN_PLUS    DC.B    ')+',0
-000015F8= 2D 28 00                 646  PRINT_MINUS_A_INDIRECT  DC.B    '-(',0
-000015FB= 24 00                    647  PRINT_DOLLAR        DC.B        '$',0
-000015FD= 23 24 00                 648  PRINT_NUM_DOLLAR    DC.B        '#$',0
-00001600                           649  
-00001600                           650  
-00001600= 54 68 69 73 20 6D ...    651  BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
-00001648= 49 6E 76 61 6C 69 ...    652  INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
-00001661= 0D 0A 00                 653  CR_LF_MSG           DC.B        CR,LF,0
-00001664= 09 00                    654  TAB_MSG             DC.B        HT,0
-00001666                           655  
-00001666= 4D 4F 56 45 2E 42 ...    656  PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
-0000166E                           657  
-0000166E                           658  STARTADDRSTRING1    DS.L        1
-00001672                           659  STARTADDRSTRING2    DS.L        1
-00001676                           660  HEXSTARTADDR        DS.L        1
-0000167A                           661  
-0000167A                           662  ENDADDRSTRING1      DS.L        1
-0000167E                           663  ENDADDRSTRING2      DS.L        1
-00001682                           664  HEXENDADDR          DS.L        1
-00001686                           665                      END     START           ; last line of source
+00001308  43F9 00001723            341                  LEA         CR_LF_MSG,A1
+0000130E  103C 000E                342                  MOVE.B      #14,D0
+00001312  4E4F                     343                  TRAP        #15
+00001314                           344                  
+00001314  6000 FF18                345                  BRA         OP_IDENT
+00001318                           346                  
+00001318                           347  * USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)
+00001318                           348  * Before branching to HANDLE_OPERAND, put Register in D6, Mode in D5 and size in OP_SIZE.                
+00001318                           349  * ANDI,SUBI,EORI,CMPI,BCHG
+00001318                           350  PARSE_OP_0
+00001318                           351  
+00001318                           352  
+00001318                           353  * MOVE.B
+00001318  43F9 00001728            354  PARSE_OP_1      LEA         PRINT_MOVE_B,A1
+0000131E  103C 000E                355                  MOVE.B      #14,D0
+00001322  4E4F                     356                  TRAP        #15
+00001324                           357                  
+00001324  13FC 0000 00001748       358                  MOVE.B      #$00,OP_SIZE            * Sets OP_SIZE to byte.
+0000132C                           359                  
+0000132C  3C07                     360                  MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+0000132E  3A3C 003F                361                  MOVE.W      #$003F,D5
+00001332  CC45                     362                  AND.W       D5,D6                   * D6 stores Source information
+00001334                           363                  
+00001334  3A3C 0007                364                  MOVE.W      #%000111,D5             * BitMask for Source register
+00001338  CA46                     365                  AND.W       D6,D5                   * D5 stores Source Register
+0000133A  E64E                     366                  LSR.W       #3,D6                   * D6 stores Source Mode
+0000133C                           367                  
+0000133C  3806                     368                  MOVE.W      D6,D4                   * Temp memory for swap
+0000133E  3C05                     369                  MOVE.W      D5,D6                   * D6 stores Source Register
+00001340  3A04                     370                  MOVE.W      D4,D5                   * D5 stores Source Mode
+00001342                           371                  
+00001342  4EB9 0000137C            372                  JSR         HANDLE_OPERAND          * Enter Subroutine for Source Handling
+00001348                           373                  
+00001348  43F9 000016AE            374                  LEA         PRINT_COMMA,A1          * Print comma
+0000134E  103C 000E                375                  MOVE.B      #14,D0
+00001352  4E4F                     376                  TRAP        #15         
+00001354                           377                  
+00001354                           378                 
+00001354  3C07                     379                  MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+00001356  3A3C 0FC0                380                  MOVE.W      #$0FC0,D5
+0000135A  CC45                     381                  AND.W       D5,D6                   * D6 stores only Destination information, not shifted.
+0000135C  EC4E                     382                  LSR.W       #6,D6                   * D6 stores Destination info
+0000135E                           383                  
+0000135E  3A3C 0007                384                  MOVE.W      #%000111,D5             * BitMask for only mode
+00001362  CA46                     385                  AND.W       D6,D5                   * D5 stores Destination Mode
+00001364                           386                  
+00001364  E64E                     387                  LSR.W       #3,D6                   * D6 stores Destination Register
+00001366                           388                  
+00001366  4EB9 0000137C            389                  JSR         HANDLE_OPERAND
+0000136C                           390                  
+0000136C  43F9 00001723            391                  LEA         CR_LF_MSG,A1            * Print New Line
+00001372  103C 000E                392                  MOVE.B      #14,D0
+00001376  4E4F                     393                  TRAP        #15
+00001378                           394                  
+00001378  6000 FEB4                395                  BRA         OP_IDENT
+0000137C                           396  
+0000137C                           397  
+0000137C                           398  * MOVE.L
+0000137C                           399  PARSE_OP_2
+0000137C                           400  
+0000137C                           401  * MOVE.W
+0000137C                           402  PARSE_OP_3
+0000137C                           403  
+0000137C                           404  * CLR,RTS,JSR,MOVEM,LEA
+0000137C                           405  PARSE_OP_4
+0000137C                           406  
+0000137C                           407  * ADDQ
+0000137C                           408  PARSE_OP_5
+0000137C                           409  
+0000137C                           410  * BCC
+0000137C                           411  PARSE_OP_6
+0000137C                           412  
+0000137C                           413  * MOVEQ
+0000137C                           414  PARSE_OP_7
+0000137C                           415  
+0000137C                           416  * DIVS
+0000137C                           417  PARSE_OP_8
+0000137C                           418  
+0000137C                           419  * SUB,SUBA
+0000137C                           420  PARSE_OP_9
+0000137C                           421  
+0000137C                           422  * EOR,CMP,CMPA
+0000137C                           423  PARSE_OP_B
+0000137C                           424  
+0000137C                           425  * AND,MULS
+0000137C                           426  PARSE_OP_C
+0000137C                           427  
+0000137C                           428  * ADD,ADDA
+0000137C                           429  PARSE_OP_D
+0000137C                           430  
+0000137C                           431  * ASL,ASR,LSL,LSR,ROL,ROR
+0000137C                           432  PARSE_OP_E
+0000137C                           433  
+0000137C                           434  *********************************************************************************
+0000137C                           435  *---------------------------Operand Subroutine----------------------------------*
+0000137C                           436  *********************************************************************************
+0000137C                           437  * D6 holds register.  
+0000137C                           438  * D5 holds mode.  
+0000137C                           439  * OP_SIZE holds size of operation: $00 = Byte, $01 = Word, $02 = Long
+0000137C  48E7 0100                440  HANDLE_OPERAND          MOVEM.L     D7,-(SP)
+00001380                           441                          
+00001380  103C 0000                442                          MOVE.B      #DR_DIRECT,D0
+00001384  BA00                     443                          CMP.B       D0,D5
+00001386  6700 005E                444                          BEQ         OPERAND_MODE_0             * Branch to Data Register Direct: Dn
+0000138A                           445                          
+0000138A  103C 0001                446                          MOVE.B      #AR_DIRECT,D0
+0000138E  BA00                     447                          CMP.B       D0,D5
+00001390  6700 006E                448                          BEQ         OPERAND_MODE_1             * Branch to Address Register Direct: An
+00001394                           449                          
+00001394  103C 0002                450                          MOVE.B      #AR_INDIRECT,D0
+00001398  BA00                     451                          CMP.B       D0,D5
+0000139A  6700 007E                452                          BEQ         OPERAND_MODE_2             * Branch to Address Register Indirect: (An)
+0000139E                           453                          
+0000139E  103C 0003                454                          MOVE.B      #AR_INDIRECT_POST,D0
+000013A2  BA00                     455                          CMP.B       D0,D5
+000013A4  6700 009A                456                          BEQ         OPERAND_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing: (An)+
+000013A8                           457                          
+000013A8  103C 0004                458                          MOVE.B      #AR_INDIRECT_PRE,D0
+000013AC  BA00                     459                          CMP.B       D0,D5
+000013AE  6700 00B8                460                          BEQ         OPERAND_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting: -(An)
+000013B2                           461                          
+000013B2  103C 0007                462                          MOVE.B      #ABS_ADDR,D0
+000013B6  BA00                     463                          CMP.B       D0,D5
+000013B8  6700 00D6                464                          BEQ         OPERAND_MODE_7             * Branch to Absolute Addressing: 3 cases (xxx).W (xxx).L #<data>
+000013BC                           465  
+000013BC                           466  * Invalid Destination Mode Handling                        
+000013BC  43F9 0000164F            467  INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1        
+000013C2  103C 000E                468                          MOVE.B      #14,D0
+000013C6  4E4F                     469                          TRAP        #15                        * Print error message for Destination Mode
+000013C8                           470                          
+000013C8  2205                     471                          MOVE.L      D5,D1
+000013CA  103C 000F                472                          MOVE.B      #15,D0
+000013CE  143C 0002                473                          MOVE.B      #2,D2
+000013D2  4E4F                     474                          TRAP        #15                        * Print the problematic Destination mode
+000013D4                           475                          
+000013D4  43F9 00001723            476                          LEA         CR_LF_MSG,A1
+000013DA  103C 000E                477                          MOVE.B      #14,D0
+000013DE  4E4F                     478                          TRAP        #15                        * Print carriage return/new line
+000013E0                           479                          
+000013E0                           480                          
+000013E0  4CDF 0080                481  EXIT_HANDLE_OPERAND     MOVEM.L     (SP)+,D7                   * Exit HANDLE_DESTINATION subroutine
+000013E4  4E75                     482                          RTS
+000013E6                           483  
+000013E6                           484  * Complex part of destination handling
+000013E6                           485  
+000013E6                           486  * Data Register Direct                        
+000013E6  43F9 000016AC            487  OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
+000013EC  103C 000E                488                          MOVE.B      #14,D0
+000013F0  4E4F                     489                          TRAP        #15
+000013F2                           490                          
+000013F2  2206                     491                          MOVE.L      D6,D1                      * Print target Register
+000013F4  103C 000F                492                          MOVE.B      #15,D0
+000013F8  143C 000A                493                          MOVE.B      #10,D2
+000013FC  4E4F                     494                          TRAP        #15
+000013FE                           495                          
+000013FE                           496  * Code goes here
+000013FE  60E0                     497                          BRA         EXIT_HANDLE_OPERAND
+00001400                           498  
+00001400                           499  * Address Register Direct
+00001400  43F9 000016B0            500  OPERAND_MODE_1          LEA         PRINT_A,A1                  * Prints: A
+00001406  103C 000E                501                          MOVE.B      #14,D0
+0000140A  4E4F                     502                          TRAP        #15
+0000140C                           503                          
+0000140C  2206                     504                          MOVE.L      D6,D1                       * Prints Register in Decimal
+0000140E  103C 000F                505                          MOVE.B      #15,D0
+00001412  143C 000A                506                          MOVE.B      #10,D2
+00001416  4E4F                     507                          TRAP        #15
+00001418                           508     
+00001418  60C6                     509                          BRA         EXIT_HANDLE_OPERAND 
+0000141A                           510  
+0000141A                           511  * Address Register Indirect
+0000141A  43F9 000016B2            512  OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
+00001420  103C 000E                513                          MOVE.B      #14,D0
+00001424  4E4F                     514                          TRAP        #15
+00001426                           515                          
+00001426  2206                     516                          MOVE.L      D6,D1                       * Prints Register in Decimal
+00001428  103C 000F                517                          MOVE.B      #15,D0
+0000142C  143C 000A                518                          MOVE.B      #10,D2
+00001430  4E4F                     519                          TRAP        #15
+00001432                           520                          
+00001432  43F9 000016B5            521                          LEA         PRINT_END_PAREN,A1          * Prints: )
+00001438  103C 000E                522                          MOVE.B      #14,D0
+0000143C  4E4F                     523                          TRAP        #15       
+0000143E                           524  
+0000143E  60A0                     525                          BRA         EXIT_HANDLE_OPERAND
+00001440                           526  
+00001440                           527  * Address Register Indirect w/Post-Incrementation
+00001440  43F9 000016B2            528  OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
+00001446  103C 000E                529                          MOVE.B      #14,D0
+0000144A  4E4F                     530                          TRAP        #15
+0000144C                           531  
+0000144C  2206                     532                          MOVE.L      D6,D1                       * Prints Register in Decimal
+0000144E  103C 000F                533                          MOVE.B      #15,D0
+00001452  143C 000A                534                          MOVE.B      #10,D2
+00001456  4E4F                     535                          TRAP        #15
+00001458                           536                          
+00001458  43F9 000016B7            537                          LEA         PRINT_END_PAREN_PLUS,A1     * Prints: )+
+0000145E  103C 000E                538                          MOVE.B      #14,D0
+00001462  4E4F                     539                          TRAP        #15                           
+00001464                           540  
+00001464  6000 FF7A                541                          BRA         EXIT_HANDLE_OPERAND
+00001468                           542                          
+00001468                           543  * Address Register Indirect w/Pre-Decrementation
+00001468  43F9 000016BA            544  OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
+0000146E  103C 000E                545                          MOVE.B      #14,D0
+00001472  4E4F                     546                          TRAP        #15
+00001474                           547                          
+00001474  2206                     548                          MOVE.L      D6,D1                       * Prints Register in Decimal
+00001476  103C 000F                549                          MOVE.B      #15,D0
+0000147A  143C 000A                550                          MOVE.B      #10,D2
+0000147E  4E4F                     551                          TRAP        #15
+00001480                           552                          
+00001480  43F9 000016B5            553                          LEA         PRINT_END_PAREN,A1          * Prints: )
+00001486  103C 000E                554                          MOVE.B      #14,D0
+0000148A  4E4F                     555                          TRAP        #15
+0000148C                           556  
+0000148C  6000 FF52                557                          BRA         EXIT_HANDLE_OPERAND
+00001490                           558                          
+00001490                           559  * Absolute Addressing
+00001490  103C 0000                560  OPERAND_MODE_7          MOVE.B      #ABS_ADDR_WORD_REG,D0       * Load %000 to D0
+00001494  BC00                     561                          CMP.B       D0,D6
+00001496  6700 003E                562                          BEQ         HANDLE_ABS_ADDR_WORD
+0000149A                           563                          
+0000149A  103C 0001                564                          MOVE.B      #ABS_ADDR_LONG_REG,D0       * Load %001 to D0
+0000149E  BC00                     565                          CMP.B       D0,D6
+000014A0  6700 0054                566                          BEQ         HANDLE_ABS_ADDR_LONG
+000014A4                           567                          
+000014A4  103C 0004                568                          MOVE.B      #IMMEDIATE_DATA,D0          * Load %100 to D0
+000014A8  BC00                     569                          CMP.B       D0,D6
+000014AA  6700 0072                570                          BEQ         HANDLE_IMMED_DATA
+000014AE                           571  
+000014AE                           572  * The address register stored in D6 is invalid.                        
+000014AE  43F9 00001677            573  INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error message
+000014B4  103C 000E                574                          MOVE.B      #14,D0
+000014B8  4E4F                     575                          TRAP        #15
+000014BA                           576                          
+000014BA  2206                     577                          MOVE.L      D6,D1                       * Print invalid address register stored in D6
+000014BC  103C 000F                578                          MOVE.B      #15,D0
+000014C0  143C 0002                579                          MOVE.B      #2,D2
+000014C4  4E4F                     580                          TRAP        #15 
+000014C6                           581                          
+000014C6  43F9 00001723            582                          LEA         CR_LF_MSG,A1                * Print new Line
+000014CC  103C 000E                583                          MOVE.B      #14,D0
+000014D0  4E4F                     584                          TRAP        #15  
+000014D2                           585                                                  
+000014D2                           586  
+000014D2  6000 FF0C                587  EXIT_OPERAND_MODE_7     BRA         EXIT_HANDLE_OPERAND 
+000014D6                           588  
+000014D6                           589  
+000014D6  43F9 000016BD            590  HANDLE_ABS_ADDR_WORD    LEA         PRINT_DOLLAR,A1
+000014DC  103C 000E                591                          MOVE.B      #14,D0
+000014E0  4E4F                     592                          TRAP        #15
+000014E2                           593                          
+000014E2  181A                     594                          MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+000014E4  E14C                     595                          LSL.W       #8,D4               * Shift D4 left 8 bits
+000014E6  181A                     596                          MOVE.B      (A2)+,D4            * D4 stores word absolute address
+000014E8                           597                          
+000014E8  2204                     598                          MOVE.L      D4,D1               * Print absolute address
+000014EA  103C 000F                599                          MOVE.B      #15,D0
+000014EE  143C 0010                600                          MOVE.B      #16,D2
+000014F2  4E4F                     601                          TRAP        #15
+000014F4                           602                          
+000014F4  60DC                     603                          BRA         EXIT_OPERAND_MODE_7
+000014F6                           604  
+000014F6  43F9 000016BD            605  HANDLE_ABS_ADDR_LONG    LEA         PRINT_DOLLAR,A1
+000014FC  103C 000E                606                          MOVE.B      #14,D0
+00001500  4E4F                     607                          TRAP        #15
+00001502                           608                          
+00001502  181A                     609                          MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+00001504  E18C                     610                          LSL.L       #8,D4               * Shift D4 left 8 bits
+00001506  181A                     611                          MOVE.B      (A2)+,D4
+00001508  E18C                     612                          LSL.L       #8,D4
+0000150A  181A                     613                          MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
+0000150C  E18C                     614                          LSL.L       #8,D4               * Shift D4 left 8 bits
+0000150E  181A                     615                          MOVE.B      (A2)+,D4            * D4 stores long absolute address
+00001510                           616  
+00001510  2204                     617                          MOVE.L      D4,D1               * Print absolute address
+00001512  103C 000F                618                          MOVE.B      #15,D0
+00001516  143C 0010                619                          MOVE.B      #16,D2
+0000151A  4E4F                     620                          TRAP        #15
+0000151C                           621  
+0000151C  60B4                     622                          BRA         EXIT_OPERAND_MODE_7
+0000151E                           623                          
+0000151E  43F9 000016BF            624  HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
+00001524  103C 000E                625                          MOVE.B      #14,D0
+00001528  4E4F                     626                          TRAP        #15
+0000152A                           627                          
+0000152A  4281                     628                          CLR.L       D1                  * Clears D1
+0000152C  1239 00001748            629                          MOVE.B      OP_SIZE,D1          * Set D1 to OP_SIZE ($00 = Byte, $01 = Word, $02 = Long)
+00001532                           630                          
+00001532  0C01 0000                631                          CMPI.B      #$00,D1
+00001536  6700 0014                632                          BEQ         IMMED_DATA_BYTE
+0000153A                           633                          
+0000153A  0C01 0001                634                          CMPI.B      #$01,D1
+0000153E  6700 001A                635                          BEQ         IMMED_DATA_WORD
+00001542                           636                          
+00001542  0C01 0002                637                          CMPI.B      #$02,D1
+00001546  6700 0024                638                          BEQ         IMMED_DATA_LONG
+0000154A                           639                          
+0000154A                           640                          
+0000154A  6086                     641  EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
+0000154C                           642  
+0000154C  121A                     643  IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Print byte of immediate data and move A2
+0000154E  103C 000F                644                          MOVE.B      #15,D0
+00001552  143C 0010                645                          MOVE.B      #16,D2
+00001556  4E4F                     646                          TRAP        #15
+00001558                           647                          
+00001558  60F0                     648                          BRA         EXIT_HANDLE_IMMED_DATA
+0000155A                           649  
+0000155A  121A                     650  IMMED_DATA_WORD         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+0000155C  E149                     651                          LSL.W       #8,D1               * Shift D1 left 8 bits
+0000155E  121A                     652                          MOVE.B      (A2)+,D1            * D1 stores immediate data word
+00001560                           653                          
+00001560  103C 000F                654                          MOVE.B      #15,D0              * Print immediate data word
+00001564  143C 0010                655                          MOVE.B      #16,D2
+00001568  4E4F                     656                          TRAP        #15
+0000156A                           657                          
+0000156A  60DE                     658                          BRA         EXIT_HANDLE_IMMED_DATA
+0000156C                           659  
+0000156C  121A                     660  IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+0000156E  E189                     661                          LSL.L       #8,D1               * Shift D1 left 8 bits
+00001570  121A                     662                          MOVE.B      (A2)+,D1
+00001572  E189                     663                          LSL.L       #8,D1
+00001574  121A                     664                          MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+00001576  E189                     665                          LSL.L       #8,D1               * Shift D1 left 8 bits
+00001578  121A                     666                          MOVE.B      (A2)+,D1            * D1 stores immediate data long
+0000157A                           667                          
+0000157A  103C 000F                668                          MOVE.B      #15,D0              * Print immediate data long
+0000157E  143C 0010                669                          MOVE.B      #16,D2
+00001582  4E4F                     670                          TRAP        #15
+00001584  60C4                     671                          BRA         EXIT_HANDLE_IMMED_DATA
+00001586                           672                       
+00001586                           673  *********************************************************************************
+00001586                           674  *-------------------------------------------------------------------------------*
+00001586                           675  *********************************************************************************
+00001586                           676  
+00001586                           677  
+00001586                           678  
+00001586                           679  END                      
+00001586                           680                                
+00001586  FFFF FFFF                681      SIMHALT             ; halt simulator
+0000158A                           682  
+0000158A                           683  * Put variables and constants here
+0000158A  =00007000                684  stack               EQU             $7000   * Stack pointer start location
+0000158A                           685  
+0000158A  =0000000D                686  CR                  EQU             $0D     * Carriage Return
+0000158A  =0000000A                687  LF                  EQU             $0A     * Line Feed
+0000158A  =00000009                688  HT                  EQU             $09     * Horizontal Tab
+0000158A                           689  
+0000158A  =00000000                690  OPCODE_0            EQU             %0000   * ANDI,SUBI,EORI,CMPI,BCHG
+0000158A  =00000001                691  OPCODE_1            EQU             %0001   * MOVE.B
+0000158A  =00000002                692  OPCODE_2            EQU             %0010   * MOVE.L
+0000158A  =00000003                693  OPCODE_3            EQU             %0011   * MOVE.W
+0000158A  =00000004                694  OPCODE_4            EQU             %0100   * CLR,RTS,JSR,MOVEM,LEA
+0000158A  =00000005                695  OPCODE_5            EQU             %0101   * ADDQ
+0000158A  =00000006                696  OPCODE_6            EQU             %0110   * BCC
+0000158A  =00000007                697  OPCODE_7            EQU             %0111   * MOVEQ
+0000158A  =00000008                698  OPCODE_8            EQU             %1000   * DIVS
+0000158A  =00000009                699  OPCODE_9            EQU             %1001   * SUB,SUBA
+0000158A  =0000000B                700  OPCODE_B            EQU             %1011   * EOR,CMP,CMPA
+0000158A  =0000000C                701  OPCODE_C            EQU             %1100   * AND,MULS
+0000158A  =0000000D                702  OPCODE_D            EQU             %1101   * ADD,ADDA
+0000158A  =0000000E                703  OPCODE_E            EQU             %1110   * ASL,ASR,LSL,LSR,ROL,ROR
+0000158A                           704  
+0000158A  =00000000                705  DR_DIRECT           EQU             %000    * Data Register Direct Mode
+0000158A  =00000001                706  AR_DIRECT           EQU             %001    * Address Register Direct Mode
+0000158A  =00000002                707  AR_INDIRECT         EQU             %010    * Address Register Indirect Mode
+0000158A  =00000003                708  AR_INDIRECT_POST    EQU             %011    * Address Register Indirect Post-Incrementing Mode
+0000158A  =00000004                709  AR_INDIRECT_PRE     EQU             %100    * Address Register Inderect Pre-Decrementing Mode
+0000158A  =00000007                710  ABS_ADDR            EQU             %111    * Absolute Address and Immediate Data Mode
+0000158A                           711  
+0000158A  =00000000                712  ABS_ADDR_WORD_REG   EQU             %000    * Absolute Word Address Register
+0000158A  =00000001                713  ABS_ADDR_LONG_REG   EQU             %001    * Absolute Long Address Register
+0000158A  =00000004                714  IMMEDIATE_DATA      EQU             %100    * Immediate Data Register
+0000158A                           715  
+0000158A                           716  
+0000158A= 57 65 6C 63 6F 6D ...    717  LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
+000015AE= 50 6C 65 61 73 65 ...    718  GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
+000015D6= 50 6C 65 61 73 65 ...    719  GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
+000015FC= 54 68 65 20 69 6E ...    720  ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
+0000164F= 54 68 65 20 66 6F ...    721  INVALID_OPERAND_MODE_MSG   DC.B 'The following operand mode is invalid: ',0
+00001677= 54 68 65 20 66 6F ...    722  INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
+000016AC                           723  
+000016AC= 44 00                    724  PRINT_D             DC.B        'D',0
+000016AE= 2C 00                    725  PRINT_COMMA         DC.B        ',',0
+000016B0= 41 00                    726  PRINT_A             DC.B        'A',0
+000016B2= 28 41 00                 727  PRINT_A_INDIRECT    DC.B        '(A',0
+000016B5= 29 00                    728  PRINT_END_PAREN     DC.B        ')',0
+000016B7= 29 2B 00                 729  PRINT_END_PAREN_PLUS    DC.B    ')+',0
+000016BA= 2D 28 00                 730  PRINT_MINUS_A_INDIRECT  DC.B    '-(',0
+000016BD= 24 00                    731  PRINT_DOLLAR        DC.B        '$',0
+000016BF= 23 24 00                 732  PRINT_NUM_DOLLAR    DC.B        '#$',0
+000016C2                           733  
+000016C2                           734  
+000016C2= 54 68 69 73 20 6D ...    735  BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
+0000170A= 49 6E 76 61 6C 69 ...    736  INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
+00001723= 0D 0A 00                 737  CR_LF_MSG           DC.B        CR,LF,0
+00001726= 09 00                    738  TAB_MSG             DC.B        HT,0
+00001728                           739  
+00001728= 4D 4F 56 45 2E 42 ...    740  PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
+00001730                           741  
+00001730                           742  STARTADDRSTRING1    DS.L        1
+00001734                           743  STARTADDRSTRING2    DS.L        1
+00001738                           744  HEXSTARTADDR        DS.L        1
+0000173C                           745  
+0000173C                           746  ENDADDRSTRING1      DS.L        1
+00001740                           747  ENDADDRSTRING2      DS.L        1
+00001744                           748  HEXENDADDR          DS.L        1
+00001748                           749  
+00001748                           750  OP_SIZE             DS.B        1
+00001749                           751                      END     START           ; last line of source
 
 No errors detected
 No warnings generated
@@ -682,8 +768,8 @@ AR_DIRECT           1
 AR_INDIRECT         2
 AR_INDIRECT_POST    3
 AR_INDIRECT_PRE     4
-BEGIN_OP_IDENT      1218
-BUGFIXMESSAGE       1600
+BEGIN_OP_IDENT      1228
+BUGFIXMESSAGE       16C2
 CHARISLETTER        10F6
 CHARISLETTER2       1138
 CHARISLETTER3       118A
@@ -699,33 +785,37 @@ CONVERTEND2         119E
 CONVERTSTART1       10C8
 CONVERTSTART2       110A
 CR                  D
-CR_LF_MSG           1661
+CR_LF_MSG           1723
 DR_DIRECT           0
-END                 14C4
+END                 1586
 ENDADDR             107C
-ENDADDRSTRING1      167A
-ENDADDRSTRING2      167E
+ENDADDRSTRING1      173C
+ENDADDRSTRING2      1740
 ERRORINPUTSIZE      1062
-ERRORMESSAGESIZE    153A
-EXIT_HANDLE_OPERAND  13C8
-EXIT_OPERAND_MODE_7  14BA
-GETENDMESSAGE       1514
-GETSTARTMESSAGE     14EC
-HANDLE_ABS_ADDR_LONG  14C0
-HANDLE_ABS_ADDR_WORD  14BE
-HANDLE_IMMED_DATA   14C2
-HANDLE_OPERAND      1364
-HEXENDADDR          1682
-HEXSTARTADDR        1676
+ERRORMESSAGESIZE    15FC
+EXIT_HANDLE_IMMED_DATA  154A
+EXIT_HANDLE_OPERAND  13E0
+EXIT_OPERAND_MODE_7  14D2
+GETENDMESSAGE       15D6
+GETSTARTMESSAGE     15AE
+HANDLE_ABS_ADDR_LONG  14F6
+HANDLE_ABS_ADDR_WORD  14D6
+HANDLE_IMMED_DATA   151E
+HANDLE_OPERAND      137C
+HEXENDADDR          1744
+HEXSTARTADDR        1738
 HT                  9
 IMMEDIATE_DATA      4
-INVALID_ABS_ADDR_REG  1496
-INVALID_ABS_ADDR_REG_MSG  15B5
-INVALID_OPERAND_MODE  13A4
-INVALID_OPERAND_MODE_MSG  158D
-INVALID_OP_MSG      1648
+IMMED_DATA_BYTE     154C
+IMMED_DATA_LONG     156C
+IMMED_DATA_WORD     155A
+INVALID_ABS_ADDR_REG  14AE
+INVALID_ABS_ADDR_REG_MSG  1677
+INVALID_OPERAND_MODE  13BC
+INVALID_OPERAND_MODE_MSG  164F
+INVALID_OP_MSG      170A
 LF                  A
-LINE1               14C8
+LINE1               158A
 LOADENDADDR1        10AE
 LOADENDADDR2        10C0
 LOADSTARTADDR1      1044
@@ -734,7 +824,7 @@ NEXTCHAR            10DA
 NEXTCHAR2           111C
 NEXTCHAR3           116E
 NEXTCHAR4           11B0
-NO_OP_MATCH         12E0
+NO_OP_MATCH         12F0
 OPCODE_0            0
 OPCODE_1            1
 OPCODE_2            2
@@ -749,41 +839,42 @@ OPCODE_B            B
 OPCODE_C            C
 OPCODE_D            D
 OPCODE_E            E
-OPERAND_MODE_0      13CE
-OPERAND_MODE_1      13E8
-OPERAND_MODE_2      1402
-OPERAND_MODE_3      1428
-OPERAND_MODE_4      1450
-OPERAND_MODE_7      1478
-OP_IDENT            121E
-PARSE_OP_0          1308
-PARSE_OP_1          1308
-PARSE_OP_2          1364
-PARSE_OP_3          1364
-PARSE_OP_4          1364
-PARSE_OP_5          1364
-PARSE_OP_6          1364
-PARSE_OP_7          1364
-PARSE_OP_8          1364
-PARSE_OP_9          1364
-PARSE_OP_B          1364
-PARSE_OP_C          1364
-PARSE_OP_D          1364
-PARSE_OP_E          1364
-PRINT_A             15EE
-PRINT_A_INDIRECT    15F0
-PRINT_COMMA         15EC
-PRINT_D             15EA
-PRINT_DOLLAR        15FB
-PRINT_END_PAREN     15F3
-PRINT_END_PAREN_PLUS  15F5
-PRINT_MINUS_A_INDIRECT  15F8
-PRINT_MOVE_B        1666
-PRINT_NUM_DOLLAR    15FD
+OPERAND_MODE_0      13E6
+OPERAND_MODE_1      1400
+OPERAND_MODE_2      141A
+OPERAND_MODE_3      1440
+OPERAND_MODE_4      1468
+OPERAND_MODE_7      1490
+OP_IDENT            122E
+OP_SIZE             1748
+PARSE_OP_0          1318
+PARSE_OP_1          1318
+PARSE_OP_2          137C
+PARSE_OP_3          137C
+PARSE_OP_4          137C
+PARSE_OP_5          137C
+PARSE_OP_6          137C
+PARSE_OP_7          137C
+PARSE_OP_8          137C
+PARSE_OP_9          137C
+PARSE_OP_B          137C
+PARSE_OP_C          137C
+PARSE_OP_D          137C
+PARSE_OP_E          137C
+PRINT_A             16B0
+PRINT_A_INDIRECT    16B2
+PRINT_COMMA         16AE
+PRINT_D             16AC
+PRINT_DOLLAR        16BD
+PRINT_END_PAREN     16B5
+PRINT_END_PAREN_PLUS  16B7
+PRINT_MINUS_A_INDIRECT  16BA
+PRINT_MOVE_B        1728
+PRINT_NUM_DOLLAR    16BF
 PROMPTENDADDR       1090
 PROMPTSTARTADDR     1026
 STACK               7000
 START               1000
-STARTADDRSTRING1    166E
-STARTADDRSTRING2    1672
-TAB_MSG             1664
+STARTADDRSTRING1    1730
+STARTADDRSTRING2    1734
+TAB_MSG             1726
