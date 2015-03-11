@@ -1,48 +1,53 @@
 *-----------------------------------------------------------
-* Title      : 68K Disassembler
-* Written by : Chance O'Day, Sara Jackson, and Bonnie Vo
-* Date       : 3/6/2015
-* Description: Displays an opening message and prompts the
-*              user for the start and end addresses for
-*              the program to be dissassembled.
+* Title      :  68K Disassembler
+* Written by :  Chance O'Day, Sara Jackson, and Bonnie Vo
+* Date       :  3/6/2015
+* Description:  A disassembler program that will convert a
+*               memory image of instructions and data back
+*               to 68000 assembly language and output the
+*               disassembled code to the display.
+*
+*               Displays an opening message and prompts
+*               the user for the start and end address
+*               for the program to be disassembled.
 *-----------------------------------------------------------
-    ORG    $1000
+                ORG    $1000
 START:          LEA         stack,SP
-                LEA         LINE1,A1                *Display welcome message to console
+                LEA         LINE1,A1                * Display welcome message to console
                 MOVE.B      #14,D0
                 TRAP        #15
             
-                LEA         GETSTARTMESSAGE,A1      *Display prompt for start address
+                LEA         GETSTARTMESSAGE,A1      * Display prompt for start address
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 MOVE.B      #1,D7
-                MOVE.B      #0,D6                   *Toggle for start/end address prompting: 0 = start, 1 = end
+                MOVE.B      #0,D6                   * Toggle for start/end address prompting: 0 = start, 1 = end
             
-PROMPTSTARTADDR MOVE.B      #2,D0
+PROMPTSTARTADDR MOVE.B      #2,D0                   * Read starting address string from keyboard
                 TRAP        #15
             
                 MOVE.B      #8,D2
-                CMP.W       D1,D2
-                BNE         ERRORINPUTSIZE
+                CMP.W       D1,D2                   * Check start address size
+                BNE         ERRORINPUTSIZE          * Branch if address size error
                 MOVE.B      #4,D2
                 MOVE.B      #0,D3
                             
-                LEA         STARTADDRSTRING1,A2
+                LEA         STARTADDRSTRING1,A2     * Load ASCII of the first half of start address to A2 register
 LOADSTARTADDR1  MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
                 BNE         LOADSTARTADDR1
                 
                 MOVE.B      #0,D3
-                LEA         STARTADDRSTRING2,A2
+                LEA         STARTADDRSTRING2,A2     * Load ASCII of the second half of start address to A2 register
 LOADSTARTADDR2  MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
                 BNE         LOADSTARTADDR2
                 BRA         ENDADDR
             
-ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1
+ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1     * Start/End Address Error
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -51,7 +56,7 @@ ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1
                 BNE         PROMPTSTARTADDR
                 BRA         PROMPTENDADDR
                 
-ENDADDR         LEA         GETENDMESSAGE,A1
+ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end address
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #1,D6
@@ -59,22 +64,22 @@ ENDADDR         LEA         GETENDMESSAGE,A1
                 
                 
 PROMPTENDADDR   MOVEA.L     #$5000,A1
-                MOVE.B      #2,D0
+                MOVE.B      #2,D0                   * Read end address string from keyboard
                 TRAP        #15
                 
-                CMP.W       D1,D2
-                BNE         ERRORINPUTSIZE
+                CMP.W       D1,D2                   * Check end address size
+                BNE         ERRORINPUTSIZE          * Branch if address size error
                 
                 MOVE.B      #4,D2
                 MOVE.B      #0,D3
-                LEA         ENDADDRSTRING1,A2
+                LEA         ENDADDRSTRING1,A2       * Load ASCII of the first half of end address to A2 register
 LOADENDADDR1    MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
                 BNE         LOADENDADDR1
                 
                 MOVE.B      #0,D3
-                LEA         ENDADDRSTRING2,A2
+                LEA         ENDADDRSTRING2,A2       * Load ASCII of the second half of end address to A2 register
 LOADENDADDR2    MOVE.B      (A1)+,(A2)+
                 ADD.B       #1,D3
                 CMP.B       D2,D3
@@ -232,17 +237,17 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A4
                 MOVE.L      D0,A5
                 MOVE.L      D0,A6
-                MOVE.L      D0,A7
+                MOVE.L      D0,A7                
                 
-                MOVE.W      #$1207,$C0680000   *Fills data to show that following code works correctly.
-BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2    *A2 is RESERVED for walking through the target code.
+                MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
+BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
 
 OP_IDENT        MOVE.L      HEXENDADDR,D0
                 MOVE.L      A2,D1
                 CMP.L       D0,D1
                 BGT         END             * Branch to end if current address is greater than ending address.
 
-                MOVE.L      A2,D1           *Print current address.  TODO: Add tab
+                MOVE.L      A2,D1                   * Print current address.  TODO: Add tab **************************
                 MOVE.B      #15,D0
                 MOVE.B      #16,D2
                 TRAP        #15
@@ -253,66 +258,66 @@ OP_IDENT        MOVE.L      HEXENDADDR,D0
 
                 MOVE.B      (A2)+,D7       
                 ROL.W       #8,D7
-                MOVE.B      (A2)+,D7        *D7 storing 16 bits of Machine Code into D7. Only WORD data is relevant.
+                MOVE.B      (A2)+,D7                * D7 storing 16 bits of Machine Code into D7. Only WORD data is relevant.
                 
                 MOVE.W      #$F000,D2                
-                AND.W       D7,D2           * D2 storing the nibble representing opcode.
+                AND.W       D7,D2                   * D2 storing the nibble representing opcode.
                 ROR.L       #8,D2
                 ROR.L       #4,D2
                 
-                MOVE.B      OPCODE_0,D3
+                MOVE.B      #OPCODE_0,D3            * ANDI,SUBI,EORI,CMPI,BCHG
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_0
                 
-                MOVE.B      #OPCODE_1,D3
+                MOVE.B      #OPCODE_1,D3            * MOVE BYTE
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_1
                 
-                MOVE.B      #OPCODE_2,D3
+                MOVE.B      #OPCODE_2,D3            * MOVE LONG
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_2                
 
-                MOVE.B      #OPCODE_3,D3
+                MOVE.B      #OPCODE_3,D3            * MOVE WORD
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_3
                 
-                MOVE.B      #OPCODE_4,D3
+                MOVE.B      #OPCODE_4,D3            * CLR,RTS,JSR,MOVEM,LEA
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_4
                 
-                MOVE.B      #OPCODE_5,D3
+                MOVE.B      #OPCODE_5,D3            * ADDQ
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_5
                 
-                MOVE.B      #OPCODE_6,D3
+                MOVE.B      #OPCODE_6,D3            * BCC
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_6                
 
-                MOVE.B      #OPCODE_7,D3
+                MOVE.B      #OPCODE_7,D3            * MOVEQ
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_7
 
-                MOVE.B      #OPCODE_8,D3
+                MOVE.B      #OPCODE_8,D3            * DIVS
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_8
                 
-                MOVE.B      #OPCODE_9,D3
+                MOVE.B      #OPCODE_9,D3            * SUB,SUBA
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_9
                 
-                MOVE.B      #OPCODE_B,D3
+                MOVE.B      #OPCODE_B,D3            * EOR,CMP,CMPA
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_B                
 
-                MOVE.B      #OPCODE_C,D3
+                MOVE.B      #OPCODE_C,D3            * AND,MULS
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_C
 
-                MOVE.B      #OPCODE_D,D3
+                MOVE.B      #OPCODE_D,D3            * ADD,ADDA
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_D
                 
-                MOVE.B      #OPCODE_E,D3
+                MOVE.B      #OPCODE_E,D3            * ASL,ASR,LSL,LSR,ROL,ROR
                 CMP.B       D2,D3
                 BEQ         PARSE_OP_E
                                 
@@ -333,7 +338,6 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 
                 BRA         OP_IDENT
                 
-                
 * USABLE REGISTERS FOR THIS SECTION:  D0-D6, A3-A6 (A0, A1, A7 usable if necessary, but refrain)                
 * ANDI,SUBI,EORI,CMPI,BCHG
 PARSE_OP_0
@@ -344,38 +348,38 @@ PARSE_OP_1      LEA         PRINT_MOVE_B,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.W      D7,D6       * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
                 MOVE.W      #$003F,D5
-                AND.W       D5,D6       * D6 stores Source information
+                AND.W       D5,D6                   * D6 stores Source information
                 
-                MOVE.W      #%000111,D5 * BitMask for Source register
-                AND.W       D6,D5       * D5 stores Source Register
-                LSR.W       #3,D6       * D6 stores Source Mode
+                MOVE.W      #%000111,D5             * BitMask for Source register
+                AND.W       D6,D5                   * D5 stores Source Register
+                LSR.W       #3,D6                   * D6 stores Source Mode
                 
-                MOVE.W      D6,D4       * Temp memory for swap
-                MOVE.W      D5,D6       * D6 stores Source Register
-                MOVE.W      D4,D5       * D5 stores Source Mode
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Source Register
+                MOVE.W      D4,D5                   * D5 stores Source Mode
                 
-                JSR         HANDLE_OPERAND   * Enter Subroutine for Source Handling
+                JSR         HANDLE_OPERAND          * Enter Subroutine for Source Handling
                 
-                LEA         PRINT_COMMA,A1      * Print comma
+                LEA         PRINT_COMMA,A1          * Print comma
                 MOVE.B      #14,D0
                 TRAP        #15         
                 
                
-                MOVE.W      D7,D6       * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
                 MOVE.W      #$0FC0,D5
-                AND.W       D5,D6       * D6 stores only Destination information, not shifted.
-                LSR.W       #6,D6       * D6 stores Destination info
+                AND.W       D5,D6                   * D6 stores only Destination information, not shifted.
+                LSR.W       #6,D6                   * D6 stores Destination info
                 
-                MOVE.W      #%000111,D5   * BitMask for only mode
-                AND.W       D6,D5         * D5 stores Destination Mode
+                MOVE.W      #%000111,D5             * BitMask for only mode
+                AND.W       D6,D5                   * D5 stores Destination Mode
                 
-                LSR.W       #3,D6         * D6 stores Destination Register
+                LSR.W       #3,D6                   * D6 stores Destination Register
                 
                 JSR         HANDLE_OPERAND
                 
-                LEA         CR_LF_MSG,A1      * Print New Line
+                LEA         CR_LF_MSG,A1            * Print New Line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -426,54 +430,54 @@ HANDLE_OPERAND          MOVEM.L     D7,-(SP)
                         
                         MOVE.B      #DR_DIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_0             * Branch to Data Register Direct
+                        BEQ         OPERAND_MODE_0             * Branch to Data Register Direct: Dn
                         
                         MOVE.B      #AR_DIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_1             * Branch to Address Register Direct
+                        BEQ         OPERAND_MODE_1             * Branch to Address Register Direct: An
                         
                         MOVE.B      #AR_INDIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_2             * Branch to Address Register Indirect
+                        BEQ         OPERAND_MODE_2             * Branch to Address Register Indirect: (An)
                         
                         MOVE.B      #AR_INDIRECT_POST,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing
+                        BEQ         OPERAND_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing: (An)+
                         
                         MOVE.B      #AR_INDIRECT_PRE,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting
+                        BEQ         OPERAND_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting: -(An)
                         
                         MOVE.B      #ABS_ADDR,D0
                         CMP.B       D0,D5
-                        BEQ         OPERAND_MODE_7             * Branch to Absolute Addressing
+                        BEQ         OPERAND_MODE_7             * Branch to Absolute Addressing: 3 cases (xxx).W (xxx).L #<data>
 
 * Invalid Destination Mode Handling                        
 INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1        
                         MOVE.B      #14,D0
-                        TRAP        #15                     * Print error message for Destination Mode
+                        TRAP        #15                        * Print error message for Destination Mode
                         
                         MOVE.L      D5,D1
                         MOVE.B      #15,D0
                         MOVE.B      #2,D2
-                        TRAP        #15                     * Print the problematic Destination mode
+                        TRAP        #15                        * Print the problematic Destination mode
                         
                         LEA         CR_LF_MSG,A1
                         MOVE.B      #14,D0
-                        TRAP        #15                     * Print carriage return/new line
+                        TRAP        #15                        * Print carriage return/new line
                         
                         
-EXIT_HANDLE_OPERAND     MOVEM.L     (SP)+,D7                *Exit HANDLE_DESTINATION subroutine
+EXIT_HANDLE_OPERAND     MOVEM.L     (SP)+,D7                   * Exit HANDLE_DESTINATION subroutine
                         RTS
 
 * Complex part of destination handling
 
 * Data Register Direct                        
-OPERAND_MODE_0          LEA         PRINT_D,A1          * Print D
+OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1               * Print target Register
+                        MOVE.L      D6,D1                      * Print target Register
                         MOVE.B      #15,D0
                         MOVE.B      #10,D2
                         TRAP        #15
@@ -593,7 +597,7 @@ END
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
-stack               EQU             $7000   *Stack pointer start location
+stack               EQU             $7000   * Stack pointer start location
 
 CR                  EQU             $0D     * Carriage Return
 LF                  EQU             $0A     * Line Feed
@@ -658,7 +662,8 @@ HEXSTARTADDR        DS.L        1
 ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
-    END    START        ; last line of source
+                    END     START           ; last line of source
+
 
 
 

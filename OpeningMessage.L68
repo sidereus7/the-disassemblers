@@ -1,6 +1,10 @@
 00001000 Starting Address
 Assembler used: EASy68K Editor/Assembler v5.15.02
+<<<<<<< Updated upstream
 Created On: 3/9/2015 4:23:35 PM
+=======
+Created On: 3/9/2015 4:01:47 PM
+>>>>>>> Stashed changes
 
 00000000                             1  *-----------------------------------------------------------
 00000000                             2  * Title      : Opening Screen Project
