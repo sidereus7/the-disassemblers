@@ -234,7 +234,7 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A6
                 MOVE.L      D0,A7
                 
-                MOVE.W      #$1200,$C0680000   *Fills data to show that following code works correctly.
+                MOVE.W      #$1207,$C0680000   *Fills data to show that following code works correctly.
 BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2    *A2 is RESERVED for walking through the target code.
 
 OP_IDENT        MOVE.L      HEXENDADDR,D0
@@ -345,6 +345,25 @@ PARSE_OP_1      LEA         PRINT_MOVE_B,A1
                 TRAP        #15
                 
                 MOVE.W      D7,D6       * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6       * D6 stores Source information
+                
+                MOVE.W      #%000111,D5 * BitMask for Source register
+                AND.W       D6,D5       * D5 stores Source Register
+                LSR.W       #3,D6       * D6 stores Source Mode
+                
+                MOVE.W      D6,D4       * Temp memory for swap
+                MOVE.W      D5,D6       * D6 stores Source Register
+                MOVE.W      D4,D5       * D5 stores Source Mode
+                
+                JSR         HANDLE_OPERAND   * Enter Subroutine for Source Handling
+                
+                LEA         PRINT_COMMA,A1      * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15         
+                
+               
+                MOVE.W      D7,D6       * D6 stores replicate of 16 bits stored in D7
                 MOVE.W      #$0FC0,D5
                 AND.W       D5,D6       * D6 stores only Destination information, not shifted.
                 LSR.W       #6,D6       * D6 stores Destination info
@@ -354,8 +373,11 @@ PARSE_OP_1      LEA         PRINT_MOVE_B,A1
                 
                 LSR.W       #3,D6         * D6 stores Destination Register
                 
-                JSR         HANDLE_DESTINATION
+                JSR         HANDLE_OPERAND
                 
+                LEA         CR_LF_MSG,A1      * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
                 
                 BRA         OP_IDENT
 
@@ -396,35 +418,38 @@ PARSE_OP_D
 * ASL,ASR,LSL,LSR,ROL,ROR
 PARSE_OP_E
 
-* D6 holds destination register.  D5 holds Destination mode.
-HANDLE_DESTINATION      MOVEM.L     D7,-(SP)
+*********************************************************************************
+*---------------------------Operand Subroutine----------------------------------*
+*********************************************************************************
+* D6 holds register.  D5 holds mode.
+HANDLE_OPERAND          MOVEM.L     D7,-(SP)
                         
                         MOVE.B      #DR_DIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_0             * Branch to Data Register Direct
+                        BEQ         OPERAND_MODE_0             * Branch to Data Register Direct
                         
                         MOVE.B      #AR_DIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_1             * Branch to Address Register Direct
+                        BEQ         OPERAND_MODE_1             * Branch to Address Register Direct
                         
                         MOVE.B      #AR_INDIRECT,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_2             * Branch to Address Register Indirect
+                        BEQ         OPERAND_MODE_2             * Branch to Address Register Indirect
                         
                         MOVE.B      #AR_INDIRECT_POST,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing
+                        BEQ         OPERAND_MODE_3             * Branch to Address Register Indirect w/Post-Incrementing
                         
                         MOVE.B      #AR_INDIRECT_PRE,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting
+                        BEQ         OPERAND_MODE_4             * Branch to Address Register Indirect w/Pre-Decrimenting
                         
                         MOVE.B      #ABS_ADDR,D0
                         CMP.B       D0,D5
-                        BEQ         DEST_MODE_7             * Branch to Absolute Addressing
+                        BEQ         OPERAND_MODE_7             * Branch to Absolute Addressing
 
 * Invalid Destination Mode Handling                        
-INVALID_DEST_MODE       LEA         INVALID_DEST_MODE_MSG,A1        
+INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1        
                         MOVE.B      #14,D0
                         TRAP        #15                     * Print error message for Destination Mode
                         
@@ -438,11 +463,13 @@ INVALID_DEST_MODE       LEA         INVALID_DEST_MODE_MSG,A1
                         TRAP        #15                     * Print carriage return/new line
                         
                         
-EXIT_HANDLE_DEST        MOVEM.L     (SP)+,D7                *Exit HANDLE_DESTINATION subroutine
+EXIT_HANDLE_OPERAND     MOVEM.L     (SP)+,D7                *Exit HANDLE_DESTINATION subroutine
                         RTS
 
-* Complex part of destination handling                        
-DEST_MODE_0             LEA         PRINT_D,A1          * Print D
+* Complex part of destination handling
+
+* Data Register Direct                        
+OPERAND_MODE_0          LEA         PRINT_D,A1          * Print D
                         MOVE.B      #14,D0
                         TRAP        #15
                         
@@ -451,31 +478,79 @@ DEST_MODE_0             LEA         PRINT_D,A1          * Print D
                         MOVE.B      #10,D2
                         TRAP        #15
                         
-                        LEA         PRINT_COMMA,A1      * Print Comma
+* Code goes here
+                        BRA         EXIT_HANDLE_OPERAND
+
+* Address Register Direct
+OPERAND_MODE_1          LEA         PRINT_A,A1
                         MOVE.B      #14,D0
                         TRAP        #15
-* Code goes here
-                        BRA         EXIT_HANDLE_DEST
+                        
+                        MOVE.L      D6,D1
+                        MOVE.B      #15,D0
+                        MOVE.B      #10,D2
+                        TRAP        #15
+   
+                        BRA         EXIT_HANDLE_OPERAND
 
-DEST_MODE_1
-* Code goes here
-                        BRA         EXIT_HANDLE_DEST
+* Address Register Indirect
+OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.L      D6,D1
+                        MOVE.B      #15,D0
+                        MOVE.B      #10,D2
+                        TRAP        #15
+                        
+                        LEA         PRINT_END_PAREN,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15       
 
-DEST_MODE_2
-* Code goes here
-                        BRA         EXIT_HANDLE_DEST
+                        BRA         EXIT_HANDLE_OPERAND
 
-DEST_MODE_3
-* Code goes here
-                        BRA         EXIT_HANDLE_DEST
+* Address Register Indirect w/Post-Incrementation
+OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
 
-DEST_MODE_4
-* Code goes here
-                        BRA         EXIT_HANDLE_DEST
+                        MOVE.L      D6,D1
+                        MOVE.B      #15,D0
+                        MOVE.B      #10,D2
+                        TRAP        #15
+                        
+                        LEA         PRINT_END_PAREN_PLUS,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15                           
 
-DEST_MODE_7
+                        BRA         EXIT_HANDLE_OPERAND
+                        
+* Address Register Indirect w/Pre-Decrementation
+OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.L      D6,D1
+                        MOVE.B      #15,D0
+                        MOVE.B      #10,D2
+                        TRAP        #15
+                        
+                        LEA         PRINT_END_PAREN,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15
+
+                        BRA         EXIT_HANDLE_OPERAND
+                        
+* Absolute Addressing
+OPERAND_MODE_7          
 * Code goes here
-                        BRA         EXIT_HANDLE_DEST                        
+                        BRA         EXIT_HANDLE_OPERAND   
+                     
+*********************************************************************************
+*-------------------------------------------------------------------------------*
+*********************************************************************************
+
+
 
 END                      
                               
@@ -519,10 +594,16 @@ LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
 GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
 GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
-INVALID_DEST_MODE_MSG   DC.B    'The following destination mode is invalid: ',0
+INVALID_OPERAND_MODE_MSG   DC.B 'The following operand mode is invalid: ',0
 PRINT_D             DC.B        'D',0
 PRINT_COMMA         DC.B        ',',0
 PRINT_A             DC.B        'A',0
+PRINT_A_INDIRECT    DC.B        '(A',0
+PRINT_END_PAREN     DC.B        ')',0
+PRINT_END_PAREN_PLUS    DC.B    ')+',0
+PRINT_MINUS_A_INDIRECT  DC.B    '-(',0
+PRINT_DOLLAR        DC.B        '$',0
+PRINT_NUM_DOLLAR    DC.B        '#$',0
 
 
 BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
@@ -540,6 +621,8 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
+
 
 
 
