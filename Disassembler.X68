@@ -966,8 +966,6 @@ PARSE_4_EA      MOVE.W      D7,D6                   * D6 stores replicate of 16 
                 MOVE.W      D5,D6                   * D6 stores Source Register
                 MOVE.W      D4,D5                   * D5 stores Source Mode     
                 RTS
-=======
->>>>>>> Added ADDQ parse logic and tests
 * ADDQ
 PARSE_OP_5      LEA         PRINT_ADD_Q,A1          * Print: ADDQ
                 MOVE.B      #14,D0
@@ -1429,9 +1427,6 @@ PARSE_B_REG     MOVE.L      D7,D1                   * Move target register to D1
 PARSE_OP_C
 
 * ADD,ADDA
-<<<<<<< HEAD
-PARSE_OP_D
-=======
 PARSE_OP_D      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
                 AND.W       D7,D2           * D2 stores the opmode, unshifted
                 LSR.W       #6,D2           * D2 stores the opmode
