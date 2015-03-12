@@ -1106,9 +1106,67 @@ IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of th
 *-------------------------------------------------------------------------------*
 *********************************************************************************
 
+* -----------------------------------------------
+* Register Summary
+*     D0: Loop counter (Decrements from value in D2)
+*     D1: Value to be converted from hex to ASCII
+*     D2: Number of nibble values to be converted (000000ABF)
+*     D3: Resulting value in ASCII
+*     D7: Stores isolated LSB
+*
+* Concerns: Limited 4 ASCII character result (change to variable instead of D3?)
+*           Should I print the contents of D3 immediately or try and return it?
+*                Or store it into a variable as well? What about yucky 0's?
+* -----------------------------------------------
+
+HEX_TO_ASCII        MOVEM.L   A1/D0-D3/D7,-(SP) * Push registers onto the stack
+                    CLR.L     D0                * Clear loop counter register
+                    CLR.L     D3                * Clear result value register
+                    CLR.L     D7                * Clear isolated LSB register
+                    LEA       ASCII_RESULT,A4   * Load memory location of result to A4
+
+INIT_H2A_LOOP	    MOVE.W    D2,D0             * Rotate until MSB is LSB 0000ABCD -> BCD0000A
+                    SUBI.W    #2,D0             * Subtract 2 from counter (1 for dumb loop, 1 to leave extra char)
+MINI_LOOP           ROR.L     #4,D1
+                    DBRA      D0,MINI_LOOP
+
+                    MOVE.W    D2,D0             * Initialize loop counter to number of values to convert
+                    BRA       TEST              * Branch to TEST to deal with extra loop iteration
+
+H2A_LOOP		    MOVE.W    #$0000000F,D7		* Move bit mask to isolate LSB into D7
+					AND.L     D1,D7         	* Store isolated LSB into D7  
+					ROL.L     #4,D1         	* Shift value that's being converted by 4 bits
+
+					CMPI.L    #9,D7         	* Compare isolated LSB to highest value number
+					BGT       CONVERT_H2A_LETTER	* If greater than 9, branch to convert letter logic
+CONVERT_H2A_NUMBER  ADDI.B    #48,D7        	* Add 48 to convert from hex to ASCII number
+	                BRA       STORE_VALUE		* Branch to store resulting value
+
+CONVERT_H2A_LETTER	ADDI.B    #55,D7	    	* Add 55 to convert from hex to ASCII letter
+	                BRA       STORE_VALUE		* Branch to store resulting value
+
+STORE_VALUE	        MOVE.B    D7,(A4)+          * Push the ASCII value onto the A4 stack
+
+TEST                DBRA      D0,H2A_LOOP       * Continue looping if counter is not -1
+
+H2A_LOOP_FINISH     MOVE.B    #$00,(A4) 
+                    
+                    * load ASCII chars directly into A1 to prep for printing
+                    
+
+                    MOVEM.L   (SP)+,A1/D0-D3/D7    * Pop registers back off the stack
+
+                    RTS                         * Return from sub-routine
 
 
-END                      
+
+END                 MOVE.L      #$12345678,D1
+                    MOVE.B      #8,D2
+                    JSR         HEX_TO_ASCII
+                    
+                    LEA         ASCII_RESULT,A1
+                    MOVE.B      #14,D0
+                    TRAP        #15
                               
     SIMHALT             ; halt simulator
 
@@ -1194,7 +1252,9 @@ ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
 
 OP_SIZE             DS.B        1
+ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
