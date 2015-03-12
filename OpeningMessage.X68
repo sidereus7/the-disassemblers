@@ -6,7 +6,7 @@
 *              user for the start and end addresses for
 *              the program to be dissassembled.
 *-----------------------------------------------------------
-    ORG    $1000
+    ORG    $10000
 START:          LEA         LINE1,A1                *Display welcome message to console
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -235,6 +235,8 @@ ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
     END    START        ; last line of source
+
+
 
 
 

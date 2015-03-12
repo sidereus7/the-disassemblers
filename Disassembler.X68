@@ -240,78 +240,82 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A7                
 
 *-----------------------TEST CODE-----------------------------------------------------                
-                MOVE.W      #$1207,$C0680000        * Fills data to show that following code works correctly.
-                MOVE.W      #$143C,$C0680002
-                MOVE.B      #$17,$C0680004
-                MOVE.B      #$1A,$C0680005
-                MOVE.B      #$BC,$C0680006
-                MOVE.B      #$33,$C0680007
+                MOVE.W      #$1207,$C0680000        * MOVE.B  D7,D1
                 
-                MOVE.B      #$98,$C0680008
-                MOVE.B      #$14,$C0680009          * SUB.B  (A4),D4
+                MOVE.W      #$143C,$C0680002        * MOVE.B  #$17,D2
+                MOVE.B      #$00,$C0680004
+                MOVE.B      #$17,$C0680005
                 
-                MOVE.B      #$94,$C068000A
-                MOVE.B      #$44,$C068000B          * SUB.W  D4,D2
+                MOVE.B      #$1A,$C0680006          * MOVE.B  #$33,(A5)
+                MOVE.B      #$BC,$C0680007
+                MOVE.B      #$00,$C0680008
+                MOVE.B      #$33,$C0680009
                 
-                MOVE.B      #$95,$C068000C
-                MOVE.B      #$94,$C068000D          * SUB.L  D2,(A4)
+                MOVE.B      #$98,$C068000A
+                MOVE.B      #$14,$C068000B          * SUB.B  (A4),D4
                 
-                MOVE.B      #$92,$C068000E 
-                MOVE.B      #$DC,$C068000F          * SUBA.W (A4)+,A1
+                MOVE.B      #$94,$C068000C
+                MOVE.B      #$44,$C068000D          * SUB.W  D4,D2
                 
-                MOVE.B      #$99,$C0680010
-                MOVE.B      #$CF,$C0680011          * SUBA.L  A7,A4
+                MOVE.B      #$95,$C068000E
+                MOVE.B      #$94,$C068000F          * SUB.L  D2,(A4)
                 
-                MOVE.W      #$0204,$C0680012        * ANDI.B    #$33,D4
-                MOVE.W      #$0033,$C0680014
+                MOVE.B      #$92,$C0680010 
+                MOVE.B      #$DC,$C0680011          * SUBA.W (A4)+,A1
                 
-                MOVE.W      #$0253,$C0680016        * ANDI.W    #$8888,(A3)
-                MOVE.W      #$8888,$C0680018
+                MOVE.B      #$99,$C0680012
+                MOVE.B      #$CF,$C0680013          * SUBA.L  A7,A4
                 
-                MOVE.W      #$029B,$C068001A        * ANDI.L    #$AAAAAAAA,(A3)+
-                MOVE.W      #$AAAA,$C068001C
+                MOVE.W      #$0204,$C0680014        * ANDI.B    #$33,D4
+                MOVE.W      #$0033,$C0680016
+                
+                MOVE.W      #$0253,$C0680018        * ANDI.W    #$8888,(A3)
+                MOVE.W      #$8888,$C068001A
+                
+                MOVE.W      #$029B,$C068001C        * ANDI.L    #$AAAAAAAA,(A3)+
                 MOVE.W      #$AAAA,$C068001E
+                MOVE.W      #$AAAA,$C0680020
                 
-                MOVE.W      #$0414,$C0680020        * SUBI.B    #$AA,(A4)
-                MOVE.W      #$00AA,$C0680022
+                MOVE.W      #$0414,$C0680022        * SUBI.B    #$AA,(A4)
+                MOVE.W      #$00AA,$C0680024
                 
-                MOVE.W      #$0444,$C0680024        * SUBI.W    #$8888,D4
-                MOVE.W      #$8888,$C0680026
+                MOVE.W      #$0444,$C0680026        * SUBI.W    #$8888,D4
+                MOVE.W      #$8888,$C0680028
                 
-                MOVE.W      #$0484,$C0680028        * SUBI.L    #$AAAAAAAA,D4
-                MOVE.W      #$AAAA,$C068002A
+                MOVE.W      #$0484,$C068002A        * SUBI.L    #$AAAAAAAA,D4
                 MOVE.W      #$AAAA,$C068002C
+                MOVE.W      #$AAAA,$C068002E
                 
-                MOVE.W      #$0A24,$C068002E        * EORI.B    #$33,-(A4)
-                MOVE.W      #$0033,$C0680030
+                MOVE.W      #$0A24,$C0680030        * EORI.B    #$33,-(A4)
+                MOVE.W      #$0033,$C0680032
                 
-                MOVE.W      #$0A44,$C0680032        * EORI.W    #$AAAA,D4
-                MOVE.W      #$AAAA,$C0680034
+                MOVE.W      #$0A44,$C0680034        * EORI.W    #$AAAA,D4
+                MOVE.W      #$AAAA,$C0680036
                 
-                MOVE.W      #$0A84,$C0680036        * EORI.L    #$12345678,D4
-                MOVE.W      #$1234,$C0680038
-                MOVE.W      #$5678,$C068003A
+                MOVE.W      #$0A84,$C0680038        * EORI.L    #$12345678,D4
+                MOVE.W      #$1234,$C068003A
+                MOVE.W      #$5678,$C068003C
                 
-                MOVE.W      #$0C03,$C068003C        * CMPI.B    #$11,D3
-                MOVE.W      #$0011,$C068003E
+                MOVE.W      #$0C03,$C068003E        * CMPI.B    #$11,D3
+                MOVE.W      #$0011,$C0680040
                 
-                MOVE.W      #$0C46,$C0680040        * CMPI.W    #$1234,D6
-                MOVE.W      #$1234,$C0680042
+                MOVE.W      #$0C46,$C0680042        * CMPI.W    #$1234,D6
+                MOVE.W      #$1234,$C0680044
                 
-                MOVE.W      #$0C84,$C0680044        * CMPI.L    #$AAAAAAAA,D4
-                MOVE.W      #$AAAA,$C0680046
+                MOVE.W      #$0C84,$C0680046        * CMPI.L    #$AAAAAAAA,D4
                 MOVE.W      #$AAAA,$C0680048
+                MOVE.W      #$AAAA,$C068004A
                 
-                MOVE.W      #$0953,$C068004A        * BCHG.B    D4,(A3)
+                MOVE.W      #$0953,$C068004C        * BCHG.B    D4,(A3)
                 
-                MOVE.W      #$085C,$C068004C        * BCHG.B    #$44,(A4)+
-                MOVE.W      #$0044,$C068004E
+                MOVE.W      #$085C,$C068004E        * BCHG.B    #$44,(A4)+
+                MOVE.W      #$0044,$C0680050
                 
-                MOVE.W      #$0742,$C0680050        * BCHG.L    D3,D2
+                MOVE.W      #$0742,$C0680052        * BCHG.L    D3,D2
                 
-                MOVE.W      #$0843,$C0680052        * BCHG.L    #AAAAAAAA,D3
-                MOVE.W      #$AAAA,$C0680054
+                MOVE.W      #$0843,$C0680054        * BCHG.L    #AAAAAAAA,D3
                 MOVE.W      #$AAAA,$C0680056
+                MOVE.W      #$AAAA,$C0680058
 
                 
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
@@ -325,7 +329,7 @@ OP_IDENT        MOVE.L      HEXENDADDR,D0
                 BGT         END                     * Branch to end if current address is greater than ending address.
 
                 MOVE.L      A2,D1                   * Generate ASCII of current address
-                MOVE.B      #8,D2
+                MOVE.L      #8,D2
                 JSR         HEX_TO_ASCII
                 
                 LEA         ASCII_RESULT,A1            * Print current address
@@ -408,7 +412,7 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 TRAP        #15
                 
                 MOVE.W      D7,D1
-                MOVE.B      #4,D2
+                MOVE.L      #4,D2
                 JSR         HEX_TO_ASCII
                 
                 LEA         ASCII_RESULT,A1
@@ -668,25 +672,25 @@ PARSE_OP_1      LEA         PRINT_MOVE_B,A1
 
 * MOVE.L
 PARSE_OP_2      
-
+                BRA         OP_IDENT
 * MOVE.W
 PARSE_OP_3
-
+                BRA         OP_IDENT
 * CLR,RTS,JSR,MOVEM,LEA
 PARSE_OP_4
-
+                BRA         OP_IDENT
 * ADDQ
 PARSE_OP_5
-
+                BRA         OP_IDENT
 * BCC
 PARSE_OP_6
-
+                BRA         OP_IDENT
 * MOVEQ
 PARSE_OP_7
-
+                BRA         OP_IDENT
 * DIVS
 PARSE_OP_8
-
+                BRA         OP_IDENT
 * SUB,SUBA
 PARSE_OP_9      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
                 AND.W       D7,D2           * D2 stores the opmode, unshifted
@@ -735,7 +739,7 @@ SUB_A_WORD      LEA         PRINT_SUB_A_W,A1    * Print: SUBA.W
                 LSR.W       #8,D1
                 LSR.W       #1,D1           * D1 stores the destination address register, shifted
                 
-                MOVE.B      #1,D2           
+                MOVE.L      #1,D2           
                 JSR         HEX_TO_ASCII    * Convert destination address register to ASCII
                 
                 LEA         ASCII_RESULT,A1 * Print the destination address register
@@ -777,7 +781,7 @@ SUB_A_LONG      LEA         PRINT_SUB_A_L,A1      * Print: SUBA.L
                 LSR.W       #8,D1
                 LSR.W       #1,D1           * D1 stores the destination address register, shifted
                 
-                MOVE.B      #1,D2           
+                MOVE.L      #1,D2           
                 JSR         HEX_TO_ASCII    * Convert the destination address register to ASCII
                 
                 LEA         ASCII_RESULT,A1 * Print the destination address register
@@ -840,7 +844,7 @@ RET_SUB_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 LSR.W       #8,D1
                 LSR.W       #1,D1               * D1 stored the destination register
                 
-                MOVE.B      #1,D2
+                MOVE.L      #1,D2
                 JSR         HEX_TO_ASCII
                 
                 LEA         ASCII_RESULT,A1
@@ -898,7 +902,7 @@ RET_SUB_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 LSR.W       #8,D1
                 LSR.W       #1,D1               * D1 stored the data register
                 
-                MOVE.B      #1,D2
+                MOVE.L      #1,D2
                 JSR         HEX_TO_ASCII
                 
                 LEA         ASCII_RESULT,A1
@@ -969,7 +973,7 @@ INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1
                         TRAP        #15                        * Print error message for Destination Mode
                         
                         MOVE.W      D7,D1
-                        MOVE.B      #4,D2
+                        MOVE.L      #4,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1
@@ -992,7 +996,7 @@ OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
                         TRAP        #15
                         
                         MOVE.L      D6,D1                      * Convert target Register
-                        MOVE.B      #1,D2
+                        MOVE.L      #1,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1
@@ -1008,7 +1012,7 @@ OPERAND_MODE_1          LEA         PRINT_A,A1                  * Prints: A
                         TRAP        #15
                         
                         MOVE.L      D6,D1                       * Converts register to ASCII
-                        MOVE.B      #1,D2
+                        MOVE.L      #1,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1             * Prints Register
@@ -1023,7 +1027,7 @@ OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         TRAP        #15
                         
                         MOVE.L      D6,D1                       * Converts Register to ASCII
-                        MOVE.B      #1,D2
+                        MOVE.L      #1,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1             * Prints Register
@@ -1043,7 +1047,7 @@ OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         TRAP        #15
 
                         MOVE.L      D6,D1                       * Converts Register to ASCII
-                        MOVE.B      #1,D2
+                        MOVE.L      #1,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1             * Prints Register
@@ -1063,7 +1067,7 @@ OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
                         TRAP        #15
                         
                         MOVE.L      D6,D1                       * Converts Register to ASCII
-                        MOVE.B      #1,D2
+                        MOVE.L      #1,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1             * Prints Register
@@ -1096,7 +1100,7 @@ INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error me
                         TRAP        #15
                         
                         MOVE.L      D7,D1                       
-                        MOVE.B      #4,D2
+                        MOVE.L      #4,D2
                         JSR         HEX_TO_ASCII                * Convert instruction to ASCII
                         
                         LEA         ASCII_RESULT,A1             * Print invalid instruction
@@ -1120,7 +1124,7 @@ HANDLE_ABS_ADDR_WORD    LEA         PRINT_DOLLAR,A1
                         MOVE.B      (A2)+,D4            * D4 stores word absolute address
                         
                         MOVE.L      D4,D1               * Convert absolute address to ASCII
-                        MOVE.B      #4,D2
+                        MOVE.L      #4,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1     * Print absolute address word
@@ -1142,7 +1146,7 @@ HANDLE_ABS_ADDR_LONG    LEA         PRINT_DOLLAR,A1
                         MOVE.B      (A2)+,D4            * D4 stores long absolute address
 
                         MOVE.L      D4,D1               * Convert absolute address to ASCII
-                        MOVE.B      #8,D2
+                        MOVE.L      #8,D2
                         JSR         HEX_TO_ASCII        
                         
                         LEA         ASCII_RESULT,A1     * Print absolute address long
@@ -1170,8 +1174,11 @@ HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
                         
 EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
 
-IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Convert byte of immediate data and move A2
-                        MOVE.L      #2,D2
+IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * load byte of filler immediate data and move A2
+                        LSL.W       #8,D1               * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1            * load byte of immediate data and move A2
+                        
+                        MOVE.L      #2,D2               * Convert byte of immediate data to ASCII
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1     * Print byte of immediate data
@@ -1356,6 +1363,8 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
+
 
 
 
