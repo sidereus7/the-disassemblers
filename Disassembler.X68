@@ -313,27 +313,26 @@ COMBINEEND      ROR.L       #8,D4
                 
                 MOVE.W      #$0742,$C0680052        * BCHG.L    D3,D2
                 
-                MOVE.W      #$0843,$C0680054        * BCHG.L    #AAAAAAAA,D3
-                MOVE.W      #$AAAA,$C0680056
-                MOVE.W      #$AAAA,$C0680058
+                MOVE.W      #$0843,$C0680054        * BCHG.L    #AA,D3
+                MOVE.W      #$00AA,$C0680056
                 
-                MOVE.W      #$B716,$C068005A        * EOR.B     D3,(A6)
+                MOVE.W      #$B716,$C0680058        * EOR.B     D3,(A6)
                 
-                MOVE.W      #$B95A,$C068005C        * EOR.W     D4,(A2)+
+                MOVE.W      #$B95A,$C068005A        * EOR.W     D4,(A2)+
                 
-                MOVE.W      #$BBB8,$C068005E        * EOR.L     D5,$1234
-                MOVE.W      #$1234,$C0680060
+                MOVE.W      #$BBB8,$C068005C        * EOR.L     D5,$1234
+                MOVE.W      #$1234,$C068006E
                 
-                MOVE.W      #$B405,$C0680062        * CMP.B     D5,D2
+                MOVE.W      #$B405,$C0680060        * CMP.B     D5,D2
                 
-                MOVE.W      #$B44B,$C0680064        * CMP.W     A3,D2
+                MOVE.W      #$B44B,$C0680062        * CMP.W     A3,D2
                 
-                MOVE.W      #$B296,$C0680066        * CMP.L     (A6),D1
+                MOVE.W      #$B296,$C0680064        * CMP.L     (A6),D1
                 
-                MOVE.W      #$B4FC,$C0680068        * CMPA.W    #$9999,A2
-                MOVE.W      #$9999,$C068006A        
+                MOVE.W      #$B4FC,$C0680066        * CMPA.W    #$9999,A2
+                MOVE.W      #$9999,$C0680068        
                 
-                MOVE.W      #$B7D3,$C068006C        * CMPA.L    (A3),A3
+                MOVE.W      #$B7D3,$C068006A        * CMPA.L    (A3),A3
                                 
 
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
@@ -597,7 +596,7 @@ PARSE_0_BCHG    MOVE.W      D7,D2                   * Need to check if the rest 
 PARSE_0_BCHG_L  LEA         PRINT_BCHG_L,A1         * Print BCHG.L
                 MOVE.B      #14,D0
                 TRAP        #15
-                MOVE.B      #$02,OP_SIZE            * Set OP_SIZE to be long
+                MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to be byte (to print only byte size of immediate data)
                 
 PARSE_BCHG_DATA MOVE.W      #$0007,D5               * Set immediate data mode
                 MOVE.W      #$0004,D6               * Set immediate data register
@@ -689,9 +688,158 @@ PARSE_OP_2
 * MOVE.W
 PARSE_OP_3
                 BRA         OP_IDENT
+                
 * CLR,RTS,JSR,MOVEM,LEA
-PARSE_OP_4
+PARSE_OP_4      MOVE.W      D7,D6
+                MOVE.W      #$0FC0,D5               * Case: BitMask check if RTS or JSR
+                AND.W       D5,D6
+                LSR.W       #7,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%111001,D6
+                BEQ         PARSE_4_RTS             * Branch to RTS
+                
+                CMPI.W      #%111010,D6
+                BEQ         PARSE_4_JSR             * Branch to JSR
+
+                MOVE.W      D7,D6                   * Case: BitMask check if CLR or MOVEM
+                MOVE.W      #$0FC0,D5
+                AND.W       D5,D6
+                LSR.W       #6,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%001000,D6     
+                BEQ         PARSE_4_CLR_B           * Branch to CLR.B
+                
+                CMPI.W      #%001001,D6
+                BEQ         PARSE_4_CLR_W           * Branch to CLR.W
+                
+                CMPI.W      #%001010,D6
+                BEQ         PARSE_4_CLR_L           * Branch to CLR.L
+                
+                CMPI.W      #%100010,D6
+                BEQ         PARSE4M_PRE_W           * Branch to MOVEM.W <list>,-(sp)
+                
+                CMPI.W      #%100011,D6
+                BEQ         PARSE4M_PRE_L           * Branch to MOVEM.L <list>,-(sp)
+                
+                CMPI.W      #%110010,D6
+                BEQ         PARSE4M_POST_W          * Branch to MOVEM.W (sp)+,<list>
+                
+                CMPI.W      #%110011,D6
+                BEQ         PARSE4M_POST_L          * Branch to MOVEM.L (sp)+,<list>
+                
+                MOVE.W      D7,D6                   * Case: BitMask check for LEA
+                MOVE.W      #$01C00,D5
+                AND.W       D5,D6
+                LSR.W       #6,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%111,D6
+                BEQ         PARSE_4_LEA             * Branch to LEA
+                
+                BRA         NO_OP_MATCH
+
+PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if it matches RTS
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6
+                
+                CMPI.W      #%110101,D6             * Compare the last 7 bits
+                BNE         NO_OP_MATCH             * Branch if doesn't match
+                
+                LEA         PRINT_RTS,A1            * Print RTS
+                MOVE.B      #14,D0
+                TRAP        #15        
+                
                 BRA         OP_IDENT
+                
+PARSE_4_JSR     LEA         PRINT_JSR,A1            * Print JSR  
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                JSR         PARSE_4_EA              * Set D6 and D5 for EA values
+                JSR         HANDLE_OPERAND          * Enter subroutine and print EA
+                
+                LEA         CR_LF_MSG,A1            * Print line
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+          
+PARSE_4_CLR_B   LEA         PRINT_CLR_B,A1          * Print CLR.B
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_4_CLR             * Branch to handle EA
+                
+PARSE_4_CLR_W   LEA         PRINT_CLR_W,A1          * Print CLR.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_4_CLR             * Branch to handle EA
+                
+PARSE_4_CLR_L   LEA         PRINT_CLR_L,A1          * Print CLR.L
+                MOVE.B      #14,D0
+                TRAP        #15
+PARSE_4_CLR     JSR         PARSE_4_EA              * Branch to handle EA
+                JSR         HANDLE_OPERAND          * Enter subroutine to handle EA
+                
+                LEA         CR_LF_MSG,A1            * Print line
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+PARSE4M_PRE_W 
+PARSE4M_PRE_L                
+PARSE_4_M_PRE
+
+PARSE4M_POST_W
+PARSE4M_POST_L
+PARSE_4_M_POST     
+
+
+PARSE_4_LEA     LEA         PRINT_LEA,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                JSR         PARSE_4_EA              * Set D6 and D5 for EA values
+                JSR         HANDLE_OPERAND          * Enter subroutine and print EA
+                
+                LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15 
+                
+                LEA         PRINT_A,A1              * Print A
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.L      D7,D1                   * Move target register to D1
+                MOVE.L      #$0E00,D4
+                AND.L       D4,D1
+                
+                LSR.L       #8,D1                   * Shift 9 to get target register
+                LSR.L       #1,D1
+                
+                MOVE.L      #1,D2
+                JSR         HEX_TO_ASCII            * Convert register to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print register
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                LEA         CR_LF_MSG,A1            * Print line
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+                
+PARSE_4_EA      MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6                   * D6 stores Source information
+                
+                MOVE.W      #%000111,D5             * BitMask for Source register
+                AND.W       D6,D5                   * D5 stores Source Register
+                LSR.W       #3,D6                   * D6 stores Source Mode
+                
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Source Register
+                MOVE.W      D4,D5                   * D5 stores Source Mode     
+                RTS
 * ADDQ
 PARSE_OP_5
                 BRA         OP_IDENT
@@ -1527,6 +1675,12 @@ PRINT_CMP_W         DC.B        'CMP.W',HT,0
 PRINT_CMP_L         DC.B        'CMP.L',HT,0
 PRINT_CMPA_W        DC.B        'CMPA.W',HT,0
 PRINT_CMPA_L        DC.B        'CMPA.L',HT,0
+PRINT_RTS           DC.B        'RTS',CR,LF,0
+PRINT_JSR           DC.B        'JSR',HT,0
+PRINT_CLR_B         DC.B        'CLR.B',HT,0
+PRINT_CLR_W         DC.B        'CLR.W',HT,0
+PRINT_CLR_L         DC.B        'CLR.L',HT,0
+PRINT_LEA           DC.B        'LEA',HT,0
 
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
@@ -1541,14 +1695,6 @@ ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
 
 
-
-
-
-
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
 *~Font name~Courier New~
 *~Font size~10~
