@@ -610,7 +610,7 @@ BCHG_PRINT_D    LEA         PRINT_D,A1
                 LSR.L       #8,D1                   * Shift 9 to get target register
                 LSR.L       #1,D1
                 
-                MOVE.B      #1,D2
+                MOVE.L      #1,D2
                 JSR         HEX_TO_ASCII            * Convert register to ASCII
                 
                 LEA         ASCII_RESULT,A1         * Print register
@@ -1171,7 +1171,7 @@ HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
 EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
 
 IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Convert byte of immediate data and move A2
-                        MOVE.B      #2,D2
+                        MOVE.L      #2,D2
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1     * Print byte of immediate data
@@ -1184,7 +1184,7 @@ IMMED_DATA_WORD         MOVE.B      (A2)+,D1            * D1 stores a byte of th
                         LSL.W       #8,D1               * Shift D1 left 8 bits
                         MOVE.B      (A2)+,D1            * D1 stores immediate data word
                         
-                        MOVE.B      #4,D2               * Convert immediate data word to ASCII
+                        MOVE.L      #4,D2               * Convert immediate data word to ASCII
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1     * Print immediate data word
@@ -1201,7 +1201,7 @@ IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of th
                         LSL.L       #8,D1               * Shift D1 left 8 bits
                         MOVE.B      (A2)+,D1            * D1 stores immediate data long
                         
-                        MOVE.B      #8,D2              * Convert immediate data long to ASCII
+                        MOVE.L      #8,D2              * Convert immediate data long to ASCII
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1
@@ -1356,6 +1356,7 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
