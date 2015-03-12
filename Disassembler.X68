@@ -324,9 +324,12 @@ OP_IDENT        MOVE.L      HEXENDADDR,D0
                 CMP.L       D0,D1
                 BGT         END                     * Branch to end if current address is greater than ending address.
 
-                MOVE.L      A2,D1                   * Print current address.  TODO: Add tab **************************
-                MOVE.B      #15,D0
-                MOVE.B      #16,D2
+                MOVE.L      A2,D1                   * Generate ASCII of current address
+                MOVE.B      #8,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1            * Print current address
+                MOVE.B      #14,D0
                 TRAP        #15
                 
                 LEA         TAB_MSG,A1
@@ -404,9 +407,12 @@ NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.L      D2,D1
-                MOVE.B      #15,D0
-                MOVE.B      #2,D2
+                MOVE.W      D7,D1
+                MOVE.B      #4,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1
+                MOVE.B      #14,D0
                 TRAP        #15
                 
                 LEA         CR_LF_MSG,A1
@@ -604,9 +610,11 @@ BCHG_PRINT_D    LEA         PRINT_D,A1
                 LSR.L       #8,D1                   * Shift 9 to get target register
                 LSR.L       #1,D1
                 
-                ************************************************************************ FIX
-                MOVE.B      #15,D0                  * Print target register
-                MOVE.B      #10,D2
+                MOVE.B      #1,D2
+                JSR         HEX_TO_ASCII            * Convert register to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print register
+                MOVE.B      #14,D0
                 TRAP        #15
 
                 BRA         PARSE_0_EA              * Branch to print parse 0 EA
@@ -727,8 +735,11 @@ SUB_A_WORD      LEA         PRINT_SUB_A_W,A1    * Print: SUBA.W
                 LSR.W       #8,D1
                 LSR.W       #1,D1           * D1 stores the destination address register, shifted
                 
-                MOVE.B      #15,D0          * Print the destination address register
-                MOVE.B      #10,D2
+                MOVE.B      #1,D2           
+                JSR         HEX_TO_ASCII    * Convert destination address register to ASCII
+                
+                LEA         ASCII_RESULT,A1 * Print the destination address register
+                MOVE.B      #14,D0
                 TRAP        #15
                 
                 LEA         CR_LF_MSG,A1    * Print new line, carriage return
@@ -766,8 +777,11 @@ SUB_A_LONG      LEA         PRINT_SUB_A_L,A1      * Print: SUBA.L
                 LSR.W       #8,D1
                 LSR.W       #1,D1           * D1 stores the destination address register, shifted
                 
-                MOVE.B      #15,D0          * Print the destination address register
-                MOVE.B      #10,D2
+                MOVE.B      #1,D2           
+                JSR         HEX_TO_ASCII    * Convert the destination address register to ASCII
+                
+                LEA         ASCII_RESULT,A1 * Print the destination address register
+                MOVE.B      #14,D0
                 TRAP        #15
                 
                 LEA         CR_LF_MSG,A1    * Print new line, carriage return
@@ -826,8 +840,11 @@ RET_SUB_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 LSR.W       #8,D1
                 LSR.W       #1,D1               * D1 stored the destination register
                 
-                MOVE.B      #15,D0
-                MOVE.B      #10,D2
+                MOVE.B      #1,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1
+                MOVE.B      #14,D0
                 TRAP        #15                 * Print destination register
                 
                 LEA         CR_LF_MSG,A1        * Print new line/carriage return
@@ -880,8 +897,12 @@ RET_SUB_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 AND.W       D7,D1               * D1 stores the data register, unshifted
                 LSR.W       #8,D1
                 LSR.W       #1,D1               * D1 stored the data register
-                MOVE.B      #15,D0
-                MOVE.B      #10,D2
+                
+                MOVE.B      #1,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1
+                MOVE.B      #14,D0
                 TRAP        #15                 * Print destination register
                 
                 LEA         PRINT_COMMA,A1      * Print comma
@@ -947,10 +968,13 @@ INVALID_OPERAND_MODE    LEA         INVALID_OPERAND_MODE_MSG,A1
                         MOVE.B      #14,D0
                         TRAP        #15                        * Print error message for Destination Mode
                         
-                        MOVE.L      D5,D1
-                        MOVE.B      #15,D0
-                        MOVE.B      #2,D2
-                        TRAP        #15                        * Print the problematic Destination mode
+                        MOVE.W      D7,D1
+                        MOVE.B      #4,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1
+                        MOVE.B      #14,D0
+                        TRAP        #15                        * Print the problematic instruction
                         
                         LEA         CR_LF_MSG,A1
                         MOVE.B      #14,D0
@@ -967,9 +991,12 @@ OPERAND_MODE_0          LEA         PRINT_D,A1                 * Print D
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1                      * Print target Register
-                        MOVE.B      #15,D0
-                        MOVE.B      #10,D2
+                        MOVE.L      D6,D1                      * Convert target Register
+                        MOVE.B      #1,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1
+                        MOVE.B      #14,D0
                         TRAP        #15
                         
 * Code goes here
@@ -980,9 +1007,12 @@ OPERAND_MODE_1          LEA         PRINT_A,A1                  * Prints: A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1                       * Prints Register in Decimal
-                        MOVE.B      #15,D0
-                        MOVE.B      #10,D2
+                        MOVE.L      D6,D1                       * Converts register to ASCII
+                        MOVE.B      #1,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1             * Prints Register
+                        MOVE.B      #14,D0
                         TRAP        #15
    
                         BRA         EXIT_HANDLE_OPERAND 
@@ -992,10 +1022,14 @@ OPERAND_MODE_2          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1                       * Prints Register in Decimal
-                        MOVE.B      #15,D0
-                        MOVE.B      #10,D2
+                        MOVE.L      D6,D1                       * Converts Register to ASCII
+                        MOVE.B      #1,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1             * Prints Register
+                        MOVE.B      #14,D0
                         TRAP        #15
+
                         
                         LEA         PRINT_END_PAREN,A1          * Prints: )
                         MOVE.B      #14,D0
@@ -1008,10 +1042,14 @@ OPERAND_MODE_3          LEA         PRINT_A_INDIRECT,A1         * Prints: (A
                         MOVE.B      #14,D0
                         TRAP        #15
 
-                        MOVE.L      D6,D1                       * Prints Register in Decimal
-                        MOVE.B      #15,D0
-                        MOVE.B      #10,D2
+                        MOVE.L      D6,D1                       * Converts Register to ASCII
+                        MOVE.B      #1,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1             * Prints Register
+                        MOVE.B      #14,D0
                         TRAP        #15
+
                         
                         LEA         PRINT_END_PAREN_PLUS,A1     * Prints: )+
                         MOVE.B      #14,D0
@@ -1024,10 +1062,14 @@ OPERAND_MODE_4          LEA         PRINT_MINUS_A_INDIRECT,A1   * Prints: -(A
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1                       * Prints Register in Decimal
-                        MOVE.B      #15,D0
-                        MOVE.B      #10,D2
+                        MOVE.L      D6,D1                       * Converts Register to ASCII
+                        MOVE.B      #1,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1             * Prints Register
+                        MOVE.B      #14,D0
                         TRAP        #15
+
                         
                         LEA         PRINT_END_PAREN,A1          * Prints: )
                         MOVE.B      #14,D0
@@ -1053,9 +1095,12 @@ INVALID_ABS_ADDR_REG    LEA         INVALID_ABS_ADDR_REG_MSG,A1 * Print error me
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.L      D6,D1                       * Print invalid address register stored in D6
-                        MOVE.B      #15,D0
-                        MOVE.B      #2,D2
+                        MOVE.L      D7,D1                       
+                        MOVE.B      #4,D2
+                        JSR         HEX_TO_ASCII                * Convert instruction to ASCII
+                        
+                        LEA         ASCII_RESULT,A1             * Print invalid instruction
+                        MOVE.B      #14,D0
                         TRAP        #15 
                         
                         LEA         CR_LF_MSG,A1                * Print new Line
@@ -1074,9 +1119,12 @@ HANDLE_ABS_ADDR_WORD    LEA         PRINT_DOLLAR,A1
                         LSL.W       #8,D4               * Shift D4 left 8 bits
                         MOVE.B      (A2)+,D4            * D4 stores word absolute address
                         
-                        MOVE.L      D4,D1               * Print absolute address
-                        MOVE.B      #15,D0
-                        MOVE.B      #16,D2
+                        MOVE.L      D4,D1               * Convert absolute address to ASCII
+                        MOVE.B      #4,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1     * Print absolute address word
+                        MOVE.B      #14,D0
                         TRAP        #15
                         
                         BRA         EXIT_OPERAND_MODE_7
@@ -1093,9 +1141,12 @@ HANDLE_ABS_ADDR_LONG    LEA         PRINT_DOLLAR,A1
                         LSL.L       #8,D4               * Shift D4 left 8 bits
                         MOVE.B      (A2)+,D4            * D4 stores long absolute address
 
-                        MOVE.L      D4,D1               * Print absolute address
-                        MOVE.B      #15,D0
-                        MOVE.B      #16,D2
+                        MOVE.L      D4,D1               * Convert absolute address to ASCII
+                        MOVE.B      #8,D2
+                        JSR         HEX_TO_ASCII        
+                        
+                        LEA         ASCII_RESULT,A1     * Print absolute address long
+                        MOVE.B      #14,D0
                         TRAP        #15
 
                         BRA         EXIT_OPERAND_MODE_7
@@ -1119,9 +1170,12 @@ HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
                         
 EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
 
-IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Print byte of immediate data and move A2
-                        MOVE.B      #15,D0
-                        MOVE.B      #16,D2
+IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * Convert byte of immediate data and move A2
+                        MOVE.B      #2,D2
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1     * Print byte of immediate data
+                        MOVE.B      #14,D0
                         TRAP        #15
                         
                         BRA         EXIT_HANDLE_IMMED_DATA
@@ -1130,22 +1184,28 @@ IMMED_DATA_WORD         MOVE.B      (A2)+,D1            * D1 stores a byte of th
                         LSL.W       #8,D1               * Shift D1 left 8 bits
                         MOVE.B      (A2)+,D1            * D1 stores immediate data word
                         
-                        MOVE.B      #15,D0              * Print immediate data word
-                        MOVE.B      #16,D2
+                        MOVE.B      #4,D2               * Convert immediate data word to ASCII
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1     * Print immediate data word
+                        MOVE.B      #14,D0
                         TRAP        #15
                         
                         BRA         EXIT_HANDLE_IMMED_DATA
 
 IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
                         LSL.L       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1
-                        LSL.L       #8,D1
-                        MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
+                        MOVE.B      (A2)+,D1            * D1 stores a word of the immediate data
+                        LSL.L       #8,D1               * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1            * D1 stores a word and a byte of the immediate data
                         LSL.L       #8,D1               * Shift D1 left 8 bits
                         MOVE.B      (A2)+,D1            * D1 stores immediate data long
                         
-                        MOVE.B      #15,D0              * Print immediate data long
-                        MOVE.B      #16,D2
+                        MOVE.B      #8,D2              * Convert immediate data long to ASCII
+                        JSR         HEX_TO_ASCII
+                        
+                        LEA         ASCII_RESULT,A1
+                        MOVE.B      #14,D0
                         TRAP        #15
                         BRA         EXIT_HANDLE_IMMED_DATA
                      
@@ -1207,13 +1267,8 @@ H2A_LOOP_FINISH     MOVE.B    #$00,(A4)
 
 
 
-END                 MOVE.L      #$12345678,D1
-                    MOVE.B      #8,D2
-                    JSR         HEX_TO_ASCII
+END 
                     
-                    LEA         ASCII_RESULT,A1
-                    MOVE.B      #14,D0
-                    TRAP        #15
                               
     SIMHALT             ; halt simulator
 
@@ -1255,7 +1310,7 @@ LINE1               DC.B        'Welcome to our 68K Dissassembler.',CR,LF,0
 GETSTARTMESSAGE     DC.B        'Please provide a valid start address.',CR,LF,0
 GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
-INVALID_OPERAND_MODE_MSG   DC.B 'The following operand mode is invalid: ',0
+INVALID_OPERAND_MODE_MSG   DC.B 'The operand mode is invalid for instruction: ',0
 INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
 
 PRINT_D             DC.B        'D',0
@@ -1270,7 +1325,7 @@ PRINT_NUM_DOLLAR    DC.B        '#$',0
 
 
 BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
-INVALID_OP_MSG      DC.B        'Invalid Operation Code: ',0
+INVALID_OP_MSG      DC.B        'Invalid Operation Code for Instruction: ',0
 CR_LF_MSG           DC.B        CR,LF,0
 TAB_MSG             DC.B        HT,0
 
@@ -1301,9 +1356,6 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
-
-
-
 
 
 
