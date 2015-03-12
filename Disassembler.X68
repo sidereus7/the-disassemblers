@@ -24,7 +24,8 @@ START:          LEA         stack,SP
                 MOVE.B      #1,D7
                 MOVE.B      #0,D6                   * Toggle for start/end address prompting: 0 = start, 1 = end
             
-PROMPTSTARTADDR MOVE.B      #2,D0                   * Read starting address string from console
+PROMPTSTARTADDR LEA         START_ADDR_INPUT,A1
+                MOVE.B      #2,D0                   * Read starting address string from console
                 TRAP        #15
             
                 MOVE.B      #8,D2
@@ -51,7 +52,6 @@ ERRORINPUTSIZE  LEA         ERRORMESSAGESIZE,A1     * Start/End Address Error
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         BUGFIXMESSAGE,A1
                 CMP.B       D7,D6
                 BNE         PROMPTSTARTADDR
                 BRA         PROMPTENDADDR
@@ -63,7 +63,8 @@ ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end add
                 MOVE.B      #8,D2
                 
                 *setting A1 to $5000 removed
-PROMPTENDADDR   MOVE.B      #2,D0                   * Read end address string from console
+PROMPTENDADDR   LEA         END_ADDR_INPUT,A1
+                MOVE.B      #2,D0                   * Read end address string from console
                 TRAP        #15
                 
                 CMP.W       D1,D2                   * Check end address size
@@ -250,8 +251,6 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.B      #$00,$C0680008
                 MOVE.B      #$33,$C0680009
                 
-                **********************************************************
-                
                 MOVE.B      #$98,$C068000A
                 MOVE.B      #$14,$C068000B          * SUB.B  (A4),D4
                 
@@ -266,25 +265,6 @@ COMBINEEND      ROR.L       #8,D4
                 
                 MOVE.B      #$99,$C0680012
                 MOVE.B      #$CF,$C0680013          * SUBA.L  A7,A4
-                
-                **********************************************************
-                
-                MOVE.B      #$D8,$C068000A
-                MOVE.B      #$14,$C068000B          * ADD.B  (A4),D4
-                
-                MOVE.B      #$D4,$C068000C
-                MOVE.B      #$44,$C068000D          * ADD.W  D4,D2
-                
-                MOVE.B      #$D5,$C068000E
-                MOVE.B      #$94,$C068000F          * ADD.L  D2,(A4)
-                
-                MOVE.B      #$D2,$C0680010 
-                MOVE.B      #$DC,$C0680011          * ADDA.W (A4)+,A1
-                
-                MOVE.B      #$D9,$C0680012
-                MOVE.B      #$CF,$C0680013          * ADDA.L  A7,A4
-                
-                **********************************************************
                 
                 MOVE.W      #$0204,$C0680014        * ANDI.B    #$33,D4
                 MOVE.W      #$0033,$C0680016
@@ -359,8 +339,53 @@ COMBINEEND      ROR.L       #8,D4
 *--------------------------------------------------------------------------
                 
 BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
+                
+                LEA         ENTER_TO_CONT_MSG,A1    * Prompt user to hit enter message
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         ENTER_LOCATION,A1
+                MOVE.B      #2,D0                   * Wait for input from user
+                TRAP        #15
+                
+                MOVE.W      #$FF00,D1               * Clear Screen
+                MOVE.B      #11,D0
+                TRAP        #15
+                
+                MOVE.B      #29,PAGE_COUNT_TARGET   * Set Page count target to 29
+                MOVE.B      #00,PAGE_COUNT_CURRENT  * set page counter to 0
+                
 
-OP_IDENT        MOVE.L      HEXENDADDR,D0
+OP_IDENT        ADD.B       #01,PAGE_COUNT_CURRENT
+                CLR.L       D0
+                CLR.L       D1
+                
+                MOVE.B      PAGE_COUNT_CURRENT,D0
+                MOVE.B      PAGE_COUNT_TARGET,D1
+                
+                CMP.B       D0,D1
+                BLE         SET_NEW_PAGE
+                BRA         CONT_OP_IDENT
+                
+SET_NEW_PAGE    LEA         CR_LF_MSG,A1
+                MOVE.B      #14,D0
+                TRAP        #15 
+
+                LEA         ENTER_TO_CONT_MSG,A1    * Prompt user to hit enter message
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         ENTER_LOCATION,A1
+                MOVE.B      #2,D0                   * Wait for input from user
+                TRAP        #15
+                
+                MOVE.W      #$FF00,D1               * Clear Screen
+                MOVE.B      #11,D0
+                TRAP        #15
+
+                MOVE.B      #00,PAGE_COUNT_CURRENT               
+                
+CONT_OP_IDENT   MOVE.L      HEXENDADDR,D0
                 MOVE.L      A2,D1
                 CMP.L       D0,D1
                 BGT         END                     * Branch to end if current address is greater than ending address.
@@ -1346,237 +1371,7 @@ PARSE_B_REG     MOVE.L      D7,D1                   * Move target register to D1
 PARSE_OP_C
 
 * ADD,ADDA
-PARSE_OP_D      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
-                AND.W       D7,D2           * D2 stores the opmode, unshifted
-                LSR.W       #6,D2           * D2 stores the opmode
-                
-                CMPI.B      #$03,D2         * If opmode is 011, parse as ADDA.W
-                BEQ         ADD_A_WORD      
-                
-                CMPI.B      #$07,D2         * If opmode is 111, parse as ADDA.L
-                BEQ         ADD_A_LONG
-                
-                CMPI.B      #$02,D2         * If opmode <= 010, parse as ADD <ea>,Dn
-                BLE         ADD_EA_DN
-                
-                CMPI.B      #06,D2          * If opmode <= 110, parse as ADD Dn,<ea>
-                BLE         ADD_DN_EA
-                
-                BRA         EXIT_PARSE_OP_D
-                
-ADD_A_WORD      LEA         PRINT_ADD_A_W,A1    * Print: ADDA.W
-                MOVE.B      #14,D0
-                TRAP        #15
-
-                MOVE.W      #$0007,D6       * Store the <ea> register into D6
-                AND.W       D7,D6
-                
-                MOVE.W      #$0038,D5       * Store the <ea> mode into D5
-                AND.W       D7,D5
-                LSR.W       #3,D5
-                
-                MOVE.B      #$01,OP_SIZE    * Set OP_SIZE to Word (%01)
-                
-                JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
-                
-                LEA         PRINT_COMMA,A1  * Print: comma (between operands)
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         PRINT_A,A1      * Print:  A
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                CLR.L       D1              * Clear D1
-                MOVE.W      #$0E00,D1
-                AND.W       D7,D1           * D1 stores the destination address register, unshifted
-                LSR.W       #8,D1
-                LSR.W       #1,D1           * D1 stores the destination address register, shifted
-                
-                MOVE.L      #1,D2           
-                JSR         HEX_TO_ASCII    * Convert destination address register to ASCII
-                
-                LEA         ASCII_RESULT,A1 * Print the destination address register
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         CR_LF_MSG,A1    * Print new line, carriage return
-                MOVE.B      #14,D0
-                TRAP        #15             
-                
-                BRA         EXIT_PARSE_OP_D
-
-ADD_A_LONG      LEA         PRINT_ADD_A_L,A1      * Print: ADDA.L
-                MOVE.B      #14,D0
-                TRAP        #15
-
-                MOVE.W      #$0007,D6
-                AND.W       D7,D6           * D6 stores the EA register
-                
-                MOVE.W      #$0038,D5
-                AND.W       D7,D5           * D5 stores the EA Mode, unshifted
-                LSR.W       #3,D5           * D5 stores the EA Mode
-                
-                MOVE.B      #$02,OP_SIZE    * Set OP_SIZE to Long (%10)
-                
-                JSR         HANDLE_OPERAND
-                
-                LEA         PRINT_COMMA,A1  * Print comma
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         PRINT_A,A1      * Print:  A
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                CLR.L       D1              * Clear D1
-                MOVE.W      #$0E00,D1       * Bitmask for destination address register
-                AND.W       D7,D1           * D1 stores the destination address register, unshifted
-                LSR.W       #8,D1
-                LSR.W       #1,D1           * D1 stores the destination address register, shifted
-                
-                MOVE.L      #1,D2           
-                JSR         HEX_TO_ASCII    * Convert the destination address register to ASCII
-                
-                LEA         ASCII_RESULT,A1 * Print the destination address register
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         CR_LF_MSG,A1    * Print new line, carriage return
-                MOVE.B      #14,D0
-                TRAP        #15   
-                
-                BRA         EXIT_PARSE_OP_D
-
-ADD_EA_DN       CMPI.B      #$00,D2
-                BEQ         ADD_EA_DN_BYTE
-                
-                CMPI.B      #$01,D2
-                BEQ         ADD_EA_DN_WORD
-                
-                CMPI.B      #$02,D2
-                BEQ         ADD_EA_DN_LONG
-                
-ADD_EA_DN_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
-                BRA         RET_SUB_EA_DN       * Merge
-                
-ADD_EA_DN_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
-                BRA         RET_ADD_EA_DN       * Merge
-                
-ADD_EA_DN_LONG  LEA         PRINT_ADD_L,A1
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
-                BRA         RET_ADD_EA_DN       * Merge
-                
-                
-RET_ADD_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
-                AND.W       D7,D6               * D6 stores EA Register
-                
-                MOVE.W      #$0038,D5
-                AND.W       D7,D5               * D5 stores EA Mode, unshifted
-                LSR.W       #3,D5               * D5 stores EA Mode
-                
-                JSR         HANDLE_OPERAND
-                
-                LEA         PRINT_COMMA,A1      * Print comma
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         PRINT_D,A1          * Print:  D
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                MOVE.W      #$0E00,D1
-                AND.W       D7,D1               * D1 stores the destination register, unshifted
-                LSR.W       #8,D1
-                LSR.W       #1,D1               * D1 stored the destination register
-                
-                MOVE.L      #1,D2
-                JSR         HEX_TO_ASCII
-                
-                LEA         ASCII_RESULT,A1
-                MOVE.B      #14,D0
-                TRAP        #15                 * Print destination register
-                
-                LEA         CR_LF_MSG,A1        * Print new line/carriage return
-                MOVE.B      #14,D0
-                TRAP        #15                
-                
-                BRA         EXIT_PARSE_OP_D
-
-ADD_DN_EA       CMPI.B      #$04,D2
-                BEQ         ADD_DN_EA_BYTE
-                
-                CMPI.B      #$05,D2
-                BEQ         ADD_DN_EA_WORD
-                
-                CMPI.B      #$06,D2
-                BEQ         ADD_DN_EA_LONG
-                
-ADD_DN_EA_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
-                BRA         RET_ADD_DN_EA       * Merge
-                
-ADD_DN_EA_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
-                BRA         RET_ADD_DN_EA       * Merge
-                
-ADD_DN_EA_LONG  LEA         PRINT_ADD_L,A1
-                MOVE.B      #14,D0
-                TRAP        #15
-                MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
-                BRA         RET_ADD_DN_EA       * Merge
-                
-                
-RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
-                AND.W       D7,D6               * D6 stores EA Register
-                
-                MOVE.W      #$0038,D5
-                AND.W       D7,D5               * D5 stores EA Mode, unshifted
-                LSR.W       #3,D5               * D5 stores EA Mode
-                
-                LEA         PRINT_D,A1          * Print:  D
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                CLR.L       D1                  * Clear D1
-                MOVE.W      #$0E00,D1
-                AND.W       D7,D1               * D1 stores the data register, unshifted
-                LSR.W       #8,D1
-                LSR.W       #1,D1               * D1 stored the data register
-                
-                MOVE.L      #1,D2
-                JSR         HEX_TO_ASCII
-                
-                LEA         ASCII_RESULT,A1
-                MOVE.B      #14,D0
-                TRAP        #15                 * Print destination register
-                
-                LEA         PRINT_COMMA,A1      * Print comma
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                JSR         HANDLE_OPERAND      * Print EA
-                
-                LEA         CR_LF_MSG,A1        * Print new line/carriage return
-                MOVE.B      #14,D0
-                TRAP        #15             
-                BRA         EXIT_PARSE_OP_D
-                
-                
-EXIT_PARSE_OP_D BRA         OP_IDENT
-
+PARSE_OP_D
 
 * ASL,ASR,LSL,LSR,ROL,ROR
 PARSE_OP_E
@@ -1920,7 +1715,27 @@ H2A_LOOP_FINISH     MOVE.B    #$00,(A4)
 
 
 
-END 
+END         LEA         CR_LF_MSG,A1        * Add an empty line
+            MOVE.B      #14,D0
+            TRAP        #15
+            
+            LEA         START_OVER_MSG,A1   * Print start over message
+            MOVE.B      #14,D0
+            TRAP        #15
+            
+            MOVE.B      #5,D0               * Get a single character from the user
+            TRAP        #15
+            
+            MOVE.B      D1,START_OVER_RESPONSE  * Save response
+            
+            MOVE.W      #$FF00,D1           * Clear Screen
+            MOVE.B      #11,D0
+            TRAP        #15
+
+            MOVE.B      START_OVER_RESPONSE,D1            
+            CMPI.B      #$59,D1
+            BEQ         START
+            
                     
                               
     SIMHALT             ; halt simulator
@@ -1965,6 +1780,8 @@ GETENDMESSAGE       DC.B        'Please provide a valid end address.',CR,LF,0
 ERRORMESSAGESIZE    DC.B        'The input you have provided is not 32 bits long.  Please provide a valid address',CR,LF,0
 INVALID_OPERAND_MODE_MSG   DC.B 'The operand mode is invalid for instruction: ',0
 INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
+ENTER_TO_CONT_MSG   DC.B        'Press ENTER to continue',0
+START_OVER_MSG      DC.B        'Would you like to Disassemble again?  Enter [Y] for Yes',CR,LF,0
 
 PRINT_D             DC.B        'D',0
 PRINT_COMMA         DC.B        ',',0
@@ -1985,11 +1802,6 @@ TAB_MSG             DC.B        HT,0
 PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
 PRINT_MOVE_W        DC.B        'MOVE.W',HT,0
 PRINT_MOVE_L        DC.B        'MOVE.L',HT,0
-PRINT_ADD_A_W       DC.B        'ADDA.W',HT,0
-PRINT_ADD_A_L       DC.B        'ADDA.L',HT,0
-PRINT_ADD_B         DC.B        'ADD.B',HT,0
-PRINT_ADD_W         DC.B        'ADD.W',HT,0
-PRINT_ADD_L         DC.B        'ADD.L',HT,0
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
 PRINT_SUB_B         DC.B        'SUB.B',HT,0
@@ -2019,19 +1831,25 @@ PRINT_CLR_W         DC.B        'CLR.W',HT,0
 PRINT_CLR_L         DC.B        'CLR.L',HT,0
 PRINT_LEA           DC.B        'LEA',HT,0
 
+START_ADDR_INPUT    DS.B        10
 STARTADDRSTRING1    DS.L        1
 STARTADDRSTRING2    DS.L        1
 HEXSTARTADDR        DS.L        1
 
+END_ADDR_INPUT      DS.B        10
 ENDADDRSTRING1      DS.L        1
 ENDADDRSTRING2      DS.L        1
 HEXENDADDR          DS.L        1
 
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
+
+PAGE_COUNT_TARGET   DS.B        1
+PAGE_COUNT_CURRENT  DS.B        1
+START_OVER_RESPONSE DS.B        1
+
+ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
