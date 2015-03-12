@@ -257,7 +257,6 @@ BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking
                 MOVE.B      #29,PAGE_COUNT_TARGET   * Set Page count target to 29
                 MOVE.B      #00,PAGE_COUNT_CURRENT  * set page counter to 0
                 
-
 OP_IDENT        ADD.B       #01,PAGE_COUNT_CURRENT
                 CLR.L       D0
                 CLR.L       D1
@@ -812,15 +811,99 @@ PARSE_4_CLR     JSR         PARSE_4_EA              * Branch to handle EA
                 TRAP        #15
                 
                 BRA         OP_IDENT
-PARSE4M_PRE_W 
-PARSE4M_PRE_L                
-PARSE_4_M_PRE
+* MOVEM.x <list>,<ea> -> <list>,-(sp) d0-D7/A0-A7
+PARSE4M_PRE_W   LEA         PRINT_MOVEM_W,A1        * Print MOVEM.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_4_M_PRE
+                
+PARSE4M_PRE_L   LEA         PRINT_MOVEM_L,A1        * Print MOVEM.L
+                MOVE.B      #14,D0
+                TRAP        #15
+                        
+PARSE_4_M_PRE   JSR         PARSE_4_M_LIST          * Get register list mask in D4
+                MOVE.W      D4,D5                   * Check Address registers
+                MOVE.L      #$00FF,D6
+                AND.L       D6,D5                   * D5 holds the first half of register list
+                
+                CLR.L       D6                      * Clear D6. 0=True-First in the list of the register 1=false
+                MOVE.B      #$FF,D3                 * Counter to print out list of registers
+                
+M_PRE_LOOP_1    ADD.B       #1,D3                   * Increment counter
+                CMPI.B      #8,D3                   * If counter reaches 8, then end of counter
+                BEQ         PARSE_4_M_EA            * Branch to handle EA. Otherwise,
+                ROL.B       #1,D5                   * Rotate D5
+                BCC         M_PRE_LOOP_1            * Register = 0, Loop again
+                
+                CMPI.B      #$1,D6                  * Is this the first in the register?
+                BNE         M_PRE_PRINT_A           * If not, print A, not /
+                
+                LEA         PRINT_SLASH,A1          * Print /
+                MOVE.B      #14,D0
+                TRAP        #15
 
-PARSE4M_POST_W
-PARSE4M_POST_L
-PARSE_4_M_POST     
+M_PRE_PRINT_A   JSR         PARSE_4_PRINT_A         * Print A ***  should fix this and have a diff counter to print A or d
+                MOVE.B      D3,D1
+                JSR         PARSE_4_REGIST          * Print register
+                
+M_PRE_LOOP_2    ADD.B       #1,D3
+                ROL.B       #1,D5
+                BCS         M_PRE_LOOP_2
+                
+                MOVE.B      #1,D6
+                
+                SUB.B       #1,D5
+                
+                LEA         PRINT_DASH,A1           * Print -
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                JSR         PARSE_4_PRINT_A         * Print A
+                MOVE.B      D3,D1
+                JSR         PARSE_4_REGIST          * Print register
+                ADD.B       #$1,D3
+                
+                BRA         M_PRE_LOOP_1            * Otherwise, start loop again
 
+PARSE_4_M_EA    * HANDLE EA
+                BRA         PARSE_4_M_EXIT
+* MOVEM.x <ea>,<list> -> (sp)+,<list>
+PARSE4M_POST_W  LEA         PRINT_MOVEM_W,A1        * Print MOVEM.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                BRA         PARSE_4_M_POST
+                
+PARSE4M_POST_L  LEA         PRINT_MOVEM_L,A1        * Print MOVEM.L
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+PARSE_4_M_POST  * ea comma then list
+                JSR         PARSE_4_M_LIST          * Get register list mask
 
+PARSE_4_M_LIST  MOVE.B      (A2)+,D4                * D1 stores a byte of the immediate data
+                LSL.L       #8,D4                   * Shift D1 left 8 bits
+                MOVE.B      (A2)+,D4                * D1 stores a word of the immediate data
+                LSL.L       #8,D4                   * Shift D1 left 8 bits
+                MOVE.B      (A2)+,D4                * D1 stores a word and a byte of the immediate data
+                LSL.L       #8,D4                   * Shift D1 left 8 bits
+                MOVE.B      (A2)+,D4                * D1 stores immediate data long
+                RTS 
+                
+PARSE_4_PRINT_A LEA         PRINT_A,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                RTS
+                
+PARSE_4_REGIST  MOVE.L      #1,D2
+                JSR         HEX_TO_ASCII            * Convert register to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print register
+                MOVE.B      #14,D0
+                TRAP        #15
+                RTS
+                
+PARSE_4_M_EXIT  BRA         OP_IDENT
+                
 PARSE_4_LEA     LEA         PRINT_LEA,A1
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -1982,7 +2065,8 @@ PRINT_MINUS_A_INDIRECT  DC.B    '-(A',0
 PRINT_DOLLAR        DC.B        '$',0
 PRINT_NUM_DOLLAR    DC.B        '#$',0
 PRINT_HASH          DC.B        '#',0
-
+PRINT_DASH          DC.B        '-',0
+PRINT_SLASH         DC.B        '/',0
 
 BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
 INVALID_OP_MSG      DC.B        'Invalid Operation Code for Instruction: ',0
@@ -2033,6 +2117,8 @@ PRINT_CLR_B         DC.B        'CLR.B',HT,0
 PRINT_CLR_W         DC.B        'CLR.W',HT,0
 PRINT_CLR_L         DC.B        'CLR.L',HT,0
 PRINT_LEA           DC.B        'LEA',HT,0
+PRINT_MOVEM_W       DC.B        'MOVEM.W',HT,0
+PRINT_MOVEM_L       DC.B        'MOVEM.L',HT,0
 
 START_ADDR_INPUT    DS.B        10
 STARTADDRSTRING1    DS.L        1
