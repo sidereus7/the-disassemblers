@@ -7,7 +7,25 @@
 *               Starts at $5000
 *-----------------------------------------------------------
     ORG    $5000
-START:       ANDI.B     #$33,D4
+START:       MOVE.B     D7,D1
+             MOVE.B     #$17,D2
+             MOVE.B     #$33,(A5)
+             
+             SUB.B      (A4),D4
+             SUB.W      D4,D2
+             SUB.L      D2,(A4)
+             
+             SUBA.W     (A4)+,A1
+             SUBA.L     A7,A4
+             
+             ADD.B      (A4),D4             * ADD/ADDA Tests
+             ADD.W      D4,D2
+             ADD.L      D2,(A4)
+             
+             ADDA.W     (A4)+,A1
+             ADDA.L     A7,A4
+             
+             ANDI.B     #$33,D4
              ANDI.W     #$8888,(A3)
              ANDI.L     #$AAAAAAAA,(A3)+
              
@@ -69,6 +87,9 @@ START:       ANDI.B     #$33,D4
              
              
              
+             ADDQ.B     #4,D2
+             ADDQ.W     #1,(A5)
+             ADDQ.L     #8,$C007
 
     SIMHALT             ; halt simulator
 

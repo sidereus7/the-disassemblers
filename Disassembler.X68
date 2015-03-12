@@ -875,6 +875,7 @@ PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if i
                 
                 BRA         OP_IDENT
                 
+<<<<<<< HEAD
 PARSE_4_JSR     LEA         PRINT_JSR,A1            * Print JSR  
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -965,8 +966,65 @@ PARSE_4_EA      MOVE.W      D7,D6                   * D6 stores replicate of 16 
                 MOVE.W      D5,D6                   * D6 stores Source Register
                 MOVE.W      D4,D5                   * D5 stores Source Mode     
                 RTS
+=======
+>>>>>>> Added ADDQ parse logic and tests
 * ADDQ
-PARSE_OP_5
+PARSE_OP_5      LEA         PRINT_ADD_Q,A1          * Print: ADDQ
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                * isolate size
+                MOVE.W      #$00C0,D2               * Store bit mask to obtain size (byte)
+                AND.W       D7,D2                   * Apply mask
+                LSR.W       #6,D2                   * Shift size to LSB
+                
+                * print size (.B,.W,.L)
+                CMPI.B      #$00,D2                 * Check if size is byte (.B)
+                BEQ         ADDQ_PRINT_BYTE
+                
+                CMPI.B      #$01,D2                 * Check if size is word (.W)
+                BEQ         ADDQ_PRINT_WORD
+
+                CMPI.B      #$02,D2                 * Check if size is long (.L)
+                BEQ         ADDQ_PRINT_LONG
+
+ADDQ_PRINT_BYTE LEA         PRINT_B,A1              * Load '.B' message
+                BRA         ADDQ_PRINT_SIZE           
+                
+ADDQ_PRINT_WORD LEA         PRINT_W,A1              * Load '.W' message
+                BRA         ADDQ_PRINT_SIZE  
+                
+ADDQ_PRINT_LONG LEA         PRINT_L,A1              * Load '.L' message
+                BRA         ADDQ_PRINT_SIZE
+                
+ADDQ_PRINT_SIZE MOVE.B      #14,D0                  * Print size (.B, .W, or .L)
+                TRAP        #15
+                
+ADDQ_PRINT_DATA LEA         PRINT_HASH,A1           * Print # symbol for immediate data
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                MOVE.W      #$0E00,D1               * Store bit mask to obtain data
+                AND.W       D7,D1                   * Apply mask
+                ROL.W       #7,D1                   * Rotate data to LSB
+                
+                ADD.W       #1,D1                   * Shift range of data from (0-7) to (1-8)
+                MOVE.L      #1,D2                   * Set number of nibbles to be converted
+                JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print immediate data to console
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
+                AND.W       D7,D6
+                
+                MOVE.W      #$0038,D5       * Store the <ea> mode into D5
+                AND.W       D7,D5
+                LSR.W       #3,D5
+                
+                JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
+                
                 BRA         OP_IDENT
 * BCC
 PARSE_OP_6
@@ -1371,7 +1429,241 @@ PARSE_B_REG     MOVE.L      D7,D1                   * Move target register to D1
 PARSE_OP_C
 
 * ADD,ADDA
+<<<<<<< HEAD
 PARSE_OP_D
+=======
+PARSE_OP_D      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
+                AND.W       D7,D2           * D2 stores the opmode, unshifted
+                LSR.W       #6,D2           * D2 stores the opmode
+                
+                CMPI.B      #$03,D2         * If opmode is 011, parse as ADDA.W
+                BEQ         ADD_A_WORD      
+                
+                CMPI.B      #$07,D2         * If opmode is 111, parse as ADDA.L
+                BEQ         ADD_A_LONG
+                
+                CMPI.B      #$02,D2         * If opmode <= 010, parse as ADD <ea>,Dn
+                BLE         ADD_EA_DN
+                
+                CMPI.B      #06,D2          * If opmode <= 110, parse as ADD Dn,<ea>
+                BLE         ADD_DN_EA
+                
+                BRA         EXIT_PARSE_OP_D
+                
+ADD_A_WORD      LEA         PRINT_ADD_A_W,A1    * Print: ADDA.W
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                MOVE.W      #$0007,D6       * Store the <ea> register into D6
+                AND.W       D7,D6
+                
+                MOVE.W      #$0038,D5       * Store the <ea> mode into D5
+                AND.W       D7,D5
+                LSR.W       #3,D5
+                
+                MOVE.B      #$01,OP_SIZE    * Set OP_SIZE to Word (%01)
+                
+                JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
+                
+                LEA         PRINT_COMMA,A1  * Print: comma (between operands)
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_A,A1      * Print:  A
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                CLR.L       D1              * Clear D1
+                MOVE.W      #$0E00,D1
+                AND.W       D7,D1           * D1 stores the destination address register, unshifted
+                LSR.W       #8,D1
+                LSR.W       #1,D1           * D1 stores the destination address register, shifted
+                
+                MOVE.L      #1,D2           
+                JSR         HEX_TO_ASCII    * Convert destination address register to ASCII
+                
+                LEA         ASCII_RESULT,A1 * Print the destination address register
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         CR_LF_MSG,A1    * Print new line, carriage return
+                MOVE.B      #14,D0
+                TRAP        #15             
+                
+                BRA         EXIT_PARSE_OP_D
+
+ADD_A_LONG      LEA         PRINT_ADD_A_L,A1      * Print: ADDA.L
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                MOVE.W      #$0007,D6
+                AND.W       D7,D6           * D6 stores the EA register
+                
+                MOVE.W      #$0038,D5
+                AND.W       D7,D5           * D5 stores the EA Mode, unshifted
+                LSR.W       #3,D5           * D5 stores the EA Mode
+                
+                MOVE.B      #$02,OP_SIZE    * Set OP_SIZE to Long (%10)
+                
+                JSR         HANDLE_OPERAND
+                
+                LEA         PRINT_COMMA,A1  * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_A,A1      * Print:  A
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                CLR.L       D1              * Clear D1
+                MOVE.W      #$0E00,D1       * Bitmask for destination address register
+                AND.W       D7,D1           * D1 stores the destination address register, unshifted
+                LSR.W       #8,D1
+                LSR.W       #1,D1           * D1 stores the destination address register, shifted
+                
+                MOVE.L      #1,D2           
+                JSR         HEX_TO_ASCII    * Convert the destination address register to ASCII
+                
+                LEA         ASCII_RESULT,A1 * Print the destination address register
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         CR_LF_MSG,A1    * Print new line, carriage return
+                MOVE.B      #14,D0
+                TRAP        #15   
+                
+                BRA         EXIT_PARSE_OP_D
+
+ADD_EA_DN       CMPI.B      #$00,D2
+                BEQ         ADD_EA_DN_BYTE
+                
+                CMPI.B      #$01,D2
+                BEQ         ADD_EA_DN_WORD
+                
+                CMPI.B      #$02,D2
+                BEQ         ADD_EA_DN_LONG
+                
+ADD_EA_DN_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
+                BRA         RET_SUB_EA_DN       * Merge
+                
+ADD_EA_DN_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
+                BRA         RET_ADD_EA_DN       * Merge
+                
+ADD_EA_DN_LONG  LEA         PRINT_ADD_L,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
+                BRA         RET_ADD_EA_DN       * Merge
+                
+                
+RET_ADD_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
+                AND.W       D7,D6               * D6 stores EA Register
+                
+                MOVE.W      #$0038,D5
+                AND.W       D7,D5               * D5 stores EA Mode, unshifted
+                LSR.W       #3,D5               * D5 stores EA Mode
+                
+                JSR         HANDLE_OPERAND
+                
+                LEA         PRINT_COMMA,A1      * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_D,A1          * Print:  D
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.W      #$0E00,D1
+                AND.W       D7,D1               * D1 stores the destination register, unshifted
+                LSR.W       #8,D1
+                LSR.W       #1,D1               * D1 stored the destination register
+                
+                MOVE.L      #1,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1
+                MOVE.B      #14,D0
+                TRAP        #15                 * Print destination register
+                
+                LEA         CR_LF_MSG,A1        * Print new line/carriage return
+                MOVE.B      #14,D0
+                TRAP        #15                
+                
+                BRA         EXIT_PARSE_OP_D
+
+ADD_DN_EA       CMPI.B      #$04,D2
+                BEQ         ADD_DN_EA_BYTE
+                
+                CMPI.B      #$05,D2
+                BEQ         ADD_DN_EA_WORD
+                
+                CMPI.B      #$06,D2
+                BEQ         ADD_DN_EA_LONG
+                
+ADD_DN_EA_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
+                BRA         RET_ADD_DN_EA       * Merge
+                
+ADD_DN_EA_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
+                BRA         RET_ADD_DN_EA       * Merge
+                
+ADD_DN_EA_LONG  LEA         PRINT_ADD_L,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
+                BRA         RET_ADD_DN_EA       * Merge
+                
+                
+RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
+                AND.W       D7,D6               * D6 stores EA Register
+                
+                MOVE.W      #$0038,D5
+                AND.W       D7,D5               * D5 stores EA Mode, unshifted
+                LSR.W       #3,D5               * D5 stores EA Mode
+                
+                LEA         PRINT_D,A1          * Print:  D
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                CLR.L       D1                  * Clear D1
+                MOVE.W      #$0E00,D1
+                AND.W       D7,D1               * D1 stores the data register, unshifted
+                LSR.W       #8,D1
+                LSR.W       #1,D1               * D1 stored the data register
+                
+                MOVE.L      #1,D2
+                JSR         HEX_TO_ASCII
+                
+                LEA         ASCII_RESULT,A1
+                MOVE.B      #14,D0
+                TRAP        #15                 * Print destination register
+                
+                LEA         PRINT_COMMA,A1      * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                    
+                JSR         HANDLE_OPERAND      * Print EA
+                
+                LEA         CR_LF_MSG,A1        * Print new line/carriage return
+                MOVE.B      #14,D0
+                TRAP        #15             
+                BRA         EXIT_PARSE_OP_D
+                
+                
+EXIT_PARSE_OP_D BRA         OP_IDENT
+
+>>>>>>> Added ADDQ parse logic and tests
 
 * ASL,ASR,LSL,LSR,ROL,ROR
 PARSE_OP_E
@@ -1792,6 +2084,7 @@ PRINT_END_PAREN_PLUS    DC.B    ')+',0
 PRINT_MINUS_A_INDIRECT  DC.B    '-(A',0
 PRINT_DOLLAR        DC.B        '$',0
 PRINT_NUM_DOLLAR    DC.B        '#$',0
+PRINT_HASH          DC.B        '#',0
 
 
 BUGFIXMESSAGE       DC.B        'This message is loaded to resolve a bug, and should never be printed.',CR,LF,0
@@ -1802,20 +2095,33 @@ TAB_MSG             DC.B        HT,0
 PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
 PRINT_MOVE_W        DC.B        'MOVE.W',HT,0
 PRINT_MOVE_L        DC.B        'MOVE.L',HT,0
+
+PRINT_ADD_A_W       DC.B        'ADDA.W',HT,0
+PRINT_ADD_A_L       DC.B        'ADDA.L',HT,0
+PRINT_ADD_B         DC.B        'ADD.B',HT,0
+PRINT_ADD_W         DC.B        'ADD.W',HT,0
+PRINT_ADD_L         DC.B        'ADD.L',HT,0
+
+PRINT_ADD_Q         DC.B        'ADDQ',HT,0
+
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
 PRINT_SUB_B         DC.B        'SUB.B',HT,0
 PRINT_SUB_W         DC.B        'SUB.W',HT,0
 PRINT_SUB_L         DC.B        'SUB.L',HT,0
+
 PRINT_BCHG_B        DC.B        'BCHG.B',HT,0
 PRINT_BCHG_L        DC.B        'BCHG.L',HT,0
+
 PRINT_ANDI          DC.B        'ANDI',0
 PRINT_SUBI          DC.B        'SUBI',0
 PRINT_EORI          DC.B        'EORI',0
 PRINT_CMPI          DC.B        'CMPI',0
+
 PRINT_B             DC.B        '.B',HT,0
 PRINT_W             DC.B        '.W',HT,0
 PRINT_L             DC.B        '.L',HT,0
+
 PRINT_EOR_B         DC.B        'EOR.B',HT,0
 PRINT_EOR_W         DC.B        'EOR.W',HT,0
 PRINT_EOR_L         DC.B        'EOR.L',HT,0
