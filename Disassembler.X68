@@ -316,8 +316,26 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.W      #$0843,$C0680054        * BCHG.L    #AAAAAAAA,D3
                 MOVE.W      #$AAAA,$C0680056
                 MOVE.W      #$AAAA,$C0680058
-
                 
+                MOVE.W      #$B716,$C068005A        * EOR.B     D3,(A6)
+                
+                MOVE.W      #$B95A,$C068005C        * EOR.W     D4,(A2)+
+                
+                MOVE.W      #$BBB8,$C068005E        * EOR.L     D5,$1234
+                MOVE.W      #$1234,$C0680060
+                
+                MOVE.W      #$B405,$C0680062        * CMP.B     D5,D2
+                
+                MOVE.W      #$B44B,$C0680064        * CMP.W     A3,D2
+                
+                MOVE.W      #$B296,$C0680066        * CMP.L     (A6),D1
+                
+                MOVE.W      #$B4FC,$C0680068        * CMPA.W    #$9999,A2
+                MOVE.W      #$9999,$C068006A        
+                
+                MOVE.W      #$B7D3,$C068006C        * CMPA.L    (A3),A3
+                                
+
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
 *--------------------------------------------------------------------------
                 
@@ -932,7 +950,7 @@ PARSE_OP_B      MOVE.W      D7,D6                   * EA for EOR,CMP,CMPA
                 MOVE.W      D4,D5                   * D5 stores Mode
                 
                 MOVE.W      D7,D4                   * Check Opcode
-                MOVE.W      #$0E00,D3               * BitMask to check Opcode
+                MOVE.W      #$01C0,D3               * BitMask to check Opcode
                 AND.W       D3,D4
                 LSR.W       #6,D4                   * Shift the BitMask to compare
                 
@@ -968,51 +986,114 @@ PARSE_B_CMP_B   LEA         PRINT_CMP_B,A1          * Print CMP.B
                 MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to byte
                 BRA         PARSE_B_CMP
                 
-PARSE_B_CMP_W   LEA         PRINT_CMP_B,A1          * Print CMP.B
+PARSE_B_CMP_W   LEA         PRINT_CMP_W,A1          * Print CMP.W
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$01,OP_SIZE            * Set OP_SIZE to word 
                 BRA         PARSE_B_CMP
                 
-PARSE_B_CMP_L   LEA         PRINT_CMP_W,A1          * Print CMP.W
+PARSE_B_CMP_L   LEA         PRINT_CMP_L,A1          * Print CMP.L
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$02,OP_SIZE            * Set OP_SIZE to long
                 BRA         PARSE_B_CMP
-* CMP.x <EA>,Dn                
+* CMP.x <ea>,Dn                
 PARSE_B_CMP     JSR         HANDLE_OPERAND          * Enter subroutine to print EA
                 LEA         PRINT_COMMA,A1          * Print comma
                 MOVE.B      #14,D0
                 TRAP        #15
 
-                ********************* continue with code  
+                LEA         PRINT_D,A1              * Print D
+                MOVE.B      #14,D0
+                TRAP        #15
                 
-PARSE_B_EOR_B   LEA         PRINT_CMP_L,A1          * Print CMP.L
+                JSR         PARSE_B_REG             * Enter subroutine to print register
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+* EOR.x Dn,<ea>                
+PARSE_B_EOR_B   LEA         PRINT_EOR_B,A1          * Print EOR.B
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to byte
+                BRA         PARSE_B_EOR
                 
-PARSE_B_EOR_W   LEA         PRINT_CMP_B,A1          * Print CMP.B
+PARSE_B_EOR_W   LEA         PRINT_EOR_W,A1          * Print EOR.W
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to word
+                BRA         PARSE_B_EOR
                 
-PARSE_B_EOR_L   LEA         PRINT_CMP_B,A1          * Print CMP.B
+PARSE_B_EOR_L   LEA         PRINT_EOR_L,A1          * Print EOR.L
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to long
+                BRA         PARSE_B_EOR
                 
-PARSE_B_CMPA_W  LEA         PRINT_CMP_B,A1          * Print CMP.B
+PARSE_B_EOR     LEA         PRINT_D,A1              * Print D
                 MOVE.B      #14,D0
                 TRAP        #15
-                MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to word
                 
-PARSE_B_CMPA_L  LEA         PRINT_CMP_B,A1          * Print CMP.B
+                JSR         PARSE_B_REG             * Enter subroutine to print register
+                
+                LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                JSR         HANDLE_OPERAND          * Enter subroutine to print EA
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         OP_IDENT
+* CMPA.x <ea>,An               
+PARSE_B_CMPA_W  LEA         PRINT_CMPA_W,A1          * Print CMPA.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                MOVE.B      #$01,OP_SIZE            * Set OP_SIZE to word
+                BRA         PARSE_B_CMPA
+                
+PARSE_B_CMPA_L  LEA         PRINT_CMPA_L,A1          * Print CMPA.L
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE            * Set OP_SIZE to long         
- 
+                BRA         PARSE_B_CMPA
+                
+PARSE_B_CMPA    JSR         HANDLE_OPERAND          * Enter subroutine to print EA
+                
+                LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_A,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                JSR         PARSE_B_REG             * Enter subroutine to print register
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
                 BRA         OP_IDENT   
+                
+PARSE_B_REG     MOVE.L      D7,D1                   * Move target register to D1
+                MOVE.L      #$0E00,D4
+                AND.L       D4,D1
+                
+                LSR.L       #8,D1                   * Shift 9 to get target register
+                LSR.L       #1,D1
+                
+                MOVE.L      #1,D2
+                JSR         HEX_TO_ASCII            * Convert register to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print register
+                MOVE.B      #14,D0
+                TRAP        #15
+                RTS                                 * Return from subroutine
 * AND,MULS
 PARSE_OP_C
 
@@ -1468,6 +1549,7 @@ ASCII_RESULT        DS.B        9
 
 =======
 >>>>>>> Stashed changes
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
