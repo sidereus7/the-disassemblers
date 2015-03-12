@@ -1319,7 +1319,7 @@ PRINT_A             DC.B        'A',0
 PRINT_A_INDIRECT    DC.B        '(A',0
 PRINT_END_PAREN     DC.B        ')',0
 PRINT_END_PAREN_PLUS    DC.B    ')+',0
-PRINT_MINUS_A_INDIRECT  DC.B    '-(',0
+PRINT_MINUS_A_INDIRECT  DC.B    '-(A',0
 PRINT_DOLLAR        DC.B        '$',0
 PRINT_NUM_DOLLAR    DC.B        '#$',0
 
@@ -1356,6 +1356,7 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
