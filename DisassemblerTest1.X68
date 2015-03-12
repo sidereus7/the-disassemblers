@@ -7,18 +7,7 @@
 *               Starts at $5000
 *-----------------------------------------------------------
     ORG    $5000
-START:       MOVE.B     D7,D1
-             MOVE.B     #$17,D2
-             MOVE.B     #$33,(A5)
-             
-             SUB.B      (A4),D4
-             SUB.W      D4,D2
-             SUB.L      D2,(A4)
-             
-             SUBA.W     (A4)+,A1
-             SUBA.L     A7,A4
-             
-             ANDI.B     #$33,D4
+START:       ANDI.B     #$33,D4
              ANDI.W     #$8888,(A3)
              ANDI.L     #$AAAAAAAA,(A3)+
              
@@ -38,7 +27,27 @@ START:       MOVE.B     D7,D1
              BCHG.B     #$44,(A4)+
              BCHG.L     D3,D2
              BCHG.L     #$AAAAAAAA,D3
+
+             MOVE.B     D7,D1
+             MOVE.B     #$17,D2
+             MOVE.B     #$33,(A5)
              
+             MOVE.W     -(A3),$5555
+             MOVE.W     D1,D2
+             MOVE.W     #$5555,A1
+             MOVE.W     (A6)+,D4
+             
+             MOVE.L     (A1),D4
+             MOVE.L     A6,(A3)+
+             MOVE.L     #$01234567,D5
+             
+             SUB.B      (A4),D4
+             SUB.W      D4,D2
+             SUB.L      D2,(A4)
+             
+             SUBA.W     (A4)+,A1
+             SUBA.L     A7,A4
+                          
              EOR.B      D3,(A6)
              EOR.W      D4,(A2)+
              EOR.L      D5,$1234
@@ -49,12 +58,24 @@ START:       MOVE.B     D7,D1
              
              CMPA.W     #$9999,A2
              CMPA.L     (A3),A3
+             
+             ADD.B      D1,D2
+             ADD.W      D2,D3
+             ADD.L      D4,D5
+             
+             ADDA.W     #$1234,A2
+             ADDA.L     D3,A3
+             
+             
+             
+             
 
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
 
     END    START        ; last line of source
+
 
 
 *~Font name~Courier New~
