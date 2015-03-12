@@ -62,9 +62,8 @@ ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end add
                 MOVE.B      #1,D6
                 MOVE.B      #8,D2
                 
-                
-PROMPTENDADDR   MOVEA.L     #$5000,A1
-                MOVE.B      #2,D0                   * Read end address string from console
+                *setting A1 to $5000 removed
+PROMPTENDADDR   MOVE.B      #2,D0                   * Read end address string from console
                 TRAP        #15
                 
                 CMP.W       D1,D2                   * Check end address size
@@ -683,10 +682,90 @@ PARSE_OP_1      LEA         PRINT_MOVE_B,A1
 
 
 * MOVE.L
-PARSE_OP_2      
+PARSE_OP_2      LEA         PRINT_MOVE_L,A1         * Print MOVE.L
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.B      #$02,OP_SIZE            * Sets OP_SIZE to long.
+                
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6                   * D6 stores Source information
+                
+                MOVE.W      #%000111,D5             * BitMask for Source register
+                AND.W       D6,D5                   * D5 stores Source Register
+                LSR.W       #3,D6                   * D6 stores Source Mode
+                
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Source Register
+                MOVE.W      D4,D5                   * D5 stores Source Mode
+                
+                JSR         HANDLE_OPERAND          * Enter Subroutine for Source Handling
+                
+                LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15         
+                
+               
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$0FC0,D5
+                AND.W       D5,D6                   * D6 stores only Destination information, not shifted.
+                LSR.W       #6,D6                   * D6 stores Destination info
+                
+                MOVE.W      #%000111,D5             * BitMask for only mode
+                AND.W       D6,D5                   * D5 stores Destination Mode
+                
+                LSR.W       #3,D6                   * D6 stores Destination Register
+                
+                JSR         HANDLE_OPERAND
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
+
                 BRA         OP_IDENT
 * MOVE.W
-PARSE_OP_3
+PARSE_OP_3      LEA         PRINT_MOVE_W,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.B      #$01,OP_SIZE            * Sets OP_SIZE to word.
+                
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$003F,D5
+                AND.W       D5,D6                   * D6 stores Source information
+                
+                MOVE.W      #%000111,D5             * BitMask for Source register
+                AND.W       D6,D5                   * D5 stores Source Register
+                LSR.W       #3,D6                   * D6 stores Source Mode
+                
+                MOVE.W      D6,D4                   * Temp memory for swap
+                MOVE.W      D5,D6                   * D6 stores Source Register
+                MOVE.W      D4,D5                   * D5 stores Source Mode
+                
+                JSR         HANDLE_OPERAND          * Enter Subroutine for Source Handling
+                
+                LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15         
+                
+               
+                MOVE.W      D7,D6                   * D6 stores replicate of 16 bits stored in D7
+                MOVE.W      #$0FC0,D5
+                AND.W       D5,D6                   * D6 stores only Destination information, not shifted.
+                LSR.W       #6,D6                   * D6 stores Destination info
+                
+                MOVE.W      #%000111,D5             * BitMask for only mode
+                AND.W       D6,D5                   * D5 stores Destination Mode
+                
+                LSR.W       #3,D6                   * D6 stores Destination Register
+                
+                JSR         HANDLE_OPERAND
+                
+                LEA         CR_LF_MSG,A1            * Print New Line
+                MOVE.B      #14,D0
+                TRAP        #15
+
                 BRA         OP_IDENT
                 
 * CLR,RTS,JSR,MOVEM,LEA
@@ -1653,6 +1732,8 @@ CR_LF_MSG           DC.B        CR,LF,0
 TAB_MSG             DC.B        HT,0
 
 PRINT_MOVE_B        DC.B        'MOVE.B',HT,0
+PRINT_MOVE_W        DC.B        'MOVE.W',HT,0
+PRINT_MOVE_L        DC.B        'MOVE.L',HT,0
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
 PRINT_SUB_B         DC.B        'SUB.B',HT,0
@@ -1693,6 +1774,7 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
