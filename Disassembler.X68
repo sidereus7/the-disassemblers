@@ -272,6 +272,46 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.W      #$AAAA,$C068001C
                 MOVE.W      #$AAAA,$C068001E
                 
+                MOVE.W      #$0414,$C0680020        * SUBI.B    #$AA,(A4)
+                MOVE.W      #$00AA,$C0680022
+                
+                MOVE.W      #$0444,$C0680024        * SUBI.W    #$8888,D4
+                MOVE.W      #$8888,$C0680026
+                
+                MOVE.W      #$0484,$C0680028        * SUBI.L    #$AAAAAAAA,D4
+                MOVE.W      #$AAAA,$C068002A
+                MOVE.W      #$AAAA,$C068002C
+                
+                MOVE.W      #$0A24,$C068002E        * EORI.B    #$33,-(A4)
+                MOVE.W      #$0033,$C0680030
+                
+                MOVE.W      #$0A44,$C0680032        * EORI.W    #$AAAA,D4
+                MOVE.W      #$AAAA,$C0680034
+                
+                MOVE.W      #$0A84,$C0680036        * EORI.L    #$12345678,D4
+                MOVE.W      #$1234,$C0680038
+                MOVE.W      #$5678,$C068003A
+                
+                MOVE.W      #$0C03,$C068003C        * CMPI.B    #$11,D3
+                MOVE.W      #$0011,$C068003E
+                
+                MOVE.W      #$0C46,$C0680040        * CMPI.W    #$1234,D6
+                MOVE.W      #$1234,$C0680042
+                
+                MOVE.W      #$0C84,$C0680044        * CMPI.L    #$AAAAAAAA,D4
+                MOVE.W      #$AAAA,$C0680046
+                MOVE.W      #$AAAA,$C0680048
+                
+                MOVE.W      #$0953,$C068004A        * BCHG.B    D4,(A3)
+                
+                MOVE.W      #$085C,$C068004C        * BCHG.B    #$44,(A4)+
+                MOVE.W      #$0044,$C068004E
+                
+                MOVE.W      #$0742,$C0680050        * BCHG.L    D3,D2
+                
+                MOVE.W      #$0843,$C0680052        * BCHG.L    #AAAA,D3
+                MOVE.W      #$00AA,$C0680054
+                
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
 *--------------------------------------------------------------------------
                 
@@ -518,6 +558,7 @@ PARSE_0_BCHG    MOVE.W      D7,D2                   * Need to check if the rest 
                 CMPI.B      #DR_DIRECT,D5           * Check if EA is Dn
                 BEQ         PARSE_0_BCHG_L          * If so, BCHG is long
                 
+                MOVE.B      #$01,OP_SIZE            * Special case: BCHG.B immediate data should always be WORD size 
                 LEA         PRINT_BCHG_B,A1         * Print BCHG.B
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -526,14 +567,11 @@ PARSE_0_BCHG    MOVE.W      D7,D2                   * Need to check if the rest 
 PARSE_0_BCHG_L  LEA         PRINT_BCHG_L,A1         * Print BCHG.L
                 MOVE.B      #14,D0
                 TRAP        #15
+                MOVE.B      #$02,OP_SIZE            * Set OP_SIZE to be long
                 
-PARSE_BCHG_DATA
-
-                MOVE.W      #$0007,D5               * Set immediate data mode
+PARSE_BCHG_DATA MOVE.W      #$0007,D5               * Set immediate data mode
                 MOVE.W      #$0004,D6               * Set immediate data register
-                MOVE.B      #$01,OP_SIZE            * Special case: BCHG immediate data should always be WORD size
                 JSR         HANDLE_OPERAND          * Enter Subroutine to print out immediate data
-                
                 BRA         PARSE_0_EA
 * Parse_0 for BCHG.x Dn,<ea> case:         
 BCHG_DN         CMPI.B      #DR_DIRECT,D5           * Check if EA is Dn
@@ -1256,6 +1294,7 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
