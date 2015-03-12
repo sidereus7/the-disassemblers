@@ -262,6 +262,16 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.B      #$99,$C0680010
                 MOVE.B      #$CF,$C0680011          * SUBA.L  A7,A4
                 
+                MOVE.W      #$0204,$C0680012        * ANDI.B    #$33,D4
+                MOVE.W      #$0033,$C0680014
+                
+                MOVE.W      #$0253,$C0680016        * ANDI.W    #$8888,(A3)
+                MOVE.W      #$8888,$C0680018
+                
+                MOVE.W      #$029B,$C068001A        * ANDI.L    #$AAAAAAAA,(A3)+
+                MOVE.W      #$AAAA,$C068001C
+                MOVE.W      #$AAAA,$C068001E
+                
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
 *--------------------------------------------------------------------------
                 
@@ -439,7 +449,7 @@ PARSE_0_CMPI    LEA         PRINT_CMPI,A1           * Print CMPI
                 
 PARSE_0_SIZE    MOVE.W      D7,D2                   * Need to check for size
                 MOVE.W      #$00C0,D1               * BitMask to check size
-                AND.W       D1,D2
+                AND.W       D2,D1
                 LSR.W       #6,D1                   * Shift the BitMask to compare
                 
                 CMPI.B      #%0000,D1               * Byte size
@@ -451,7 +461,7 @@ PARSE_0_SIZE    MOVE.W      D7,D2                   * Need to check for size
                 CMPI.B      #%0010,D1               * Long size
                 BEQ         PARSE_0_SIZE_L
                 
-PARSE_0_SIZE_B  MOVE.B      #$00,OP_SIZE            * Sets OP_SIZE to byte
+PARSE_0_SIZE_B  MOVE.B      #$01,OP_SIZE            * Sets OP_SIZE to word
                 LEA         PRINT_B,A1              * Print .B
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -468,11 +478,7 @@ PARSE_0_SIZE_L  MOVE.B      #$02,OP_SIZE            * Sets OP_SIZE to long
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-PARSE_0_IMMDATA LEA         TAB_MSG,A1            
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                MOVE.W      #$0007,D5               * Set immediate data mode
+PARSE_0_IMMDATA MOVE.W      #$0007,D5               * Set immediate data mode
                 MOVE.W      #$0004,D6               * Set immediate data register
 
                 JSR         HANDLE_OPERAND          * Enter Subroutine to print out immediate data
@@ -542,11 +548,7 @@ BCHG_PRINT_L    LEA         PRINT_BCHG_L,A1         * Print BCHG.L
                 MOVE.B      #14,D0
                 TRAP        #15
 
-BCHG_PRINT_D    LEA         TAB_MSG,A1              * Print tab
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         PRINT_D,A1
+BCHG_PRINT_D    LEA         PRINT_D,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -1177,10 +1179,10 @@ PRINT_SUB_W         DC.B        'SUB.W',HT,0
 PRINT_SUB_L         DC.B        'SUB.L',HT,0
 PRINT_BCHG_B        DC.B        'BCHG.B',HT,0
 PRINT_BCHG_L        DC.B        'BCHG.L',HT,0
-PRINT_ANDI          DC.B        'ANDI',HT,0
-PRINT_SUBI          DC.B        'SUBI',HT,0
-PRINT_EORI          DC.B        'EORI',HT,0
-PRINT_CMPI          DC.B        'CMPI',HT,0
+PRINT_ANDI          DC.B        'ANDI',0
+PRINT_SUBI          DC.B        'SUBI',0
+PRINT_EORI          DC.B        'EORI',0
+PRINT_CMPI          DC.B        'CMPI',0
 PRINT_B             DC.B        '.B',HT,0
 PRINT_W             DC.B        '.W',HT,0
 PRINT_L             DC.B        '.L',HT,0
@@ -1195,6 +1197,7 @@ HEXENDADDR          DS.L        1
 
 OP_SIZE             DS.B        1
                     END     START           ; last line of source
+
 
 
 
