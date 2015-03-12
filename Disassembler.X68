@@ -309,8 +309,10 @@ COMBINEEND      ROR.L       #8,D4
                 
                 MOVE.W      #$0742,$C0680050        * BCHG.L    D3,D2
                 
-                MOVE.W      #$0843,$C0680052        * BCHG.L    #AAAA,D3
-                MOVE.W      #$00AA,$C0680054
+                MOVE.W      #$0843,$C0680052        * BCHG.L    #AAAAAAAA,D3
+                MOVE.W      #$AAAA,$C0680054
+                MOVE.W      #$AAAA,$C0680056
+
                 
               * 0001 0100 0011 1100   = binary for MOVE.B immediate data to D2
 *--------------------------------------------------------------------------
@@ -547,12 +549,17 @@ PARSE_0_EA      LEA         PRINT_COMMA,A1          * Print comma
 
                 BRA         OP_IDENT
 * Parse_0 for BCHG.x #<data>,<ea>                
+
+                *MOVE.W      #$085C,$C068004C        * BCHG.B    #$44,(A4)+
+                *MOVE.W      #$0044,$C068004E
+                * 0000 1000 01 01 1-100
+                * 0000 0000 11 00 0000
 PARSE_0_BCHG    MOVE.W      D7,D2                   * Need to check if the rest of the op code ends in 01
-                MOVE.W      #$00C0,D1               * BitMask to check 
+                MOVE.L      #$00C0,D1               * BitMask to check 
                 AND.W       D1,D2
-                LSR.W       #6,D1                   * Shift the BitMask to compare
+                LSR.W       #6,D2                   * Shift the BitMask to compare
                 
-                CMPI.B      #%0001,D1               * Is the rest of the op code 01?
+                CMPI.B      #%01,D2               * Is the rest of the op code 01?
                 BNE         NO_OP_MATCH             * If not equal: ERROR
                 
                 CMPI.B      #DR_DIRECT,D5           * Check if EA is Dn
@@ -1294,6 +1301,7 @@ HEXENDADDR          DS.L        1
 OP_SIZE             DS.B        1
 ASCII_RESULT        DS.B        9
                     END     START           ; last line of source
+
 
 
 
