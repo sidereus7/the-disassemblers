@@ -692,16 +692,16 @@ PARSE_OP_9      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
                 AND.W       D7,D2           * D2 stores the opmode, unshifted
                 LSR.W       #6,D2           * D2 stores the opmode
                 
-                CMPI.B      #$03,D2
+                CMPI.B      #$03,D2         * If opmode is 011, parse as SUBA.W
                 BEQ         SUB_A_WORD      
                 
-                CMPI.B      #$07,D2
+                CMPI.B      #$07,D2         * If opmode is 111, parse as SUBA.L
                 BEQ         SUB_A_LONG
                 
-                CMPI.B      #$02,D2
+                CMPI.B      #$02,D2         * If opmode <= 010, parse as SUB <ea>,Dn
                 BLE         SUB_EA_DN
                 
-                CMPI.B      #06,D2
+                CMPI.B      #06,D2          * If opmode <= 110, parse as SUB Dn,<ea>
                 BLE         SUB_DN_EA
                 
                 BRA         EXIT_PARSE_OP_9
@@ -710,18 +710,18 @@ SUB_A_WORD      LEA         PRINT_SUB_A_W,A1    * Print: SUBA.W
                 MOVE.B      #14,D0
                 TRAP        #15
 
-                MOVE.W      #$0007,D6
-                AND.W       D7,D6           * D6 stores the EA register
+                MOVE.W      #$0007,D6       * Store the <ea> register into D6
+                AND.W       D7,D6
                 
-                MOVE.W      #$0038,D5
-                AND.W       D7,D5           * D5 stores the EA Mode, unshifted
-                LSR.W       #3,D5           * D5 stores the EA Mode
+                MOVE.W      #$0038,D5       * Store the <ea> mode into D5
+                AND.W       D7,D5
+                LSR.W       #3,D5
                 
                 MOVE.B      #$01,OP_SIZE    * Set OP_SIZE to Word (%01)
                 
-                JSR         HANDLE_OPERAND
+                JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
                 
-                LEA         PRINT_COMMA,A1  * Print comma
+                LEA         PRINT_COMMA,A1  * Print: comma (between operands)
                 MOVE.B      #14,D0
                 TRAP        #15
                 
