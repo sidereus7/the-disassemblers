@@ -717,25 +717,17 @@ PARSE_OP_3      LEA         PRINT_MOVE_W,A1
                 
 * CLR,RTS,JSR,MOVEM,LEA
 PARSE_OP_4      MOVE.W      D7,D6
-                MOVE.W      #$0FC0,D5               * CASE: BitMask check if RTS or JSR
+                MOVE.W      #$0FC0,D5               * Case: BitMask check if RTS or JSR
                 AND.W       D5,D6
-                LSR.W       #6,D6                   * Shift the BitMask to compare
+                LSR.W       #7,D6                   * Shift the BitMask to compare
                 
                 CMPI.W      #%111001,D6
                 BEQ         PARSE_4_RTS             * Branch to RTS
                 
                 CMPI.W      #%111010,D6
                 BEQ         PARSE_4_JSR             * Branch to JSR
-                
-                MOVE.W      D7,D6                   * CASE: BitMask check for LEA
-                MOVE.W      #$01C0,D5
-                AND.W       D5,D6
-                LSR.W       #6,D6                   * Shift the BitMask to compare
-                
-                CMPI.W      #%111,D6
-                BEQ         PARSE_4_LEA             * Branch to LEA
 
-                MOVE.W      D7,D6                   * CASE: BitMask check if CLR or MOVEM
+                MOVE.W      D7,D6                   * Case: BitMask check if CLR or MOVEM
                 MOVE.W      #$0FC0,D5
                 AND.W       D5,D6
                 LSR.W       #6,D6                   * Shift the BitMask to compare
@@ -761,6 +753,14 @@ PARSE_OP_4      MOVE.W      D7,D6
                 CMPI.W      #%110011,D6
                 BEQ         PARSE4M_POST_L          * Branch to MOVEM.L (sp)+,<list>
                 
+                MOVE.W      D7,D6                   * Case: BitMask check for LEA
+                MOVE.W      #$01C00,D5
+                AND.W       D5,D6
+                LSR.W       #6,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%111,D6
+                BEQ         PARSE_4_LEA             * Branch to LEA
+                
                 BRA         NO_OP_MATCH
 
 PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if it matches RTS
@@ -776,7 +776,6 @@ PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if i
                 
                 BRA         OP_IDENT
                 
-* need to print absolute address                
 PARSE_4_JSR     LEA         PRINT_JSR,A1            * Print JSR  
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -991,8 +990,12 @@ ADDQ_PRINT_DATA LEA         PRINT_HASH,A1           * Print # symbol for immedia
                 AND.W       D7,D1                   * Apply mask
                 ROL.W       #7,D1                   * Rotate data to LSB
                 
-                ADD.W       #1,D1                   * Shift range of data from (0-7) to (1-8)
-                MOVE.L      #1,D2                   * Set number of nibbles to be converted
+                CMPI.B      #$0,D1                  * If value is zero, change to 8
+                BNE         ADDQ_DATA_CONV
+                
+ADDQ_SET_8      MOVE.B      #$8,D1                  * Change of value of 0 to 8                
+                
+ADDQ_DATA_CONV  MOVE.L      #1,D2                   * Set number of nibbles to be converted
                 JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
                 
                 LEA         ASCII_RESULT,A1         * Print immediate data to console
@@ -1691,7 +1694,60 @@ RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
 EXIT_PARSE_OP_D BRA         OP_IDENT
 
 * ASL,ASR,LSL,LSR,ROL,ROR
-PARSE_OP_E
+PARSE_OP_E              * TODO: Some magic code that determines ASL/R,LSL/R,ROL/R
+
+HANDLE_ASL_ASR          MOVE.W  #$100,D6        * Bit mask to obtain L or R data
+                        AND.W   D7,D6           
+                        CMPI.W  #$100,D6        * Compare L/R bit to 1
+                        BNE     PRINT_ASR       * If not equal, print ASR; else, ASL
+                        
+PRINT_ASL               LEA     PRINT_ASL,A1    * Print: ASL
+                        MOVE.B  #14,D0
+                        TRAP    #15
+                        
+                        BRA     ASX_SIZE        * Branch to determine size
+                        
+PRINT_ASR               LEA     PRINT_ASL,A1    * Print: ASR
+                        MOVE.B  #14,D0
+                        TRAP    #15
+
+ASX_SIZE                MOVE.W  #$00C0,D6       * Bit mask to obtain size data
+                        LSR.W   #6,D6           * Shift size data to LSB
+                        
+                        CMPI.B      #$00,D6                 * Check if size is byte (.B)
+                        BEQ         ASX_PRINT_BYTE
+                
+                        CMPI.B      #$01,D6                 * Check if size is word (.W)
+                        BEQ         ASX_PRINT_WORD
+
+                        CMPI.B      #$02,D6                 * Check if size is long (.L)
+                        BEQ         ASX_PRINT_LONG
+                        
+                        CMPI.B      #$03,D6                 * Check if <ea> case (Print tab)
+                        BEQ         ASX_PRINT_TAB
+
+ASX_PRINT_BYTE          LEA         PRINT_B,A1              * Load '.B' message
+                        BRA         ASX_PRINT_SIZE           
+                
+ASX_PRINT_WORD          LEA         PRINT_W,A1              * Load '.W' message
+                        BRA         ASX_PRINT_SIZE  
+                
+ASX_PRINT_LONG          LEA         PRINT_L,A1              * Load '.L' message
+                        BRA         ASX_PRINT_SIZE
+                        
+ASX_PRINT_TAB           LEA         TAB_MSG,A1            * Load tab message
+                        BRA         ASX_PRINT_SIZE
+                
+ASX_PRINT_SIZE          MOVE.B      #14,D0                  * Print size (.B, .W, or .L)
+                        TRAP        #15
+                        
+* LSL
+
+* LSR
+
+* ROL
+
+* ROR
 
 *********************************************************************************
 *---------------------------Operand Subroutine----------------------------------*
@@ -2186,8 +2242,6 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
