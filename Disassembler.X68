@@ -717,17 +717,25 @@ PARSE_OP_3      LEA         PRINT_MOVE_W,A1
                 
 * CLR,RTS,JSR,MOVEM,LEA
 PARSE_OP_4      MOVE.W      D7,D6
-                MOVE.W      #$0FC0,D5               * Case: BitMask check if RTS or JSR
+                MOVE.W      #$0FC0,D5               * CASE: BitMask check if RTS or JSR
                 AND.W       D5,D6
-                LSR.W       #7,D6                   * Shift the BitMask to compare
+                LSR.W       #6,D6                   * Shift the BitMask to compare
                 
                 CMPI.W      #%111001,D6
                 BEQ         PARSE_4_RTS             * Branch to RTS
                 
                 CMPI.W      #%111010,D6
                 BEQ         PARSE_4_JSR             * Branch to JSR
+                
+                MOVE.W      D7,D6                   * CASE: BitMask check for LEA
+                MOVE.W      #$01C0,D5
+                AND.W       D5,D6
+                LSR.W       #6,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%111,D6
+                BEQ         PARSE_4_LEA             * Branch to LEA
 
-                MOVE.W      D7,D6                   * Case: BitMask check if CLR or MOVEM
+                MOVE.W      D7,D6                   * CASE: BitMask check if CLR or MOVEM
                 MOVE.W      #$0FC0,D5
                 AND.W       D5,D6
                 LSR.W       #6,D6                   * Shift the BitMask to compare
@@ -753,14 +761,6 @@ PARSE_OP_4      MOVE.W      D7,D6
                 CMPI.W      #%110011,D6
                 BEQ         PARSE4M_POST_L          * Branch to MOVEM.L (sp)+,<list>
                 
-                MOVE.W      D7,D6                   * Case: BitMask check for LEA
-                MOVE.W      #$01C00,D5
-                AND.W       D5,D6
-                LSR.W       #6,D6                   * Shift the BitMask to compare
-                
-                CMPI.W      #%111,D6
-                BEQ         PARSE_4_LEA             * Branch to LEA
-                
                 BRA         NO_OP_MATCH
 
 PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if it matches RTS
@@ -776,6 +776,7 @@ PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if i
                 
                 BRA         OP_IDENT
                 
+* need to print absolute address                
 PARSE_4_JSR     LEA         PRINT_JSR,A1            * Print JSR  
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -2144,6 +2145,8 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
