@@ -83,19 +83,19 @@ START:       MOVE.B     D7,D1
              
              ADDA.W     #$1234,A2
              ADDA.L     D3,A3
-             
-             
-             
-             
+            
              ADDQ.B     #4,D2
              ADDQ.W     #1,(A5)
              ADDQ.L     #8,$C007
+             
+             MOVEQ      #$B4,D6
 
     SIMHALT             ; halt simulator
 
 * Put variables and constants here
 
     END    START        ; last line of source
+
 
 
 

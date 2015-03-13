@@ -1021,7 +1021,46 @@ ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
 PARSE_OP_6
                 BRA         OP_IDENT
 * MOVEQ
-PARSE_OP_7
+PARSE_OP_7      LEA         PRINT_MOVE_Q,A1         * Print: MOVEQ
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+MOVEQ_DATA      LEA         PRINT_NUM_DOLLAR,A1     * Print #$ symbol for immediate data
+                MOVE.B      #14,D0
+                TRAP        #15
+
+                MOVE.W      #$00FF,D1               * Store bit mask to obtain data
+                AND.W       D7,D1                   * Apply mask
+                ASL.L       #8,D1                   * A really
+                ASL.L       #8,D1                   * terrible
+                ASL.L       #8,D1                   * way
+                ASR.L       #8,D1                   * to do
+                ASR.L       #8,D1                   * sign
+                ASR.L       #8,D1                   * extension
+                
+                MOVE.L      #2,D2                   * Set number of nibbles to be converted (byte)
+                JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
+                
+                LEA         ASCII_RESULT,A1         * Print immediate data to console
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                LEA         PRINT_COMMA,A1          * Print comma between operands
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+MOVEQ_PRINT_EA  MOVE.W      #$0E00,D6       * Store the Dn register into D6
+                AND.W       D7,D6
+                ROL.W       #7,D6           * Rotate Dn register to LSB
+                
+                MOVE.W      #$0000,D5       * Store the Dn mode into D5 (000)
+                
+                JSR         HANDLE_OPERAND  * Print Dn operand (D5 stores mode, D6 stores register)
+                
+                LEA         CR_LF_MSG,A1    * Print new line
+                MOVE.B      #14,D0
+                TRAP        #15
+
                 BRA         OP_IDENT
 * DIVS
 PARSE_OP_8
@@ -2090,6 +2129,8 @@ PRINT_ADD_W         DC.B        'ADD.W',HT,0
 PRINT_ADD_L         DC.B        'ADD.L',HT,0
 
 PRINT_ADD_Q         DC.B        'ADDQ',0
+
+PRINT_MOVE_Q        DC.B        'MOVEQ',HT,0
 
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
