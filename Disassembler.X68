@@ -2715,7 +2715,7 @@ INVALID_OPERAND_MODE_MSG   DC.B 'The operand mode is invalid for instruction: ',
 INVALID_ABS_ADDR_REG_MSG   DC.B 'The following absolute address register is invalid: ',0
 ENTER_TO_CONT_MSG   DC.B        'Press ENTER to continue',CR,LF,0
 START_OVER_MSG      DC.B        'Would you like to Disassemble again?  Enter [Y] for Yes',CR,LF,0
-THANK_YOU_MSG       DC.B        'Thank you for using our 68K Disassember.  Goodbye!',CR,LF,0
+THANK_YOU_MSG       DC.B        'Thank you for using our 68K Disassembler.  Goodbye!',CR,LF,0
 
 PRINT_D             DC.B        'D',0
 PRINT_COMMA         DC.B        ',',0
@@ -2823,6 +2823,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 
 
 
