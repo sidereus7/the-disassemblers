@@ -2327,15 +2327,15 @@ HANDLE_ABS_ADDR_WORD    LEA         PRINT_DOLLAR,A1
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
-                        LSL.W       #8,D4               * Shift D4 left 8 bits
-                        MOVE.B      (A2)+,D4            * D4 stores word absolute address
+                        MOVE.B      (A2)+,D4                    * D4 stores a byte of the absolute address.
+                        LSL.W       #8,D4                       * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4                    * D4 stores word absolute address
                         
-                        MOVE.L      D4,D1               * Convert absolute address to ASCII
+                        MOVE.L      D4,D1                       * Convert absolute address to ASCII
                         MOVE.L      #4,D2
                         JSR         HEX_TO_ASCII
                         
-                        LEA         ASCII_RESULT,A1     * Print absolute address word
+                        LEA         ASCII_RESULT,A1             * Print absolute address word
                         MOVE.B      #14,D0
                         TRAP        #15
                         
@@ -2345,19 +2345,19 @@ HANDLE_ABS_ADDR_LONG    LEA         PRINT_DOLLAR,A1
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
-                        LSL.L       #8,D4               * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4                    * D4 stores a byte of the absolute address.
+                        LSL.L       #8,D4                       * Shift D4 left 8 bits
                         MOVE.B      (A2)+,D4
                         LSL.L       #8,D4
-                        MOVE.B      (A2)+,D4            * D4 stores a byte of the absolute address.
-                        LSL.L       #8,D4               * Shift D4 left 8 bits
-                        MOVE.B      (A2)+,D4            * D4 stores long absolute address
+                        MOVE.B      (A2)+,D4                    * D4 stores a byte of the absolute address.
+                        LSL.L       #8,D4                       * Shift D4 left 8 bits
+                        MOVE.B      (A2)+,D4                    * D4 stores long absolute address
 
-                        MOVE.L      D4,D1               * Convert absolute address to ASCII
+                        MOVE.L      D4,D1                       * Convert absolute address to ASCII
                         MOVE.L      #8,D2
                         JSR         HEX_TO_ASCII        
                         
-                        LEA         ASCII_RESULT,A1     * Print absolute address long
+                        LEA         ASCII_RESULT,A1             * Print absolute address long
                         MOVE.B      #14,D0
                         TRAP        #15
 
@@ -2367,8 +2367,8 @@ HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
                         MOVE.B      #14,D0
                         TRAP        #15
                         
-                        CLR.L       D1                  * Clears D1
-                        MOVE.B      OP_SIZE,D1          * Set D1 to OP_SIZE ($00 = Byte, $01 = Word, $02 = Long)
+                        CLR.L       D1                          * Clears D1
+                        MOVE.B      OP_SIZE,D1                  * Set D1 to OP_SIZE ($00 = Byte, $01 = Word, $02 = Long)
                         
                         CMPI.B      #$00,D1
                         BEQ         IMMED_DATA_BYTE
@@ -2382,41 +2382,41 @@ HANDLE_IMMED_DATA       LEA         PRINT_NUM_DOLLAR,A1
                         
 EXIT_HANDLE_IMMED_DATA  BRA         EXIT_OPERAND_MODE_7
 
-IMMED_DATA_BYTE         MOVE.B      (A2)+,D1            * load byte of filler immediate data and move A2
-                        LSL.W       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1            * load byte of immediate data and move A2
+IMMED_DATA_BYTE         MOVE.B      (A2)+,D1                    * load byte of filler immediate data and move A2
+                        LSL.W       #8,D1                       * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1                    * load byte of immediate data and move A2
                         
-                        MOVE.L      #2,D2               * Convert byte of immediate data to ASCII
+                        MOVE.L      #2,D2                       * Convert byte of immediate data to ASCII
                         JSR         HEX_TO_ASCII
                         
-                        LEA         ASCII_RESULT,A1     * Print byte of immediate data
+                        LEA         ASCII_RESULT,A1             * Print byte of immediate data
                         MOVE.B      #14,D0
                         TRAP        #15
                         
                         BRA         EXIT_HANDLE_IMMED_DATA
 
-IMMED_DATA_WORD         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
-                        LSL.W       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1            * D1 stores immediate data word
+IMMED_DATA_WORD         MOVE.B      (A2)+,D1                    * D1 stores a byte of the immediate data
+                        LSL.W       #8,D1                       * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1                    * D1 stores immediate data word
                         
-                        MOVE.L      #4,D2               * Convert immediate data word to ASCII
+                        MOVE.L      #4,D2                       * Convert immediate data word to ASCII
                         JSR         HEX_TO_ASCII
                         
-                        LEA         ASCII_RESULT,A1     * Print immediate data word
+                        LEA         ASCII_RESULT,A1             * Print immediate data word
                         MOVE.B      #14,D0
                         TRAP        #15
                         
                         BRA         EXIT_HANDLE_IMMED_DATA
 
-IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of the immediate data
-                        LSL.L       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1            * D1 stores a word of the immediate data
-                        LSL.L       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1            * D1 stores a word and a byte of the immediate data
-                        LSL.L       #8,D1               * Shift D1 left 8 bits
-                        MOVE.B      (A2)+,D1            * D1 stores immediate data long
+IMMED_DATA_LONG         MOVE.B      (A2)+,D1                    * D1 stores a byte of the immediate data
+                        LSL.L       #8,D1                       * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1                    * D1 stores a word of the immediate data
+                        LSL.L       #8,D1                       * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1                    * D1 stores a word and a byte of the immediate data
+                        LSL.L       #8,D1                       * Shift D1 left 8 bits
+                        MOVE.B      (A2)+,D1                    * D1 stores immediate data long
                         
-                        MOVE.L      #8,D2              * Convert immediate data long to ASCII
+                        MOVE.L      #8,D2                       * Convert immediate data long to ASCII
                         JSR         HEX_TO_ASCII
                         
                         LEA         ASCII_RESULT,A1
@@ -2441,61 +2441,60 @@ IMMED_DATA_LONG         MOVE.B      (A2)+,D1            * D1 stores a byte of th
 *                Or store it into a variable as well? What about yucky 0's?
 * -----------------------------------------------
 
-HEX_TO_ASCII        MOVEM.L   A1/D0-D3/D7,-(SP) * Push registers onto the stack
-                    CLR.L     D0                * Clear loop counter register
-                    CLR.L     D3                * Clear result value register
-                    CLR.L     D7                * Clear isolated LSB register
-                    LEA       ASCII_RESULT,A4   * Load memory location of result to A4
+HEX_TO_ASCII        MOVEM.L   A1/D0-D3/D7,-(SP)         * Push registers onto the stack
+                    CLR.L     D0                        * Clear loop counter register
+                    CLR.L     D3                        * Clear result value register
+                    CLR.L     D7                        * Clear isolated LSB register
+                    LEA       ASCII_RESULT,A4           * Load memory location of result to A4
 
-INIT_H2A_LOOP	    MOVE.W    D2,D0             * Rotate until MSB is LSB 0000ABCD -> BCD0000A
-                    SUBI.W    #2,D0             * Subtract 2 from counter (1 for dumb loop, 1 to leave extra char)
+INIT_H2A_LOOP	    MOVE.W    D2,D0                     * Rotate until MSB is LSB 0000ABCD -> BCD0000A
+                    SUBI.W    #2,D0                     * Subtract 2 from counter (1 for dumb loop, 1 to leave extra char)
 MINI_LOOP           ROR.L     #4,D1
                     DBRA      D0,MINI_LOOP
 
-                    MOVE.W    D2,D0             * Initialize loop counter to number of values to convert
-                    BRA       TEST              * Branch to TEST to deal with extra loop iteration
+                    MOVE.W    D2,D0                     * Initialize loop counter to number of values to convert
+                    BRA       TEST                      * Branch to TEST to deal with extra loop iteration
 
-H2A_LOOP		    MOVE.W    #$0000000F,D7		* Move bit mask to isolate LSB into D7
-					AND.L     D1,D7         	* Store isolated LSB into D7  
-					ROL.L     #4,D1         	* Shift value that's being converted by 4 bits
+H2A_LOOP		    MOVE.W    #$0000000F,D7		        * Move bit mask to isolate LSB into D7
+					AND.L     D1,D7         	        * Store isolated LSB into D7  
+					ROL.L     #4,D1         	        * Shift value that's being converted by 4 bits
 
-					CMPI.L    #9,D7         	* Compare isolated LSB to highest value number
-					BGT       CONVERT_H2A_LETTER	* If greater than 9, branch to convert letter logic
-CONVERT_H2A_NUMBER  ADDI.B    #48,D7        	* Add 48 to convert from hex to ASCII number
-	                BRA       STORE_VALUE		* Branch to store resulting value
+					CMPI.L    #9,D7         	        * Compare isolated LSB to highest value number
+					BGT       CONVERT_H2A_LETTER	    * If greater than 9, branch to convert letter logic
+CONVERT_H2A_NUMBER  ADDI.B    #48,D7        	        * Add 48 to convert from hex to ASCII number
+	                BRA       STORE_VALUE		        * Branch to store resulting value
 
-CONVERT_H2A_LETTER	ADDI.B    #55,D7	    	* Add 55 to convert from hex to ASCII letter
-	                BRA       STORE_VALUE		* Branch to store resulting value
+CONVERT_H2A_LETTER	ADDI.B    #55,D7	    	        * Add 55 to convert from hex to ASCII letter
+	                BRA       STORE_VALUE		        * Branch to store resulting value
 
-STORE_VALUE	        MOVE.B    D7,(A4)+          * Push the ASCII value onto the A4 stack
+STORE_VALUE	        MOVE.B    D7,(A4)+                  * Push the ASCII value onto the A4 stack
 
-TEST                DBRA      D0,H2A_LOOP       * Continue looping if counter is not -1
+TEST                DBRA      D0,H2A_LOOP               * Continue looping if counter is not -1
 
 H2A_LOOP_FINISH     MOVE.B    #$00,(A4) 
                     
                     * load ASCII chars directly into A1 to prep for printing
-                    
 
-                    MOVEM.L   (SP)+,A1/D0-D3/D7    * Pop registers back off the stack
+                    MOVEM.L   (SP)+,A1/D0-D3/D7         * Pop registers back off the stack
 
-                    RTS                         * Return from sub-routine
-
+                    RTS                                 * Return from sub-routine
 
 
-END         LEA         CR_LF_MSG,A1        * Add an empty line
+
+END         LEA         CR_LF_MSG,A1                    * Add an empty line
             MOVE.B      #14,D0
             TRAP        #15
             
-            LEA         START_OVER_MSG,A1   * Print start over message
+            LEA         START_OVER_MSG,A1               * Print start over message
             MOVE.B      #14,D0
             TRAP        #15
             
-            MOVE.B      #5,D0               * Get a single character from the user
+            MOVE.B      #5,D0                           * Get a single character from the user
             TRAP        #15
             
-            MOVE.B      D1,START_OVER_RESPONSE  * Save response
+            MOVE.B      D1,START_OVER_RESPONSE          * Save response
             
-            MOVE.W      #$FF00,D1           * Clear Screen
+            MOVE.W      #$FF00,D1                       * Clear Screen
             MOVE.B      #11,D0
             TRAP        #15
 
@@ -2645,6 +2644,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 
 
 
