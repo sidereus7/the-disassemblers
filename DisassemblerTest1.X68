@@ -83,12 +83,17 @@ START:       MOVE.B     D7,D1
              
              ADDA.W     #$1234,A2
              ADDA.L     D3,A3
-            
-             ADDQ.B     #4,D2
-             ADDQ.W     #1,(A5)
+             
+             BGT        TEST_BGT_POS
+             BLE        TEST_BLE_POS
+             
+TEST_BGT_NEG ADDQ.B     #4,D2
+TEST_BLE_POS ADDQ.W     #1,(A5)
              ADDQ.L     #8,$C007
              
-             MOVEQ      #$B4,D6
+TEST_BGT_POS BGT        TEST_BGT_NEG
+             
+             
 
     SIMHALT             ; halt simulator
 
