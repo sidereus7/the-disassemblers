@@ -776,7 +776,6 @@ PARSE_4_RTS     MOVE.W      D7,D6                   * Check the last 6 bits if i
                 
                 BRA         OP_IDENT
                 
-<<<<<<< HEAD
 PARSE_4_JSR     LEA         PRINT_JSR,A1            * Print JSR  
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -1642,8 +1641,6 @@ RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 
                 
 EXIT_PARSE_OP_D BRA         OP_IDENT
-
->>>>>>> Added ADDQ parse logic and tests
 
 * ASL,ASR,LSL,LSR,ROL,ROR
 PARSE_OP_E
