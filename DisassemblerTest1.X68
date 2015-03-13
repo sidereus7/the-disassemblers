@@ -152,13 +152,13 @@ PARSE_4     JSR         NEXT
             MOVEM.L     A0-A3/A7/D1/D6,-(A7)
             
             MOVEM.W     A0/A3/A5/A7/D1-D2/D4/D7,-(A7)
-            MOVEM.L     A0/A3/A5/A7/D1/D4/D6-D7,-(A7)** not printing d7
+            MOVEM.L     A0/A3/A5/A7/D1/D4/D6-D7,-(A7)
             
             MOVEM.W     (A7)+,A0-A3/A7/D1/D6
             MOVEM.L     (A7)+,A0-A3/A7/D1/D6
             
             MOVEM.W     (A7)+,A0/A3/A5/A7/D1-D2/D4/D7
-            MOVEM.L     (A7)+,A0/A3/A5/A7/D1/D4/D6-D7 ** not printing d7
+            MOVEM.L     (A7)+,A0/A3/A5/A7/D1/D4/D6-D7
             
             BRA         PARSE_B
             
@@ -181,6 +181,7 @@ END         SIMHALT             ; halt simulator
 * Put variables and constants here
 
     END    START        ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~

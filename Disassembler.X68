@@ -902,6 +902,14 @@ M_PRE_LOOP_2    ADD.B       #1,D3                   * Enter second loop to check
                 MOVE.B      #14,D0
                 TRAP        #15
                 
+                CMPI.B      #7,D3                   * Check if this is D7 or A7
+                BNE         M_PRE_LOOP_3            
+                
+                JSR         PARSE_4_PRINT_A_OR_D    * Enter subroutine to print A or D
+                MOVE.B      D3,D1
+                JSR         PARSE_4_REGIST          * Enter subroutine to print register
+                BRA         M_PRE_LOOP_END          * End of list, exit
+                
 M_PRE_LOOP_3    ADD.B       #1,D3                   * Enter third loop for end register
                 CMPI.B      #8,D3
                 BEQ         M_PRE_LOOP_END          * Branch out if counter reaches 8
@@ -1002,6 +1010,14 @@ M_POST_LOOP_2   ADD.B       #1,D3                   * Enter second loop to check
                 LEA         PRINT_DASH,A1           * Print -
                 MOVE.B      #14,D0
                 TRAP        #15
+                
+                CMPI.B      #7,D3                   * Check if this is D7 or A7
+                BNE         M_POST_LOOP_3            
+                
+                JSR         PARSE_4_PRINT_A_OR_D    * Enter subroutine to print A or D
+                MOVE.B      D3,D1
+                JSR         PARSE_4_REGIST          * Enter subroutine to print register
+                BRA         M_POST_LOOP_END          * End of list, exit
                 
 M_POST_LOOP_3   ADD.B       #1,D3                   * Enter third loop for end register
                 CMPI.B      #8,D3
@@ -2299,14 +2315,6 @@ ASX_DONE                LEA         CR_LF_MSG,A1            * Print new line
  
                         BRA         OP_IDENT                * Done; branch back to main program
 
-* LSL
-
-* LSR
-
-* ROL
-
-* ROR
-
 *********************************************************************************
 *---------------------------Operand Subroutine----------------------------------*
 *********************************************************************************
@@ -2819,6 +2827,8 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
+
 
 
 *~Font name~Courier New~
