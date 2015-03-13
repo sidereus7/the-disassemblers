@@ -1441,8 +1441,8 @@ PARSE_OP_8      LEA         PRINT_DIVS_W,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.W      #$0007,D6               * D6 stores Bitmask for EA register
-                AND.W       D7,D6                   * D6 stores the EA register
+HANDLE_DIV_MUL  MOVE.W      #$0007,D6       * D6 stores Bitmask for EA register
+                AND.W       D7,D6           * D6 stores the EA register
                 
                 MOVE.W      #$0038,D5               * D5 stores bitmask for EA mode
                 AND.W       D7,D5                   * D5 stores the EA mode, unshifted
@@ -1859,7 +1859,32 @@ PARSE_B_REG     MOVE.L      D7,D1                   * Move target register to D1
                 TRAP        #15
                 RTS                                 * Return from subroutine
 * AND,MULS
-PARSE_OP_C
+PARSE_OP_C      MOVE.W      #$01C0,D2       * Bitmask for OPmode
+                AND.W       D7,D2           * D2 stores opmode, unshifted
+                LSR.W       #6,D2           * D2 stores opmode
+                
+                CMPI.B      #$07,D2
+                BEQ         PARSE_MULS      * Handle MULS
+                
+                LEA         PRINT_AND,A1    * Print: AND
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                CMPI.B      #$02,D2
+                BLE         HANDLE_EA_DN    * Branch to EA -> Dn handling
+                
+                CMPI.B      #$04,D2
+                BLE         HANDLE_DN_EA    * Branch to Dn -> EA handling
+                
+                BRA         OP_IDENT        * Move to the next operation.
+                
+                
+                
+PARSE_MULS      LEA         PRINT_MULS_W,A1 * Print:  MULS.W
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                BRA         HANDLE_DIV_MUL  * Output operands the same as DIVS
 
 * ADD,ADDA
 PARSE_OP_D      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
@@ -1872,11 +1897,15 @@ PARSE_OP_D      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
                 CMPI.B      #$07,D2         * If opmode is 111, parse as ADDA.L
                 BEQ         ADD_A_LONG
                 
+                LEA         PRINT_ADD,A1    * Print:  ADD
+                MOVE.B      #14,D0
+                TRAP        #15
+                
                 CMPI.B      #$02,D2         * If opmode <= 010, parse as ADD <ea>,Dn
-                BLE         ADD_EA_DN
+                BLE         HANDLE_EA_DN
                 
                 CMPI.B      #06,D2          * If opmode <= 110, parse as ADD Dn,<ea>
-                BLE         ADD_DN_EA
+                BLE         HANDLE_DN_EA
                 
                 BRA         EXIT_PARSE_OP_D
                 
@@ -1964,35 +1993,35 @@ ADD_A_LONG      LEA         PRINT_ADD_A_L,A1      * Print: ADDA.L
                 
                 BRA         EXIT_PARSE_OP_D
 
-ADD_EA_DN       CMPI.B      #$00,D2
-                BEQ         ADD_EA_DN_BYTE
+HANDLE_EA_DN    CMPI.B      #$00,D2             * Handles general EA -> Dn cases
+                BEQ         EA_DN_BYTE
                 
                 CMPI.B      #$01,D2
-                BEQ         ADD_EA_DN_WORD
+                BEQ         EA_DN_WORD
                 
                 CMPI.B      #$02,D2
-                BEQ         ADD_EA_DN_LONG
+                BEQ         EA_DN_LONG
                 
-ADD_EA_DN_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
+EA_DN_BYTE      LEA         PRINT_B,A1          * Print:  .B
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
-                BRA         RET_SUB_EA_DN       * Merge
+                BRA         RET_EA_DN           * Merge
                 
-ADD_EA_DN_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
+EA_DN_WORD      LEA         PRINT_W,A1          * Print:  .W
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
-                BRA         RET_ADD_EA_DN       * Merge
+                BRA         RET_EA_DN           * Merge
                 
-ADD_EA_DN_LONG  LEA         PRINT_ADD_L,A1
+EA_DN_LONG      LEA         PRINT_L,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
-                BRA         RET_ADD_EA_DN       * Merge
+                BRA         RET_EA_DN           * Merge
                 
                 
-RET_ADD_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
+RET_EA_DN       MOVE.W      #$0007,D6           * Bitmask for EA Register
                 AND.W       D7,D6               * D6 stores EA Register
                 
                 MOVE.W      #$0038,D5
@@ -2027,35 +2056,35 @@ RET_ADD_EA_DN   MOVE.W      #$0007,D6           * Bitmask for EA Register
                 
                 BRA         EXIT_PARSE_OP_D
 
-ADD_DN_EA       CMPI.B      #$04,D2
-                BEQ         ADD_DN_EA_BYTE
+HANDLE_DN_EA    CMPI.B      #$04,D2             * Handles general DN -> EA cases
+                BEQ         DN_EA_BYTE
                 
                 CMPI.B      #$05,D2
-                BEQ         ADD_DN_EA_WORD
+                BEQ         DN_EA_WORD
                 
                 CMPI.B      #$06,D2
-                BEQ         ADD_DN_EA_LONG
+                BEQ         DN_EA_LONG
                 
-ADD_DN_EA_BYTE  LEA         PRINT_ADD_B,A1      * Print:  ADD.B
+DN_EA_BYTE      LEA         PRINT_B,A1          * Print:  .B
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$00,OP_SIZE        * Set OP_SIZE to byte
-                BRA         RET_ADD_DN_EA       * Merge
+                BRA         RET_DN_EA           * Merge
                 
-ADD_DN_EA_WORD  LEA         PRINT_ADD_W,A1      * Print:  ADD.W
+DN_EA_WORD      LEA         PRINT_W,A1          * Print:  .W
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$01,OP_SIZE        * Set OP_SIZE to word
-                BRA         RET_ADD_DN_EA       * Merge
+                BRA         RET_DN_EA           * Merge
                 
-ADD_DN_EA_LONG  LEA         PRINT_ADD_L,A1
+DN_EA_LONG      LEA         PRINT_L,A1          * Print:  .L
                 MOVE.B      #14,D0
                 TRAP        #15
                 MOVE.B      #$02,OP_SIZE        * Set OP_SIZE to long
-                BRA         RET_ADD_DN_EA       * Merge
+                BRA         RET_DN_EA           * Merge
                 
                 
-RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
+RET_DN_EA       MOVE.W      #$0007,D6           * Bitmask for EA Register
                 AND.W       D7,D6               * D6 stores EA Register
                 
                 MOVE.W      #$0038,D5
@@ -2580,6 +2609,8 @@ PRINT_MOVE_L        DC.B        'MOVE.L',HT,0
 
 PRINT_ADD_A_W       DC.B        'ADDA.W',HT,0
 PRINT_ADD_A_L       DC.B        'ADDA.L',HT,0
+
+PRINT_ADD           DC.B        'ADD',0
 PRINT_ADD_B         DC.B        'ADD.B',HT,0
 PRINT_ADD_W         DC.B        'ADD.W',HT,0
 PRINT_ADD_L         DC.B        'ADD.L',HT,0
@@ -2629,6 +2660,8 @@ PRINT_BGT           DC.B        'BGT',HT,0
 PRINT_BLE           DC.B        'BLE',HT,0
 PRINT_BVS           DC.B        'BVS',HT,0
 PRINT_DIVS_W        DC.B        'DIVS.W',HT,0
+PRINT_MULS_W        DC.B        'MULS.W',HT,0
+PRINT_AND           DC.B        'AND',0
 
 START_ADDR_INPUT    DS.B        10
 STARTADDRSTRING1    DS.L        1
@@ -2650,7 +2683,6 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
-
 
 
 

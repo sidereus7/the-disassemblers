@@ -101,6 +101,12 @@ TEST_BGT_POS BGT        TEST_BGT_NEG
             DIVS.W      #$1000,D1
             DIVS.W      D1,D3
             
+            MULS.W      #$1000,D1
+            MULS.W      (A3),D2
+            
+            AND.B       #$01,D1
+            AND.W       #$1234,D2
+            AND.L       D3,D4
              
 
     SIMHALT             ; halt simulator
@@ -108,6 +114,7 @@ TEST_BGT_POS BGT        TEST_BGT_NEG
 * Put variables and constants here
 
     END    START        ; last line of source
+
 
 
 
