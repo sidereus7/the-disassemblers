@@ -826,7 +826,9 @@ PARSE_4_M_PRE   JSR         PARSE_4_M_LIST          * Get register list mask in 
                 MOVE.L      #$00FF,D6
                 AND.L       D6,D5                   * D5 holds the first half of register list
                 
+                CLR.L       D4                      * Clear D4 to keep track of if register needs dash
                 CLR.L       D6                      * Clear D6. 0=True-First in the list of the register 1=false
+                CLR.L       D1                      * Clear D1 to print register
                 MOVE.B      #$FF,D3                 * Counter to print out list of registers
                 
 M_PRE_LOOP_1    ADD.B       #1,D3                   * Increment counter
@@ -835,37 +837,97 @@ M_PRE_LOOP_1    ADD.B       #1,D3                   * Increment counter
                 ROL.B       #1,D5                   * Rotate D5
                 BCC         M_PRE_LOOP_1            * Register = 0, Loop again
                 
+                *CMPI.B      #$1,D4                  * Check if need to print dash
+                *BEQ         M_PRE_DASH
+                
                 CMPI.B      #$1,D6                  * Is this the first in the register?
                 BNE         M_PRE_PRINT_A           * If not, print A, not /
                 
                 LEA         PRINT_SLASH,A1          * Print /
                 MOVE.B      #14,D0
                 TRAP        #15
+                BRA         M_PRE_PRINT_A
+                
+                *delete the next three
+M_PRE_DASH      LEA         PRINT_DASH,A1           * Print -
+                MOVE.B      #14,D0
+                TRAP        #15
+                *MOVE.B      #0,D4
+
 
 M_PRE_PRINT_A   JSR         PARSE_4_PRINT_A         * Print A ***  should fix this and have a diff counter to print A or d
                 MOVE.B      D3,D1
                 JSR         PARSE_4_REGIST          * Print register
                 
+                MOVE.B      #1,D6                   * Set to 1. First in list already printed
+
 M_PRE_LOOP_2    ADD.B       #1,D3
+                CMPI.B      #8,D3
+                BEQ         PARSE_4_M_EA
                 ROL.B       #1,D5
                 BCS         M_PRE_LOOP_2
                 
-                MOVE.B      #1,D6
+                CMPI.B      #$1,D4
+                BNE         M_PRE_PRINT_NEXT
                 
-                SUB.B       #1,D5
+                MOVE.B      #0,D4
+                BRA         M_PRE_LOOP_1
                 
-                LEA         PRINT_DASH,A1           * Print -
+M_PRE_PRINT_NEXT                
+                MOVE.B      #1,D4                   * Print dash during next loop
+
+                SUB.B       #2,D3
+
+                ROR.B       #2,D5
+                BRA         M_PRE_LOOP_1
+                
+               * MOVE.B      #1,D4                   * Print dash during next loop
+
+               * SUB.B       #2,D3
+               * BRA         M_PRE_LOOP_1
+                
+              *  CMPI.B      #$1,D4                  * Is it a continuation of a register list?
+              *  BEQ         M_PRE_END_LIST
+                
+               * SUB.B       #1,D3
+
+               * BRA         M_PRE_LOOP_1
+                
+*M_PRE_END_LIST                *  MOVE.B      #0,D4
+
+              *  MOVE.B      #0,D4                   * End of register list
+                
+               * SUB.B       #1,D3
+                
+              *  LEA         PRINT_DASH,A1           * Print -
+               * MOVE.B      #14,D0
+               * TRAP        #15
+                
+              *  JSR         PARSE_4_PRINT_A         * Print A
+              *  MOVE.B      D3,D1
+               * JSR         PARSE_4_REGIST          * Print register
+               * ADD.B       #$1,D3
+                
+                *BRA         M_PRE_PRINT_A
+                
+               * BRA         M_PRE_LOOP_1            * Otherwise, start loop again
+                
+                
+                
+                
+                
+
+PARSE_4_M_EA    LEA         PRINT_COMMA,A1          * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15 
+                
+                JSR         PARSE_4_EA
+                
+                JSR         HANDLE_OPERAND
+                LEA         CR_LF_MSG,A1            * Print line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                JSR         PARSE_4_PRINT_A         * Print A
-                MOVE.B      D3,D1
-                JSR         PARSE_4_REGIST          * Print register
-                ADD.B       #$1,D3
-                
-                BRA         M_PRE_LOOP_1            * Otherwise, start loop again
-
-PARSE_4_M_EA    * HANDLE EA
                 BRA         PARSE_4_M_EXIT
 * MOVEM.x <ea>,<list> -> (sp)+,<list>
 PARSE4M_POST_W  LEA         PRINT_MOVEM_W,A1        * Print MOVEM.W
@@ -883,11 +945,7 @@ PARSE_4_M_POST  * ea comma then list
 PARSE_4_M_LIST  MOVE.B      (A2)+,D4                * D1 stores a byte of the immediate data
                 LSL.L       #8,D4                   * Shift D1 left 8 bits
                 MOVE.B      (A2)+,D4                * D1 stores a word of the immediate data
-                LSL.L       #8,D4                   * Shift D1 left 8 bits
-                MOVE.B      (A2)+,D4                * D1 stores a word and a byte of the immediate data
-                LSL.L       #8,D4                   * Shift D1 left 8 bits
-                MOVE.B      (A2)+,D4                * D1 stores immediate data long
-                RTS 
+                RTS                                 * Word size saved in D4
                 
 PARSE_4_PRINT_A LEA         PRINT_A,A1
                 MOVE.B      #14,D0
