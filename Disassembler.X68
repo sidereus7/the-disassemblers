@@ -998,6 +998,10 @@ ADDQ_PRINT_DATA LEA         PRINT_HASH,A1           * Print # symbol for immedia
                 MOVE.B      #14,D0
                 TRAP        #15
                 
+                LEA         PRINT_COMMA,A1         * Print comma between operands
+                MOVE.B      #14,D0
+                TRAP        #15
+                
 ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
                 AND.W       D7,D6
                 
@@ -1006,6 +1010,10 @@ ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
                 LSR.W       #3,D5
                 
                 JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
+                
+                LEA         CR_LF_MSG,A1         * Print new line
+                MOVE.B      #14,D0
+                TRAP        #15
                 
                 BRA         OP_IDENT
 * BCC
@@ -2080,7 +2088,7 @@ PRINT_ADD_B         DC.B        'ADD.B',HT,0
 PRINT_ADD_W         DC.B        'ADD.W',HT,0
 PRINT_ADD_L         DC.B        'ADD.L',HT,0
 
-PRINT_ADD_Q         DC.B        'ADDQ',HT,0
+PRINT_ADD_Q         DC.B        'ADDQ',0
 
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
@@ -2136,6 +2144,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
