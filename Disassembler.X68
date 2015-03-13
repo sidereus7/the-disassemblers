@@ -10,6 +10,8 @@
 *               Displays an opening message and prompts
 *               the user for the start and end address
 *               for the program to be disassembled.
+*               Requires the user to enter an 8 hexadecimal
+*               address
 *-----------------------------------------------------------
                 ORG         $1000
 START:          LEA         stack,SP
@@ -62,7 +64,6 @@ ENDADDR         LEA         GETENDMESSAGE,A1        * Display prompt for end add
                 MOVE.B      #1,D6
                 MOVE.B      #8,D2
                 
-                *setting A1 to $5000 removed
 PROMPTENDADDR   LEA         END_ADDR_INPUT,A1
                 MOVE.B      #2,D0                   * Read end address string from console
                 TRAP        #15
@@ -238,8 +239,13 @@ COMBINEEND      ROR.L       #8,D4
                 MOVE.L      D0,A5
                 MOVE.L      D0,A6
                 MOVE.L      D0,A7                
-
-                
+****************************************************************************
+*--------------------------------------------------------------------------*
+****************************************************************************
+* BEGIN OP IDENTIFICATION SECTION FOR:
+* ANDI, SUBI, EORI, CMPI, BCHG, MOVE, CLR, RTS, JSR, MOVEM, LEA, ADDQ, BCC,
+* BGT, BLE, BVS, MOVEQ, DIVS, SUB, SUBA, EOR, CMP, CMPA, AND, MULS, ADD, ADDA,
+* ASL, ASR, LSL, LSR, ROL, ROR
 BEGIN_OP_IDENT  MOVE.L      HEXSTARTADDR,A2         * A2 is RESERVED for walking through the target code.
                 
                 LEA         ENTER_TO_CONT_MSG,A1    * Prompt user to hit enter message
@@ -369,7 +375,7 @@ CONT_OP_IDENT   MOVE.L      HEXENDADDR,D0
                 BEQ         PARSE_OP_E
                                 
                 
-                *CASE where nothing matched, bad data. report to user. Skip to next 16 bit code
+* CASE where nothing matched, bad data. report to user. Skip to next 16 bit code
 NO_OP_MATCH     LEA         INVALID_OP_MSG,A1
                 MOVE.B      #14,D0
                 TRAP        #15
@@ -2644,6 +2650,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 
 
 
