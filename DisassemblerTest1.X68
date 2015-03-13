@@ -11,21 +11,21 @@ START:       MOVE.B     D7,D1
              MOVE.B     #$17,D2
              MOVE.B     #$33,(A5)
              
-             SUB.B      (A4),D4
+PARSE_9      SUB.B      (A4),D4
              SUB.W      D4,D2
              SUB.L      D2,(A4)
              
              SUBA.W     (A4)+,A1
              SUBA.L     A7,A4
              
-             ADD.B      (A4),D4             * ADD/ADDA Tests
+PARSE_D      ADD.B      (A4),D4             * ADD/ADDA Tests
              ADD.W      D4,D2
              ADD.L      D2,(A4)
              
              ADDA.W     (A4)+,A1
              ADDA.L     A7,A4
              
-             ANDI.B     #$33,D4
+PARSE_0      ANDI.B     #$33,D4
              ANDI.W     #$8888,(A3)
              ANDI.L     #$AAAAAAAA,(A3)+
              
@@ -46,16 +46,16 @@ START:       MOVE.B     D7,D1
              BCHG.L     D3,D2
              BCHG.L     #$AAAAAAAA,D3
 
-             MOVE.B     D7,D1
+PARSE_1      MOVE.B     D7,D1
              MOVE.B     #$17,D2
              MOVE.B     #$33,(A5)
              
-             MOVE.W     -(A3),$5555
+PARSE_3      MOVE.W     -(A3),$5555
              MOVE.W     D1,D2
              MOVE.W     #$5555,A1
              MOVE.W     (A6)+,D4
              
-             MOVE.L     (A1),D4
+PARSE_2      MOVE.L     (A1),D4
              MOVE.L     A6,(A3)+
              MOVE.L     #$01234567,D5
              
@@ -84,7 +84,7 @@ START:       MOVE.B     D7,D1
              ADDA.W     #$1234,A2
              ADDA.L     D3,A3
              
-             BGT        TEST_BGT_POS
+PARSE_6      BGT        TEST_BGT_POS
              BLE        TEST_BLE_POS
              
              ASL.B      D1,D7
@@ -128,22 +128,60 @@ TEST_BGT_POS BGT        TEST_BGT_NEG
             
             
             MOVE.L      #$FFFF0456,D1
-            DIVS.W      #$1000,D1
+PARSE_8     DIVS.W      #$1000,D1
             DIVS.W      D1,D3
             
-            MULS.W      #$1000,D1
+PARSE_C     MULS.W      #$1000,D1
             MULS.W      (A3),D2
             
             AND.B       #$01,D1
             AND.W       #$1234,D2
             AND.L       D3,D4
              
+PARSE_4     JSR         NEXT
+           
+            LEA         $1234,A4
+            LEA         $12345678,A7
+            LEA         $123,A0
+            
+            CLR.B       D4
+            CLR.W       D7
+            CLR.L       D1
+            
+            MOVEM.W     A0-A3/A7/D1/D6,-(A7)
+            MOVEM.L     A0-A3/A7/D1/D6,-(A7)
+            
+            MOVEM.W     A0/A3/A5/A7/D1-D2/D4/D7,-(A7)
+            MOVEM.L     A0/A3/A5/A7/D1/D4/D6-D7,-(A7)** not printing d7
+            
+            MOVEM.W     (A7)+,A0-A3/A7/D1/D6
+            MOVEM.L     (A7)+,A0-A3/A7/D1/D6
+            
+            MOVEM.W     (A7)+,A0/A3/A5/A7/D1-D2/D4/D7
+            MOVEM.L     (A7)+,A0/A3/A5/A7/D1/D4/D6-D7 ** not printing d7
+            
+            BRA         PARSE_B
+            
+NEXT        MOVE.B      #11,D0
+            RTS      
 
-    SIMHALT             ; halt simulator
+PARSE_B     EOR.B       D3,(A4)
+            EOR.W       D2,-(A3)
+            EOR.L       D4,(A7)+
+
+            CMP.B       (A3),D2  
+            CMP.W       $A432,D4
+            CMP.L       A7,D6
+
+            CMPA.W      A6,A4
+            CMPA.L      D5,A7
+            
+END         SIMHALT             ; halt simulator
 
 * Put variables and constants here
 
     END    START        ; last line of source
+
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~
