@@ -87,6 +87,36 @@ START:       MOVE.B     D7,D1
              BGT        TEST_BGT_POS
              BLE        TEST_BLE_POS
              
+             ASL.B      D1,D7
+             ASL.W      #5,D3
+             ASL.L      #2,D4
+             ASL        $9999
+             
+             ASR.B      #2,D2
+             ASR.W      D4,D5
+             ASR.L      #8,D6
+             ASR        $8888
+             
+             LSL.B      D1,D7
+             LSL.W      #5,D3
+             LSL.L      #2,D4
+             LSL        $9999
+             
+             LSR.B      #2,D2
+             LSR.W      D4,D5
+             LSR.L      #8,D6
+             LSR        $8888
+             
+             ROL.B      D1,D7
+             ROL.W      #5,D3
+             ROL.L      #2,D4
+             ROL        $9999
+             
+             ROR.B      #2,D2
+             ROR.W      D4,D5
+             ROR.L      #8,D6
+             ROR        $8888
+             
 TEST_BGT_NEG ADDQ.B     #4,D2
 TEST_BLE_POS ADDQ.W     #1,(A5)
              ADDQ.L     #8,$C007
@@ -114,13 +144,6 @@ TEST_BGT_POS BGT        TEST_BGT_NEG
 * Put variables and constants here
 
     END    START        ; last line of source
-
-
-
-
-
-
-
 *~Font name~Courier New~
 *~Font size~10~
 *~Tab type~1~

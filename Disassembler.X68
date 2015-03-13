@@ -2123,24 +2123,80 @@ RET_DN_EA       MOVE.W      #$0007,D6           * Bitmask for EA Register
 EXIT_PARSE_OP_D BRA         OP_IDENT
 
 * ASL,ASR,LSL,LSR,ROL,ROR
-PARSE_OP_E              * TODO: Some magic code that determines ASL/R,LSL/R,ROL/R
+PARSE_OP_E              MOVE.W  #$00C0,D6       * Bit mask to obtain size data
+                        AND.W   D7,D6           
+                        LSR.W   #6,D6           * Shift size data to LSB
 
-HANDLE_ASL_ASR          MOVE.W  #$100,D6        * Bit mask to obtain L or R data
+                        CMPI.B      #$02,D6             * Check for <ea> case
+                        BGT         HANDLE_EA_SHIFT_OP
+
+****** Determine ASL/R vs LSL/R vs ROL/R ******
+HANDLE_SHIFT_OP         MOVE.W  #$0018,D6       * Bit mask to obtain ASL/R vs LSL/R vs ROL/R
+                        AND.W   D7,D6           
+                        LSR.W   #3,D6           * Shift result into LSB
+
+                        CMPI.B  #$0,D6          * Check if ASL/R
+                        BEQ     PRINT_ASX_LBL
+                        
+                        CMPI.B  #$1,D6          * Check if LSL/R
+                        BEQ     PRINT_LSX_LBL
+                        
+                        CMPI.B  #$3,D6          * Check if ROL/R
+                        BEQ     PRINT_ROX_LBL
+                        
+****** Special <ea> case to determine ASL/R vs LSL/R vs ROL/R ******
+HANDLE_EA_SHIFT_OP      MOVE.W  #$0600,D6       * Bit mask to obtain ASL/R vs LSL/R vs ROL/R
+                        AND.W   D7,D6           
+                        ROL.W   #7,D6           * Shift result into LSB
+
+                        CMPI.B  #$0,D6          * Check if ASL/R
+                        BEQ     PRINT_ASX_LBL
+                        
+                        CMPI.B  #$1,D6          * Check if LSL/R
+                        BEQ     PRINT_LSX_LBL
+                        
+                        CMPI.B  #$3,D6          * Check if ROL/R
+                        BEQ     PRINT_ROX_LBL
+
+****** Print ASL or ASR ******
+PRINT_ASX_LBL           LEA     PRINT_AS,A1    * Print: AS
+                        MOVE.B  #14,D0
+                        TRAP    #15
+                        
+                        BRA     PRINT_DIRECTION
+                        
+PRINT_LSX_LBL           LEA     PRINT_LS,A1    * Print: LS
+                        MOVE.B  #14,D0
+                        TRAP    #15
+                        
+                        BRA     PRINT_DIRECTION
+                        
+PRINT_ROX_LBL           LEA     PRINT_RO,A1    * Print: RO
+                        MOVE.B  #14,D0
+                        TRAP    #15
+                        
+                        BRA     PRINT_DIRECTION
+                        
+PRINT_DIRECTION         MOVE.W  #$100,D6        * Bit mask to obtain L or R data
                         AND.W   D7,D6           
                         CMPI.W  #$100,D6        * Compare L/R bit to 1
-                        BNE     PRINT_ASR       * If not equal, print ASR; else, ASL
+                        BNE     PRINT_RIGHT     * If not equal, print R
                         
-PRINT_ASL               LEA     PRINT_ASL,A1    * Print: ASL
+PRINT_LEFT              LEA     PRINT_L_DIR,A1  * Print L direction
                         MOVE.B  #14,D0
                         TRAP    #15
                         
                         BRA     ASX_SIZE        * Branch to determine size
                         
-PRINT_ASR               LEA     PRINT_ASL,A1    * Print: ASR
+PRINT_RIGHT             LEA     PRINT_R_DIR,A1  * Print R direction
                         MOVE.B  #14,D0
                         TRAP    #15
+                        
+                        BRA     ASX_SIZE        * Branch to determine size
 
+****** Print size (.B, .W, .L) ******
 ASX_SIZE                MOVE.W  #$00C0,D6       * Bit mask to obtain size data
+                        AND.W   D7,D6           
                         LSR.W   #6,D6           * Shift size data to LSB
                         
                         CMPI.B      #$00,D6                 * Check if size is byte (.B)
@@ -2152,8 +2208,8 @@ ASX_SIZE                MOVE.W  #$00C0,D6       * Bit mask to obtain size data
                         CMPI.B      #$02,D6                 * Check if size is long (.L)
                         BEQ         ASX_PRINT_LONG
                         
-                        CMPI.B      #$03,D6                 * Check if <ea> case (Print tab)
-                        BEQ         ASX_PRINT_TAB
+                        CMPI.B      #$03,D6                 * Check if <ea> case
+                        BEQ         ASX_HANDLE_EA
 
 ASX_PRINT_BYTE          LEA         PRINT_B,A1              * Load '.B' message
                         BRA         ASX_PRINT_SIZE           
@@ -2164,12 +2220,85 @@ ASX_PRINT_WORD          LEA         PRINT_W,A1              * Load '.W' message
 ASX_PRINT_LONG          LEA         PRINT_L,A1              * Load '.L' message
                         BRA         ASX_PRINT_SIZE
                         
-ASX_PRINT_TAB           LEA         TAB_MSG,A1            * Load tab message
-                        BRA         ASX_PRINT_SIZE
-                
 ASX_PRINT_SIZE          MOVE.B      #14,D0                  * Print size (.B, .W, or .L)
                         TRAP        #15
                         
+                        BRA         ASX_HANDLE_OPS          * Jump to handle operand code
+                        
+****** Handle ASX <ea> Case ******
+ASX_HANDLE_EA           LEA         TAB_MSG,A1              * Load tab message
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.W      #$0007,D6               * Bit mask for <ea> register
+                        AND.W       D7,D6                   * D6 stores <ea> register
+                
+                        MOVE.W      #$0038,D5
+                        AND.W       D7,D5                   * D5 stores <ea> mode, unshifted
+                        LSR.W       #3,D5                   * D5 stores <ea> mode
+                
+                        JSR         HANDLE_OPERAND          * Print <ea>
+                        
+                        BRA         ASX_DONE
+                        
+****** Handle ASX Dx,Dy and ASX #<data>,Dy Cases ******
+ASX_HANDLE_OPS          MOVE.W      #$0020,D2               * Bit mask for i/r
+                        AND.W       D7,D2
+                        CMPI.B      #$20,D2                 * Test if source operand is data register
+                        BEQ         ASX_PRINT_SRC_DN        * If i/r = 1, print Dn register for source
+                        
+****** Print #<data> if applicable ******
+ASX_PRINT_SRC_IMM       LEA         PRINT_HASH,A1           * Print # symbol for immediate data
+                        MOVE.B      #14,D0
+                        TRAP        #15
+
+                        MOVE.W      #$0E00,D1               * Store bit mask to obtain data
+                        AND.W       D7,D1                   * Apply mask
+                        ROL.W       #7,D1                   * Rotate data to LSB
+                
+                        CMPI.B      #$0,D1                  * If value is zero, change to 8
+                        BNE         ASX_DATA_CONV
+                
+ASX_SET_8               MOVE.B      #$8,D1                  * Change of value of 0 to 8                
+                
+ASX_DATA_CONV           MOVE.L      #1,D2                   * Set number of nibbles to be converted
+                        JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
+                
+                        LEA         ASCII_RESULT,A1         * Print immediate data to console
+                        MOVE.B      #14,D0
+                        TRAP        #15
+
+                        BRA         ASX_PRINT_DST_DN
+                        
+****** Print Dx source if applicable ******
+ASX_PRINT_SRC_DN        MOVE.W      #$0E00,D6               * Bit mask for Dn register
+                        AND.W       D7,D6                   * D6 stores Dn register unshifted
+                        ROL.W       #7,D6                   * D6 stores Dn register shifted to LSB
+                
+                        MOVE.W      #$0000,D5               * Store Dn mode into D5 (000)
+                
+                        JSR         HANDLE_OPERAND          * Print Dn source
+
+****** Print ,Dy destination ******     
+ASX_PRINT_DST_DN        LEA         PRINT_COMMA,A1          * Print comma between operands
+                        MOVE.B      #14,D0
+                        TRAP        #15
+                        
+                        MOVE.W      #$0007,D6               * Bit mask for Dn register
+                        AND.W       D7,D6                   * D6 stores Dn register unshifted
+                
+                        MOVE.W      #$0000,D5               * Store Dn mode into D5 (000)
+                
+                        JSR         HANDLE_OPERAND          * Print Dn destination
+                        
+                        BRA         ASX_DONE
+                        
+ASX_DONE                LEA         CR_LF_MSG,A1            * Print new line
+                        MOVE.B      #14,D0
+                        TRAP        #15
+ 
+                        BRA         OP_IDENT                * Done; branch back to main program
+
 * LSL
 
 * LSR
@@ -2638,6 +2767,8 @@ PRINT_W             DC.B        '.W',HT,0
 PRINT_L             DC.B        '.L',HT,0
 PRINT_PLUS          DC.B        '+',0
 PRINT_MINUS         DC.B        '-',0
+PRINT_L_DIR         DC.B        'L',0
+PRINT_R_DIR         DC.B        'R',0
 
 PRINT_EOR_B         DC.B        'EOR.B',HT,0
 PRINT_EOR_W         DC.B        'EOR.W',HT,0
@@ -2659,9 +2790,14 @@ PRINT_BCC           DC.B        'BCC',HT,0
 PRINT_BGT           DC.B        'BGT',HT,0
 PRINT_BLE           DC.B        'BLE',HT,0
 PRINT_BVS           DC.B        'BVS',HT,0
+
 PRINT_DIVS_W        DC.B        'DIVS.W',HT,0
 PRINT_MULS_W        DC.B        'MULS.W',HT,0
 PRINT_AND           DC.B        'AND',0
+
+PRINT_AS            DC.B        'AS',0          * ASL/R
+PRINT_LS            DC.B        'LS',0          * LSL/R
+PRINT_RO            DC.B        'RO',0          * ROL/R
 
 START_ADDR_INPUT    DS.B        10
 STARTADDRSTRING1    DS.L        1
@@ -2683,9 +2819,6 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
-
-
-
 
 *~Font name~Courier New~
 *~Font size~10~
