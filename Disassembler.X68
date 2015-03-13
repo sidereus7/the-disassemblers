@@ -295,7 +295,7 @@ CONT_OP_IDENT   MOVE.L      HEXENDADDR,D0
                 MOVE.L      #8,D2
                 JSR         HEX_TO_ASCII
                 
-                LEA         ASCII_RESULT,A1            * Print current address
+                LEA         ASCII_RESULT,A1         * Print current address
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -1136,16 +1136,16 @@ ADDQ_DATA_CONV  MOVE.L      #1,D2                   * Set number of nibbles to b
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
+ADDQ_PRINT_EA   MOVE.W      #$0007,D6              * Store the <ea> register into D6
                 AND.W       D7,D6
                 
-                MOVE.W      #$0038,D5       * Store the <ea> mode into D5
+                MOVE.W      #$0038,D5              * Store the <ea> mode into D5
                 AND.W       D7,D5
                 LSR.W       #3,D5
                 
-                JSR         HANDLE_OPERAND  * Print operand (D5 stores mode, D6 stores register)
+                JSR         HANDLE_OPERAND         * Print operand (D5 stores mode, D6 stores register)
                 
-                LEA         CR_LF_MSG,A1         * Print new line
+                LEA         CR_LF_MSG,A1           * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -1155,9 +1155,9 @@ ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
 * BGT = 1110
 * BLE = 1111
 * BVS = 1001
-PARSE_OP_6      MOVE.W      #$0F00,D1       * Bit Mask for condition code
-                AND.W       D7,D1           * D1 stores the condition code, unshifted
-                LSR.W       #8,D1           * D1 stores the condition code
+PARSE_OP_6      MOVE.W      #$0F00,D1              * Bit Mask for condition code
+                AND.W       D7,D1                  * D1 stores the condition code, unshifted
+                LSR.W       #8,D1                  * D1 stores the condition code
                 
                 CMPI.B      #$04,D1
                 BEQ         PARSE_BCC
@@ -1171,7 +1171,7 @@ PARSE_OP_6      MOVE.W      #$0F00,D1       * Bit Mask for condition code
                 CMPI.B      #$09,D1
                 BEQ         PARSE_BVS
                 
-INVALID_CC_CODE LEA         INVALID_CC_CODE_MSG,A1      * Print error message for CC Code
+INVALID_CC_CODE LEA         INVALID_CC_CODE_MSG,A1  * Print error message for CC Code
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -1214,8 +1214,8 @@ PARSE_BVS       LEA         PRINT_BVS,A1
 
                 BRA         OP_6_LOCATION
 
-OP_6_LOCATION   MOVE.L      #$00FF,D1       * Bit mask for the 8-bit displacement field
-                AND.W       D7,D1           * D1 stores the 8-bit displacement field
+OP_6_LOCATION   MOVE.L      #$00FF,D1               * Bit mask for the 8-bit displacement field
+                AND.W       D7,D1                   * D1 stores the 8-bit displacement field
                 
                 CMPI.B      #$00,D1
                 BEQ         OP_6_16_BIT_DIS
@@ -1223,164 +1223,164 @@ OP_6_LOCATION   MOVE.L      #$00FF,D1       * Bit mask for the 8-bit displacemen
                 CMPI.B      #$FF,D1
                 BEQ         OP_6_32_BIT_DIS
                 
-OP_6_8_BIT_DIS  MOVE.B      #$80,D2         * Bitmask to get the sign bit
-                AND.B       D1,D2           * D2 stores the sign bit, unshifted
-                LSR.B       #7,D2           * D2 stores the sign bit, shifted
+OP_6_8_BIT_DIS  MOVE.B      #$80,D2                 * Bitmask to get the sign bit
+                AND.B       D1,D2                   * D2 stores the sign bit, unshifted
+                LSR.B       #7,D2                   * D2 stores the sign bit, shifted
 
-                CMPI.B      #$00,D2         * If D2 is 0, branch to positive
+                CMPI.B      #$00,D2                 * If D2 is 0, branch to positive
                 BEQ         OP_6_8_BIT_POS
                 
-OP_6_8_BIT_NEG  LEA         PRINT_MINUS,A1  * Print:  -
+OP_6_8_BIT_NEG  LEA         PRINT_MINUS,A1          * Print:  -
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.B      #$FF,D2         * Bitmask for 8-bit negative displacement
-                EOR.B       D2,D1           * Inverse D1 bits
-                ADD.B       #$01,D1         * Add 1 to D1
+                MOVE.B      #$FF,D2                 * Bitmask for 8-bit negative displacement
+                EOR.B       D2,D1                   * Inverse D1 bits
+                ADD.B       #$01,D1                 * Add 1 to D1
                 
-                MOVE.L      #2,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 8-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 8-bit displacement to ASCII
+                MOVE.L      #2,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 8-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 8-bit displacement to ASCII
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 BRA         EXIT_PARSE_OP_6
                 
 
-OP_6_8_BIT_POS  LEA         PRINT_PLUS,A1   * Print:  +
+OP_6_8_BIT_POS  LEA         PRINT_PLUS,A1           * Print:  +
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.L      #2,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 8-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 8-bit displacement
+                MOVE.L      #2,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 8-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 8-bit displacement
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 BRA         EXIT_PARSE_OP_6
                 
                 
-OP_6_16_BIT_DIS MOVE.W      (A2)+,D1        * D1 stores 16-bit displacement
-                MOVE.W      #$8000,D2       * Bitmask to get the sign bit
-                AND.W       D1,D2           * D2 stores the sign bit, unshifted
+OP_6_16_BIT_DIS MOVE.W      (A2)+,D1                * D1 stores 16-bit displacement
+                MOVE.W      #$8000,D2               * Bitmask to get the sign bit
+                AND.W       D1,D2                   * D2 stores the sign bit, unshifted
                 LSR.W       #8,D2 
-                LSR.W       #7,D2           * D2 stores the sign bit, shifted
+                LSR.W       #7,D2                   * D2 stores the sign bit, shifted
 
-                CMPI.W      #$0000,D2         * If D2 is 0, branch to positive
+                CMPI.W      #$0000,D2               * If D2 is 0, branch to positive
                 BEQ         OP_6_16_BIT_POS
 
-OP_6_16_BIT_NEG LEA         PRINT_MINUS,A1  * Print:  -
+OP_6_16_BIT_NEG LEA         PRINT_MINUS,A1          * Print:  -
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.W      #$FFFF,D2       * Bitmask for 16-bit negative displacement
-                EOR.W       D2,D1           * Inverse D1 bits
-                ADD.W       #$01,D1         * Add 1 to D1
+                MOVE.W      #$FFFF,D2               * Bitmask for 16-bit negative displacement
+                EOR.W       D2,D1                   * Inverse D1 bits
+                ADD.W       #$01,D1                 * Add 1 to D1
                 
-                MOVE.L      #4,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 16-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 16-bit displacement to ASCII
+                MOVE.L      #4,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 16-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 16-bit displacement to ASCII
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 BRA         EXIT_PARSE_OP_6
 
                 
-OP_6_16_BIT_POS LEA         PRINT_PLUS,A1   * Print:  +
+OP_6_16_BIT_POS LEA         PRINT_PLUS,A1           * Print:  +
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.L      #4,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 8-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 8-bit displacement
+                MOVE.L      #4,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 8-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 8-bit displacement
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 BRA         EXIT_PARSE_OP_6                
 
-OP_6_32_BIT_DIS MOVE.L      (A2)+,D1        * D1 stores 32-bit displacement
-                MOVE.L      #$80000000,D2       * Bitmask to get the sign bit
-                AND.L       D1,D2           * D2 stores the sign bit, unshifted
+OP_6_32_BIT_DIS MOVE.L      (A2)+,D1                * D1 stores 32-bit displacement
+                MOVE.L      #$80000000,D2           * Bitmask to get the sign bit
+                AND.L       D1,D2                   * D2 stores the sign bit, unshifted
                 LSR.L       #8,D2
                 LSR.L       #8,D2
                 LSR.L       #8,D2 
-                LSR.L       #7,D2           * D2 stores the sign bit, shifted
+                LSR.L       #7,D2                   * D2 stores the sign bit, shifted
 
-                CMPI.L      #$00000000,D2   * If D2 is 0, branch to positive
+                CMPI.L      #$00000000,D2           * If D2 is 0, branch to positive
                 BEQ         OP_6_32_BIT_POS
 
-OP_6_32_BIT_NEG LEA         PRINT_MINUS,A1  * Print:  -
+OP_6_32_BIT_NEG LEA         PRINT_MINUS,A1          * Print:  -
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.L      #$FFFFFFFF,D2   * Bitmask for 32-bit negative displacement
-                EOR.L       D2,D1           * Inverse D1 bits
-                ADD.L       #$01,D1         * Add 1 to D1
+                MOVE.L      #$FFFFFFFF,D2           * Bitmask for 32-bit negative displacement
+                EOR.L       D2,D1                   * Inverse D1 bits
+                ADD.L       #$01,D1                 * Add 1 to D1
                 
-                MOVE.L      #8,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 16-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 16-bit displacement to ASCII
+                MOVE.L      #8,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 16-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 16-bit displacement to ASCII
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
                 BRA         EXIT_PARSE_OP_6
 
                 
-OP_6_32_BIT_POS LEA         PRINT_PLUS,A1   * Print:  +
+OP_6_32_BIT_POS LEA         PRINT_PLUS,A1           * Print:  +
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         PRINT_DOLLAR,A1 * Print:  $
+                LEA         PRINT_DOLLAR,A1         * Print:  $
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.L      #8,D2           * Set number of hex values to convert
-                JSR         HEX_TO_ASCII    * Convert 8-bit displacement to ASCII
-                LEA         ASCII_RESULT,A1 * Print 8-bit displacement
+                MOVE.L      #8,D2                   * Set number of hex values to convert
+                JSR         HEX_TO_ASCII            * Convert 8-bit displacement to ASCII
+                LEA         ASCII_RESULT,A1         * Print 8-bit displacement
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
                 
@@ -1417,15 +1417,15 @@ MOVEQ_DATA      LEA         PRINT_NUM_DOLLAR,A1     * Print #$ symbol for immedi
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-MOVEQ_PRINT_EA  MOVE.W      #$0E00,D6       * Store the Dn register into D6
+MOVEQ_PRINT_EA  MOVE.W      #$0E00,D6               * Store the Dn register into D6
                 AND.W       D7,D6
-                ROL.W       #7,D6           * Rotate Dn register to LSB
+                ROL.W       #7,D6                   * Rotate Dn register to LSB
                 
-                MOVE.W      #$0000,D5       * Store the Dn mode into D5 (000)
+                MOVE.W      #$0000,D5               * Store the Dn mode into D5 (000)
                 
-                JSR         HANDLE_OPERAND  * Print Dn operand (D5 stores mode, D6 stores register)
+                JSR         HANDLE_OPERAND          * Print Dn operand (D5 stores mode, D6 stores register)
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15
 
@@ -1435,29 +1435,29 @@ PARSE_OP_8      LEA         PRINT_DIVS_W,A1
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.W      #$0007,D6       * D6 stores Bitmask for EA register
-                AND.W       D7,D6           * D6 stores the EA register
+                MOVE.W      #$0007,D6               * D6 stores Bitmask for EA register
+                AND.W       D7,D6                   * D6 stores the EA register
                 
-                MOVE.W      #$0038,D5       * D5 stores bitmask for EA mode
-                AND.W       D7,D5           * D5 stores the EA mode, unshifted
-                LSR.W       #3,D5           * D5 stores the EA mode
+                MOVE.W      #$0038,D5               * D5 stores bitmask for EA mode
+                AND.W       D7,D5                   * D5 stores the EA mode, unshifted
+                LSR.W       #3,D5                   * D5 stores the EA mode
                 MOVE.B      #$01,OP_SIZE
                 
-                JSR         HANDLE_OPERAND  * Output EA
+                JSR         HANDLE_OPERAND          * Output EA
                 
-                LEA         PRINT_COMMA,A1  * Print comma
+                LEA         PRINT_COMMA,A1          * Print comma
                 MOVE.B      #14,D0
                 TRAP        #15
                 
-                MOVE.W      #$0000,D5       * D5 stores Destination mode (Data register direct)
-                MOVE.W      #$0E00,D6       * Bitmask for Destination register
-                AND.W       D7,D6           * D6 stores destination register, unshifted
+                MOVE.W      #$0000,D5               * D5 stores Destination mode (Data register direct)
+                MOVE.W      #$0E00,D6               * Bitmask for Destination register
+                AND.W       D7,D6                   * D6 stores destination register, unshifted
                 LSR.W       #8,D6
-                LSR.W       #1,D6           * D6 stores destination register, shifted
+                LSR.W       #1,D6                   * D6 stores destination register, shifted
                 
-                JSR         HANDLE_OPERAND   * Output destination
+                JSR         HANDLE_OPERAND          * Output destination
                 
-                LEA         CR_LF_MSG,A1    * Print new line
+                LEA         CR_LF_MSG,A1            * Print new line
                 MOVE.B      #14,D0
                 TRAP        #15     
                 
@@ -2645,6 +2645,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 
 
 *~Font name~Courier New~
