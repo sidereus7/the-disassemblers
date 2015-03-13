@@ -717,17 +717,25 @@ PARSE_OP_3      LEA         PRINT_MOVE_W,A1
                 
 * CLR,RTS,JSR,MOVEM,LEA
 PARSE_OP_4      MOVE.W      D7,D6
-                MOVE.W      #$0FC0,D5               * Case: BitMask check if RTS or JSR
+                MOVE.W      #$0FC0,D5               * CASE: BitMask check if RTS or JSR
                 AND.W       D5,D6
-                LSR.W       #7,D6                   * Shift the BitMask to compare
+                LSR.W       #6,D6                   * Shift the BitMask to compare
                 
                 CMPI.W      #%111001,D6
                 BEQ         PARSE_4_RTS             * Branch to RTS
                 
                 CMPI.W      #%111010,D6
                 BEQ         PARSE_4_JSR             * Branch to JSR
+                
+                MOVE.W      D7,D6                   * CASE: BitMask check for LEA
+                MOVE.W      #$01C0,D5
+                AND.W       D5,D6
+                LSR.W       #6,D6                   * Shift the BitMask to compare
+                
+                CMPI.W      #%111,D6
+                BEQ         PARSE_4_LEA             * Branch to LEA
 
-                MOVE.W      D7,D6                   * Case: BitMask check if CLR or MOVEM
+                MOVE.W      D7,D6                   * CASE: BitMask check if CLR or MOVEM
                 MOVE.W      #$0FC0,D5
                 AND.W       D5,D6
                 LSR.W       #6,D6                   * Shift the BitMask to compare
@@ -752,14 +760,6 @@ PARSE_OP_4      MOVE.W      D7,D6
                 
                 CMPI.W      #%110011,D6
                 BEQ         PARSE4M_POST_L          * Branch to MOVEM.L (sp)+,<list>
-                
-                MOVE.W      D7,D6                   * Case: BitMask check for LEA
-                MOVE.W      #$01C00,D5
-                AND.W       D5,D6
-                LSR.W       #6,D6                   * Shift the BitMask to compare
-                
-                CMPI.W      #%111,D6
-                BEQ         PARSE_4_LEA             * Branch to LEA
                 
                 BRA         NO_OP_MATCH
 
@@ -830,14 +830,11 @@ PARSE_4_M_PRE   JSR         PARSE_4_M_LIST          * Get register list mask in 
                 CLR.L       D1                      * Clear D1 to print register
                 MOVE.B      #$FF,D3                 * Counter to print out list of registers
                 
-M_PRE_LOOP_1    ADD.B       #1,D3                   * Increment counter
+M_PRE_LOOP_1_A  ADD.B       #1,D3                   * Increment counter
                 CMPI.B      #8,D3                   * If counter reaches 8, then end of counter
                 BEQ         PARSE_4_M_EA            * Branch to handle EA. Otherwise,
                 ROL.B       #1,D5                   * Rotate D5
-                BCC         M_PRE_LOOP_1            * Register = 0, Loop again
-                
-                *CMPI.B      #$1,D4                  * Check if need to print dash
-                *BEQ         M_PRE_DASH
+                BCC         M_PRE_LOOP_1_A          * Register = 0, Loop again
                 
                 CMPI.B      #$1,D6                  * Is this the first in the register?
                 BNE         M_PRE_PRINT_A           * If not, print A, not /
@@ -845,77 +842,42 @@ M_PRE_LOOP_1    ADD.B       #1,D3                   * Increment counter
                 LEA         PRINT_SLASH,A1          * Print /
                 MOVE.B      #14,D0
                 TRAP        #15
-                BRA         M_PRE_PRINT_A
-                
-                *delete the next three
-M_PRE_DASH      LEA         PRINT_DASH,A1           * Print -
-                MOVE.B      #14,D0
-                TRAP        #15
-                *MOVE.B      #0,D4
 
-
-M_PRE_PRINT_A   JSR         PARSE_4_PRINT_A         * Print A ***  should fix this and have a diff counter to print A or d
+M_PRE_PRINT_A   JSR         PARSE_4_PRINT_A         * Print A
                 MOVE.B      D3,D1
                 JSR         PARSE_4_REGIST          * Print register
                 
-                MOVE.B      #1,D6                   * Set to 1. First in list already printed
-
-M_PRE_LOOP_2    ADD.B       #1,D3
+                MOVE.B      D3,D4                   * Last printed register
+                ADD.B       #1,D4                   * Add 1 to the last printed register to check next register
+                MOVE.B      #1,D6                   * Set D6 to 1 to indicate the first in list was printed
+                
+M_PRE_LOOP_2_A  ADD.B       #1,D3                   * Enter second loop to check if list is a continuation
                 CMPI.B      #8,D3
-                BEQ         PARSE_4_M_EA
+                BEQ         PARSE_4_M_EA            * Branch out if counter reaches 8
                 ROL.B       #1,D5
-                BCS         M_PRE_LOOP_2
+                BCC         M_PRE_LOOP_1_A          * If not a continuation, loop back to 1               
+                                                    * Otherwise print dash 
+M_PRINT_DASH    
+                CMP.B       D3,D4                   * Only print one dash so compare if this is equal
+                BNE         M_PRE_LOOP_3_A          * Otherwise loop to 3 to find the end of this list                   
                 
-                CMPI.B      #$1,D4
-                BNE         M_PRE_PRINT_NEXT
+                LEA         PRINT_DASH,A1           * Print -
+                MOVE.B      #14,D0
+                TRAP        #15
                 
-                MOVE.B      #0,D4
-                BRA         M_PRE_LOOP_1
+M_PRE_LOOP_3_A  ADD.B       #1,D3                   * Enter third loop for end register
+                CMPI.B      #8,D3
+                BEQ         PARSE_4_M_EA            * Branch out if counter reaches 8
+                ROL.B       #1,D5
+                BCS         M_PRE_LOOP_2_A          * Branch back to loop 2 if still a continuation
                 
-M_PRE_PRINT_NEXT                
-                MOVE.B      #1,D4                   * Print dash during next loop
-
-                SUB.B       #2,D3
-
-                ROR.B       #2,D5
-                BRA         M_PRE_LOOP_1
-                
-               * MOVE.B      #1,D4                   * Print dash during next loop
-
-               * SUB.B       #2,D3
-               * BRA         M_PRE_LOOP_1
-                
-              *  CMPI.B      #$1,D4                  * Is it a continuation of a register list?
-              *  BEQ         M_PRE_END_LIST
-                
-               * SUB.B       #1,D3
-
-               * BRA         M_PRE_LOOP_1
-                
-*M_PRE_END_LIST                *  MOVE.B      #0,D4
-
-              *  MOVE.B      #0,D4                   * End of register list
-                
-               * SUB.B       #1,D3
-                
-              *  LEA         PRINT_DASH,A1           * Print -
-               * MOVE.B      #14,D0
-               * TRAP        #15
-                
-              *  JSR         PARSE_4_PRINT_A         * Print A
-              *  MOVE.B      D3,D1
-               * JSR         PARSE_4_REGIST          * Print register
-               * ADD.B       #$1,D3
-                
-                *BRA         M_PRE_PRINT_A
-                
-               * BRA         M_PRE_LOOP_1            * Otherwise, start loop again
-                
-                
-                
-                
-                
-
+                SUB.B       #1,D3                   * Otherwise print the previous register
+                JSR         PARSE_4_PRINT_A         * Enter subroutine to print A
+                MOVE.B      D3,D1
+                JSR         PARSE_4_REGIST          * Enter subroutine to print register
+                ADD.B       #1,D3
+                BRA         M_PRE_LOOP_1_A          * Start the loop back at 1
+  
 PARSE_4_M_EA    LEA         PRINT_COMMA,A1          * Print comma
                 MOVE.B      #14,D0
                 TRAP        #15 
@@ -926,8 +888,8 @@ PARSE_4_M_EA    LEA         PRINT_COMMA,A1          * Print comma
                 LEA         CR_LF_MSG,A1            * Print line
                 MOVE.B      #14,D0
                 TRAP        #15
-                
                 BRA         PARSE_4_M_EXIT
+                
 * MOVEM.x <ea>,<list> -> (sp)+,<list>
 PARSE4M_POST_W  LEA         PRINT_MOVEM_W,A1        * Print MOVEM.W
                 MOVE.B      #14,D0
@@ -1048,12 +1010,8 @@ ADDQ_PRINT_DATA LEA         PRINT_HASH,A1           * Print # symbol for immedia
                 AND.W       D7,D1                   * Apply mask
                 ROL.W       #7,D1                   * Rotate data to LSB
                 
-                CMPI.B      #$0,D1                  * If value is zero, change to 8
-                BNE         ADDQ_DATA_CONV
-                
-ADDQ_SET_8      MOVE.B      #$8,D1                  * Change of value of 0 to 8                
-                
-ADDQ_DATA_CONV  MOVE.L      #1,D2                   * Set number of nibbles to be converted
+                ADD.W       #1,D1                   * Shift range of data from (0-7) to (1-8)
+                MOVE.L      #1,D2                   * Set number of nibbles to be converted
                 JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
                 
                 LEA         ASCII_RESULT,A1         * Print immediate data to console
@@ -1082,46 +1040,7 @@ ADDQ_PRINT_EA   MOVE.W      #$0007,D6       * Store the <ea> register into D6
 PARSE_OP_6
                 BRA         OP_IDENT
 * MOVEQ
-PARSE_OP_7      LEA         PRINT_MOVE_Q,A1         * Print: MOVEQ
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-MOVEQ_DATA      LEA         PRINT_NUM_DOLLAR,A1     * Print #$ symbol for immediate data
-                MOVE.B      #14,D0
-                TRAP        #15
-
-                MOVE.W      #$00FF,D1               * Store bit mask to obtain data
-                AND.W       D7,D1                   * Apply mask
-                ASL.L       #8,D1                   * A really
-                ASL.L       #8,D1                   * terrible
-                ASL.L       #8,D1                   * way
-                ASR.L       #8,D1                   * to do
-                ASR.L       #8,D1                   * sign
-                ASR.L       #8,D1                   * extension
-                
-                MOVE.L      #2,D2                   * Set number of nibbles to be converted (byte)
-                JSR         HEX_TO_ASCII            * Convert immediate data to ASCII
-                
-                LEA         ASCII_RESULT,A1         * Print immediate data to console
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-                LEA         PRINT_COMMA,A1          * Print comma between operands
-                MOVE.B      #14,D0
-                TRAP        #15
-                
-MOVEQ_PRINT_EA  MOVE.W      #$0E00,D6       * Store the Dn register into D6
-                AND.W       D7,D6
-                ROL.W       #7,D6           * Rotate Dn register to LSB
-                
-                MOVE.W      #$0000,D5       * Store the Dn mode into D5 (000)
-                
-                JSR         HANDLE_OPERAND  * Print Dn operand (D5 stores mode, D6 stores register)
-                
-                LEA         CR_LF_MSG,A1    * Print new line
-                MOVE.B      #14,D0
-                TRAP        #15
-
+PARSE_OP_7
                 BRA         OP_IDENT
 * DIVS
 PARSE_OP_8
@@ -1752,60 +1671,7 @@ RET_ADD_DN_EA   MOVE.W      #$0007,D6           * Bitmask for EA Register
 EXIT_PARSE_OP_D BRA         OP_IDENT
 
 * ASL,ASR,LSL,LSR,ROL,ROR
-PARSE_OP_E              * TODO: Some magic code that determines ASL/R,LSL/R,ROL/R
-
-HANDLE_ASL_ASR          MOVE.W  #$100,D6        * Bit mask to obtain L or R data
-                        AND.W   D7,D6           
-                        CMPI.W  #$100,D6        * Compare L/R bit to 1
-                        BNE     PRINT_ASR       * If not equal, print ASR; else, ASL
-                        
-PRINT_ASL               LEA     PRINT_ASL,A1    * Print: ASL
-                        MOVE.B  #14,D0
-                        TRAP    #15
-                        
-                        BRA     ASX_SIZE        * Branch to determine size
-                        
-PRINT_ASR               LEA     PRINT_ASL,A1    * Print: ASR
-                        MOVE.B  #14,D0
-                        TRAP    #15
-
-ASX_SIZE                MOVE.W  #$00C0,D6       * Bit mask to obtain size data
-                        LSR.W   #6,D6           * Shift size data to LSB
-                        
-                        CMPI.B      #$00,D6                 * Check if size is byte (.B)
-                        BEQ         ASX_PRINT_BYTE
-                
-                        CMPI.B      #$01,D6                 * Check if size is word (.W)
-                        BEQ         ASX_PRINT_WORD
-
-                        CMPI.B      #$02,D6                 * Check if size is long (.L)
-                        BEQ         ASX_PRINT_LONG
-                        
-                        CMPI.B      #$03,D6                 * Check if <ea> case (Print tab)
-                        BEQ         ASX_PRINT_TAB
-
-ASX_PRINT_BYTE          LEA         PRINT_B,A1              * Load '.B' message
-                        BRA         ASX_PRINT_SIZE           
-                
-ASX_PRINT_WORD          LEA         PRINT_W,A1              * Load '.W' message
-                        BRA         ASX_PRINT_SIZE  
-                
-ASX_PRINT_LONG          LEA         PRINT_L,A1              * Load '.L' message
-                        BRA         ASX_PRINT_SIZE
-                        
-ASX_PRINT_TAB           LEA         TAB_MSG,A1            * Load tab message
-                        BRA         ASX_PRINT_SIZE
-                
-ASX_PRINT_SIZE          MOVE.B      #14,D0                  * Print size (.B, .W, or .L)
-                        TRAP        #15
-                        
-* LSL
-
-* LSR
-
-* ROL
-
-* ROR
+PARSE_OP_E
 
 *********************************************************************************
 *---------------------------Operand Subroutine----------------------------------*
@@ -2244,8 +2110,6 @@ PRINT_ADD_L         DC.B        'ADD.L',HT,0
 
 PRINT_ADD_Q         DC.B        'ADDQ',0
 
-PRINT_MOVE_Q        DC.B        'MOVEQ',HT,0
-
 PRINT_SUB_A_W       DC.B        'SUBA.W',HT,0
 PRINT_SUB_A_L       DC.B        'SUBA.L',HT,0
 PRINT_SUB_B         DC.B        'SUB.B',HT,0
@@ -2300,6 +2164,10 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
+
+
+
 
 *~Font name~Courier New~
 *~Font size~10~
