@@ -1,4 +1,2 @@
-Disassembler.L68
-Disassembler.S68
-DisassemblerTest.L68
-DisassemblerTest.S68
+*.L68
+*.S68
