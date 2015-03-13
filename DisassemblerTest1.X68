@@ -92,7 +92,15 @@ TEST_BLE_POS ADDQ.W     #1,(A5)
              ADDQ.L     #8,$C007
              
 TEST_BGT_POS BGT        TEST_BGT_NEG
-             
+
+            MOVEM.W     A0-A3/A7,-(A7)
+            MOVEM.L     A1/A3-A4/A6,-(A7)
+            
+            
+            MOVE.L      #$FFFF0456,D1
+            DIVS.W      #$1000,D1
+            DIVS.W      D1,D3
+            
              
 
     SIMHALT             ; halt simulator
@@ -100,6 +108,8 @@ TEST_BGT_POS BGT        TEST_BGT_NEG
 * Put variables and constants here
 
     END    START        ; last line of source
+
+
 
 
 

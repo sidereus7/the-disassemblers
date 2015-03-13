@@ -1324,7 +1324,36 @@ MOVEQ_PRINT_EA  MOVE.W      #$0E00,D6       * Store the Dn register into D6
 
                 BRA         OP_IDENT
 * DIVS
-PARSE_OP_8
+PARSE_OP_8      LEA         PRINT_DIVS_W,A1
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.W      #$0007,D6       * D6 stores Bitmask for EA register
+                AND.W       D7,D6           * D6 stores the EA register
+                
+                MOVE.W      #$0038,D5       * D5 stores bitmask for EA mode
+                AND.W       D7,D5           * D5 stores the EA mode, unshifted
+                LSR.W       #3,D5           * D5 stores the EA mode
+                MOVE.B      #$01,OP_SIZE
+                
+                JSR         HANDLE_OPERAND  * Output EA
+                
+                LEA         PRINT_COMMA,A1  * Print comma
+                MOVE.B      #14,D0
+                TRAP        #15
+                
+                MOVE.W      #$0000,D5       * D5 stores Destination mode (Data register direct)
+                MOVE.W      #$0E00,D6       * Bitmask for Destination register
+                AND.W       D7,D6           * D6 stores destination register, unshifted
+                LSR.W       #8,D6
+                LSR.W       #1,D6           * D6 stores destination register, shifted
+                
+                JSR         HANDLE_OPERAND   * Output destination
+                
+                LEA         CR_LF_MSG,A1    * Print new line
+                MOVE.B      #14,D0
+                TRAP        #15     
+                
                 BRA         OP_IDENT
 * SUB,SUBA
 PARSE_OP_9      MOVE.W      #$01C0,D2       * Bitmask for retrieving Opmode.
@@ -2487,6 +2516,7 @@ PRINT_BCC           DC.B        'BCC',HT,0
 PRINT_BGT           DC.B        'BGT',HT,0
 PRINT_BLE           DC.B        'BLE',HT,0
 PRINT_BVS           DC.B        'BVS',HT,0
+PRINT_DIVS_W        DC.B        'DIVS.W',HT,0
 
 START_ADDR_INPUT    DS.B        10
 STARTADDRSTRING1    DS.L        1
@@ -2507,6 +2537,7 @@ START_OVER_RESPONSE DS.B        1
 
 ENTER_LOCATION      DS.L        1        
                     END     START           ; last line of source
+
 
 *~Font name~Courier New~
 *~Font size~10~
