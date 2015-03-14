@@ -1,0 +1,281 @@
+EASy68K output log file: 3/13/2015 6:21:17 PM
+
+Welcome to our 68K Dissassembler.
+Please provide a valid start address.
+00005000
+Please provide a valid end address.
+00005200
+Press ENTER to continue
+
+00005000	MOVE.B	D7,D1
+00005002	MOVE.B	#$17,D2
+00005006	MOVE.B	#$33,(A5)
+0000500A	SUB.B	(A4),D4
+0000500C	SUB.W	D4,D2
+0000500E	SUB.L	D2,(A4)
+00005010	SUBA.W	(A4)+,A1
+00005012	SUBA.L	A7,A4
+00005014	ADD.B	(A4),D4
+00005016	ADD.W	D4,D2
+00005018	ADD.L	D2,(A4)
+0000501A	ADDA.W	(A4)+,A1
+0000501C	ADDA.L	A7,A4
+0000501E	ANDI.B	#$33,D4
+00005022	ANDI.W	#$8888,(A3)
+00005026	ANDI.L	#$AAAAAAAA,(A3)+
+0000502C	SUBI.B	#$AA,(A4)
+00005030	SUBI.W	#$8888,D4
+00005034	SUBI.L	#$AAAAAAAA,D4
+0000503A	EORI.B	#$33,-(A4)
+0000503E	EORI.W	#$AAAA,D4
+00005042	EORI.L	#$12345678,D4
+00005048	CMPI.B	#$11,D3
+0000504C	CMPI.W	#$1234,D6
+00005050	CMPI.L	#$AAAAAAAA,D4
+00005056	BCHG.B	D4,(A3)
+00005058	BCHG.B	#$44,(A4)+
+0000505C	BCHG.L	D3,D2
+
+Press ENTER to continue
+
+0000505E	BCHG.L	#$AA,D3
+00005062	MOVE.B	D7,D1
+00005064	MOVE.B	#$17,D2
+00005068	MOVE.B	#$33,(A5)
+0000506C	MOVE.W	-(A3),$5555
+00005070	MOVE.W	D1,D2
+00005072	MOVE.W	#$5555,A1
+00005076	MOVE.W	(A6)+,D4
+00005078	MOVE.L	(A1),D4
+0000507A	MOVE.L	A6,(A3)+
+0000507C	MOVE.L	#$01234567,D5
+00005082	SUB.B	(A4),D4
+00005084	SUB.W	D4,D2
+00005086	SUB.L	D2,(A4)
+00005088	SUBA.W	(A4)+,A1
+0000508A	SUBA.L	A7,A4
+0000508C	EOR.B	D3,(A6)
+0000508E	EOR.W	D4,(A2)+
+00005090	EOR.L	D5,$1234
+00005094	CMP.B	D5,D2
+00005096	CMP.W	A3,D2
+00005098	CMP.L	(A6),D1
+0000509A	CMPA.W	#$9999,A2
+0000509E	CMPA.L	(A3),A3
+000050A0	ADD.B	D1,D2
+000050A2	ADD.W	D2,D3
+000050A4	ADD.L	D4,D5
+000050A6	ADDA.W	#$1234,A2
+000050AA	ADDA.L	D3,A3
+
+Press ENTER to continue
+
+000050AC	BGT	+$0058
+000050B0	BLE	+$004C
+000050B4	ASL.B	D1,D7
+000050B6	ASL.W	#5,D3
+000050B8	ASL.L	#2,D4
+000050BA	ASL	$00009999
+000050C0	ASR.B	#2,D2
+000050C2	ASR.W	D4,D5
+000050C4	ASR.L	#8,D6
+000050C6	ASR	$00008888
+000050CC	LSL.B	D1,D7
+000050CE	LSL.W	#5,D3
+000050D0	LSL.L	#2,D4
+000050D2	LSL	$00009999
+000050D8	LSR.B	#2,D2
+000050DA	LSR.W	D4,D5
+000050DC	LSR.L	#8,D6
+000050DE	LSR	$00008888
+000050E4	ROL.B	D1,D7
+000050E6	ROL.W	#5,D3
+000050E8	ROL.L	#2,D4
+000050EA	ROL	$00009999
+000050F0	ROR.B	#2,D2
+000050F2	ROR.W	D4,D5
+000050F4	ROR.L	#8,D6
+000050F6	ROR	$00008888
+000050FC	ADDQ.B	#4,D2
+000050FE	ADDQ.W	#1,(A5)
+00005100	ADDQ.L	#8,$0000C007
+
+Press ENTER to continue
+
+00005106	BGT	-$0C
+00005108	MOVEM.W	A0-A3/A7,-(A7)
+0000510C	MOVEM.L	A1/A3-A4/A6,-(A7)
+00005110	MOVE.L	#$FFFF0456,D1
+00005116	DIVS.W	#$1000,D1
+0000511A	DIVS.W	D1,D3
+0000511C	MULS.W	#$1000,D1
+00005120	MULS.W	(A3),D2
+00005122	AND.B	#$01,D1
+00005126	AND.W	#$1234,D2
+0000512A	AND.L	D3,D4
+0000512C	JSR	$0000516A
+00005132	LEA	$1234,A4
+00005136	LEA	$12345678,A7
+0000513C	LEA	$0123,A0
+00005140	CLR.B	D4
+00005142	CLR.W	D7
+00005144	CLR.L	D1
+00005146	MOVEM.W	A0-A3/A7/D1/D6,-(A7)
+0000514A	MOVEM.L	A0-A3/A7/D1/D6,-(A7)
+0000514E	MOVEM.W	A0/A3/A5/A7/D1-D2/D4/D7,-(A7)
+00005152	MOVEM.L	A0/A3/A5/A7/D1/D4/D6-D7,-(A7)
+00005156	MOVEM.W	(A7)+,A0-A3/A7/D1/D6
+0000515A	MOVEM.L	(A7)+,A0-A3/A7/D1/D6
+0000515E	MOVEM.W	(A7)+,A0/A3/A5/A7/D1-D2/D4/D7
+00005162	MOVEM.L	(A7)+,A0/A3/A5/A7/D1/D4/D6-D7
+00005166	Invalid Condition Code for Instruction: 6000
+00005168	Invalid Operation Code for Instruction: 0008
+0000516A	MOVE.B	#$0B,D0
+
+Press ENTER to continue
+
+0000516E	RTS
+00005170	EOR.B	D3,(A4)
+00005172	EOR.W	D2,-(A3)
+00005174	EOR.L	D4,(A7)+
+00005176	CMP.B	(A3),D2
+00005178	CMP.W	$0000A432,D4
+0000517E	CMP.L	A7,D6
+00005180	CMPA.W	A6,A4
+00005182	CMPA.L	D5,A7
+00005184	Invalid Operation Code for Instruction: FFFF
+00005186	Invalid Operation Code for Instruction: FFFF
+00005188	Invalid Operation Code for Instruction: FFFF
+0000518A	Invalid Operation Code for Instruction: FFFF
+0000518C	Invalid Operation Code for Instruction: FFFF
+0000518E	Invalid Operation Code for Instruction: FFFF
+00005190	Invalid Operation Code for Instruction: FFFF
+00005192	Invalid Operation Code for Instruction: FFFF
+00005194	Invalid Operation Code for Instruction: FFFF
+00005196	Invalid Operation Code for Instruction: FFFF
+00005198	Invalid Operation Code for Instruction: FFFF
+0000519A	Invalid Operation Code for Instruction: FFFF
+0000519C	Invalid Operation Code for Instruction: FFFF
+0000519E	Invalid Operation Code for Instruction: FFFF
+000051A0	Invalid Operation Code for Instruction: FFFF
+000051A2	Invalid Operation Code for Instruction: FFFF
+000051A4	Invalid Operation Code for Instruction: FFFF
+000051A6	Invalid Operation Code for Instruction: FFFF
+000051A8	Invalid Operation Code for Instruction: FFFF
+000051AA	Invalid Operation Code for Instruction: FFFF
+
+Press ENTER to continue
+
+000051AC	Invalid Operation Code for Instruction: FFFF
+000051AE	Invalid Operation Code for Instruction: FFFF
+000051B0	Invalid Operation Code for Instruction: FFFF
+000051B2	Invalid Operation Code for Instruction: FFFF
+000051B4	Invalid Operation Code for Instruction: FFFF
+000051B6	Invalid Operation Code for Instruction: FFFF
+000051B8	Invalid Operation Code for Instruction: FFFF
+000051BA	Invalid Operation Code for Instruction: FFFF
+000051BC	Invalid Operation Code for Instruction: FFFF
+000051BE	Invalid Operation Code for Instruction: FFFF
+000051C0	Invalid Operation Code for Instruction: FFFF
+000051C2	Invalid Operation Code for Instruction: FFFF
+000051C4	Invalid Operation Code for Instruction: FFFF
+000051C6	Invalid Operation Code for Instruction: FFFF
+000051C8	Invalid Operation Code for Instruction: FFFF
+000051CA	Invalid Operation Code for Instruction: FFFF
+000051CC	Invalid Operation Code for Instruction: FFFF
+000051CE	Invalid Operation Code for Instruction: FFFF
+000051D0	Invalid Operation Code for Instruction: FFFF
+000051D2	Invalid Operation Code for Instruction: FFFF
+000051D4	Invalid Operation Code for Instruction: FFFF
+000051D6	Invalid Operation Code for Instruction: FFFF
+000051D8	Invalid Operation Code for Instruction: FFFF
+000051DA	Invalid Operation Code for Instruction: FFFF
+000051DC	Invalid Operation Code for Instruction: FFFF
+000051DE	Invalid Operation Code for Instruction: FFFF
+000051E0	Invalid Operation Code for Instruction: FFFF
+000051E2	Invalid Operation Code for Instruction: FFFF
+000051E4	Invalid Operation Code for Instruction: FFFF
+
+Press ENTER to continue
+
+000051E6	Invalid Operation Code for Instruction: FFFF
+000051E8	Invalid Operation Code for Instruction: FFFF
+000051EA	Invalid Operation Code for Instruction: FFFF
+000051EC	Invalid Operation Code for Instruction: FFFF
+000051EE	Invalid Operation Code for Instruction: FFFF
+000051F0	Invalid Operation Code for Instruction: FFFF
+000051F2	Invalid Operation Code for Instruction: FFFF
+000051F4	Invalid Operation Code for Instruction: FFFF
+000051F6	Invalid Operation Code for Instruction: FFFF
+000051F8	Invalid Operation Code for Instruction: FFFF
+000051FA	Invalid Operation Code for Instruction: FFFF
+000051FC	Invalid Operation Code for Instruction: FFFF
+000051FE	Invalid Operation Code for Instruction: FFFF
+00005200	Invalid Operation Code for Instruction: FFFF
+
+Would you like to Disassemble again?  Enter [Y] for Yes
+YWelcome to our 68K Dissassembler.
+Please provide a valid start address.
+00005000
+Please provide a valid end address.
+00005020
+Press ENTER to continue
+
+00005000	MOVE.B	D7,D1
+00005002	MOVE.B	#$17,D2
+00005006	MOVE.B	#$33,(A5)
+0000500A	SUB.B	(A4),D4
+0000500C	SUB.W	D4,D2
+0000500E	SUB.L	D2,(A4)
+00005010	SUBA.W	(A4)+,A1
+00005012	SUBA.L	A7,A4
+00005014	ADD.B	(A4),D4
+00005016	ADD.W	D4,D2
+00005018	ADD.L	D2,(A4)
+0000501A	ADDA.W	(A4)+,A1
+0000501C	ADDA.L	A7,A4
+0000501E	ANDI.B	#$33,D4
+
+Would you like to Disassemble again?  Enter [Y] for Yes
+YWelcome to our 68K Dissassembler.
+Please provide a valid start address.
+00005000
+Please provide a valid end address.
+00005060
+Press ENTER to continue
+
+00005000	MOVE.B	D7,D1
+00005002	MOVE.B	#$17,D2
+00005006	MOVE.B	#$33,(A5)
+0000500A	SUB.B	(A4),D4
+0000500C	SUB.W	D4,D2
+0000500E	SUB.L	D2,(A4)
+00005010	SUBA.W	(A4)+,A1
+00005012	SUBA.L	A7,A4
+00005014	ADD.B	(A4),D4
+00005016	ADD.W	D4,D2
+00005018	ADD.L	D2,(A4)
+0000501A	ADDA.W	(A4)+,A1
+0000501C	ADDA.L	A7,A4
+0000501E	ANDI.B	#$33,D4
+00005022	ANDI.W	#$8888,(A3)
+00005026	ANDI.L	#$AAAAAAAA,(A3)+
+0000502C	SUBI.B	#$AA,(A4)
+00005030	SUBI.W	#$8888,D4
+00005034	SUBI.L	#$AAAAAAAA,D4
+0000503A	EORI.B	#$33,-(A4)
+0000503E	EORI.W	#$AAAA,D4
+00005042	EORI.L	#$12345678,D4
+00005048	CMPI.B	#$11,D3
+0000504C	CMPI.W	#$1234,D6
+00005050	CMPI.L	#$AAAAAAAA,D4
+00005056	BCHG.B	D4,(A3)
+00005058	BCHG.B	#$44,(A4)+
+0000505C	BCHG.L	D3,D2
+
+Press ENTER to continue
+
+0000505E	BCHG.L	#$AA,D3
+
+Would you like to Disassemble again?  Enter [Y] for Yes
+nThank you for using our 68K Disassembler.  Goodbye!
